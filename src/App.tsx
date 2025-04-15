@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +8,7 @@ import Artists from "./pages/Artists";
 import Walls from "./pages/Walls";
 import HowItWorks from "./components/HowItWorks";
 import NotFound from "./pages/NotFound";
+import ArtistProfile from "./pages/ArtistProfile";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +21,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/artistes" element={<Artists />} />
+          <Route path="/artistes/:id" element={<ArtistProfile />} />
           <Route path="/murs" element={<Walls />} />
           <Route path="/comment-ca-marche" element={<HowItWorks />} />
           <Route path="/a-propos" element={<NotFound />} />

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Maximize2 } from 'lucide-react';
+import { MapPin, Maximize2, Users, User, Home, Sun, Clock } from 'lucide-react';
 
 interface WallCardProps {
   id: string;
@@ -10,6 +10,10 @@ interface WallCardProps {
   size: string;
   imageUrl: string;
   budget?: string;
+  clientType?: string;
+  locationType?: string;
+  area?: number;
+  timeframe?: string;
 }
 
 const WallCard: React.FC<WallCardProps> = ({
@@ -19,6 +23,9 @@ const WallCard: React.FC<WallCardProps> = ({
   size,
   imageUrl,
   budget,
+  clientType,
+  locationType,
+  timeframe,
 }) => {
   return (
     <Link to={`/murs/${id}`} className="group">
@@ -29,6 +36,36 @@ const WallCard: React.FC<WallCardProps> = ({
             alt={title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
+          {clientType && (
+            <div className="absolute top-3 left-3 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+              {clientType === 'B2B' ? (
+                <>
+                  <Users className="h-3 w-3" />
+                  B2B
+                </>
+              ) : (
+                <>
+                  <User className="h-3 w-3" />
+                  B2C
+                </>
+              )}
+            </div>
+          )}
+          {locationType && (
+            <div className="absolute top-3 right-3 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+              {locationType === 'interior' ? (
+                <>
+                  <Home className="h-3 w-3" />
+                  Intérieur
+                </>
+              ) : (
+                <>
+                  <Sun className="h-3 w-3" />
+                  Extérieur
+                </>
+              )}
+            </div>
+          )}
         </div>
         <div className="p-4">
           <h3 className="text-xl font-bold text-wxll-dark mb-2">{title}</h3>
@@ -40,11 +77,23 @@ const WallCard: React.FC<WallCardProps> = ({
             <Maximize2 size={16} className="mr-1" />
             <span className="text-sm">{size}</span>
           </div>
-          {budget && (
-            <div className="mt-2 bg-wxll-light text-wxll-dark text-sm font-medium px-3 py-1 rounded-full inline-block">
-              Budget: {budget}
-            </div>
-          )}
+          
+          <div className="flex flex-wrap gap-2 mb-3">
+            {timeframe && (
+              <div className="bg-gray-100 text-wxll-dark text-xs font-medium px-2 py-1 rounded-full inline-flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                {timeframe === 'asap' ? 'Dès que possible' : 
+                 timeframe === '3months' ? '< 3 mois' : 'Dans l\'année'}
+              </div>
+            )}
+            
+            {budget && (
+              <div className="bg-wxll-light text-wxll-dark text-xs font-medium px-2 py-1 rounded-full inline-block">
+                Budget: {budget}
+              </div>
+            )}
+          </div>
+          
           <div className="mt-4 flex justify-between items-center">
             <span className="text-sm text-gray-600">Voir le mur</span>
             <svg

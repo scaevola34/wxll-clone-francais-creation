@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,34 +12,64 @@ import HowItWorks from '@/components/HowItWorks';
 import TestimonialCard from '@/components/TestimonialCard';
 import StatsSection from '@/components/StatsSection';
 import AuthModal from '@/components/AuthModal';
+import ArtistCarousel from '@/components/ArtistCarousel';
 
 const Index = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authInitialTab, setAuthInitialTab] = useState('register');
   const [userType, setUserType] = useState<'artist' | 'owner' | null>(null);
 
-  // Sample data for artists
+  // Enhanced data for artists with additional fields
   const featuredArtists = [
     {
       id: "1",
       name: "Sophie Durand",
       style: "Graffiti Abstrait",
       location: "Paris",
-      imageUrl: "https://images.unsplash.com/photo-1607000975631-8bdfb8aaa279?q=80&w=1974&auto=format&fit=crop"
+      imageUrl: "https://images.unsplash.com/photo-1607000975631-8bdfb8aaa279?q=80&w=1974&auto=format&fit=crop",
+      rating: 5,
+      specialties: ["Murals", "Street Art"],
+      projectsCount: 24
     },
     {
       id: "2",
       name: "Marc Lefèvre",
       style: "Muralisme",
       location: "Lyon",
-      imageUrl: "https://images.unsplash.com/photo-1574014629736-e5efc9b7732e?q=80&w=1964&auto=format&fit=crop"
+      imageUrl: "https://images.unsplash.com/photo-1574014629736-e5efc9b7732e?q=80&w=1964&auto=format&fit=crop",
+      rating: 4,
+      specialties: ["Trompe-l'œil", "Fresque"],
+      projectsCount: 18
     },
     {
       id: "3",
       name: "Emma Bernard",
       style: "Street Art Figuratif",
       location: "Marseille",
-      imageUrl: "https://images.unsplash.com/photo-1623944887776-2f6e8acb83f3?q=80&w=1964&auto=format&fit=crop"
+      imageUrl: "https://images.unsplash.com/photo-1623944887776-2f6e8acb83f3?q=80&w=1964&auto=format&fit=crop",
+      rating: 5,
+      specialties: ["Portrait", "Urban Art"],
+      projectsCount: 32
+    },
+    {
+      id: "4",
+      name: "Thomas Martin",
+      style: "Calligraffiti",
+      location: "Bordeaux",
+      imageUrl: "https://images.unsplash.com/photo-1584837140804-599ddb86a9f3?q=80&w=1964&auto=format&fit=crop",
+      rating: 4,
+      specialties: ["Typography", "Lettering"],
+      projectsCount: 15
+    },
+    {
+      id: "5",
+      name: "Julie Moreau",
+      style: "Pop Art Urbain",
+      location: "Nantes",
+      imageUrl: "https://images.unsplash.com/photo-1581368135153-a506cf13531c?q=80&w=1964&auto=format&fit=crop",
+      rating: 5,
+      specialties: ["Collage", "Street Art"],
+      projectsCount: 28
     }
   ];
 
@@ -150,10 +181,8 @@ const Index = () => {
             Découvrez des artistes talentueux prêts à transformer votre espace
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-            {featuredArtists.map(artist => (
-              <ArtistCard key={artist.id} {...artist} />
-            ))}
+          <div className="mt-12">
+            <ArtistCarousel artists={featuredArtists} />
           </div>
           
           <div className="mt-12 text-center">

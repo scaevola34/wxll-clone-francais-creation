@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound";
 import ArtistProfile from "./pages/ArtistProfile";
 import ArtistDashboard from "./pages/ArtistDashboard";
 import OwnerDashboard from "./pages/OwnerDashboard";
+import VerifyEmail from "./pages/VerifyEmail";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/a-propos" element={<NotFound />} />
           <Route path="/artiste/profil" element={<ArtistDashboard />} />
           <Route path="/proprietaire/profil" element={<OwnerDashboard />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

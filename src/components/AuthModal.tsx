@@ -18,7 +18,9 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs';
-import { ArrowRight, User, MapPin } from 'lucide-react';
+import { ArrowRight, User, MapPin, Mail, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { toast } from '@/components/ui/sonner';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -29,6 +31,8 @@ interface AuthModalProps {
 const AuthModal = ({ isOpen, onClose, initialTab = 'login' }: AuthModalProps) => {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [userType, setUserType] = useState<'artist' | 'owner' | null>(null);
+  const [email, setEmail] = useState('');
+  const [isVerificationSent, setIsVerificationSent] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = (e: React.FormEvent) => {
@@ -44,18 +48,34 @@ const AuthModal = ({ isOpen, onClose, initialTab = 'login' }: AuthModalProps) =>
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would create a new user account
+    
+    // In a real app with backend, this would create a user and send a verification email
+    // For now, we'll simulate this behavior with a timeout
+    setIsVerificationSent(true);
+    
+    // Show a toast notification
+    toast.success("Email de vérification envoyé", {
+      description: "Veuillez vérifier votre boîte de réception et cliquer sur le lien de vérification.",
+    });
+    
+    // In a real implementation, we would not navigate away automatically
+    // The user would need to verify their email first
+  };
+
+  const selectUserType = (type: 'artist' | 'owner') => {
+    setUserType(type);
+    setActiveTab('register');
+  };
+
+  const handleVerificationComplete = () => {
+    // This would be triggered when a user returns to the app after verifying email
+    // In a real implementation, this would validate the token from the URL
     if (userType === 'artist') {
       navigate('/artiste/profil');
     } else if (userType === 'owner') {
       navigate('/proprietaire/profil');
     }
     onClose();
-  };
-
-  const selectUserType = (type: 'artist' | 'owner') => {
-    setUserType(type);
-    setActiveTab('register');
   };
 
   return (
@@ -120,6 +140,33 @@ const AuthModal = ({ isOpen, onClose, initialTab = 'login' }: AuthModalProps) =>
                   <ArrowRight size={18} />
                 </Button>
               </div>
+            ) : isVerificationSent ? (
+              <div className="py-6 space-y-4">
+                <Alert>
+                  <Mail className="h-4 w-4" />
+                  <AlertTitle>Vérifiez votre email</AlertTitle>
+                  <AlertDescription>
+                    Nous avons envoyé un lien de vérification à {email}. Veuillez vérifier votre boîte de réception et cliquer sur le lien pour activer votre compte.
+                  </AlertDescription>
+                </Alert>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Vous n'avez pas reçu d'email? Vérifiez votre dossier spam ou essayez de vous réinscrire.
+                </p>
+                <Button 
+                  onClick={() => setIsVerificationSent(false)} 
+                  variant="outline" 
+                  className="w-full mt-4"
+                >
+                  Retour à l'inscription
+                </Button>
+                <Button 
+                  onClick={handleVerificationComplete} 
+                  className="w-full"
+                  variant="link"
+                >
+                  J'ai déjà vérifié mon email
+                </Button>
+              </div>
             ) : (
               <form onSubmit={handleRegister} className="space-y-4 py-4">
                 <div className="space-y-2">
@@ -128,7 +175,14 @@ const AuthModal = ({ isOpen, onClose, initialTab = 'login' }: AuthModalProps) =>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="register-email">Email</Label>
-                  <Input id="register-email" type="email" placeholder="votre@email.com" required />
+                  <Input 
+                    id="register-email" 
+                    type="email" 
+                    placeholder="votre@email.com" 
+                    required 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="register-password">Mot de passe</Label>

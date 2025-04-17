@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
@@ -11,8 +10,13 @@ import WallCard from '@/components/WallCard';
 import HowItWorks from '@/components/HowItWorks';
 import TestimonialCard from '@/components/TestimonialCard';
 import StatsSection from '@/components/StatsSection';
+import AuthModal from '@/components/AuthModal';
 
 const Index = () => {
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authInitialTab, setAuthInitialTab] = useState('register');
+  const [userType, setUserType] = useState<'artist' | 'owner' | null>(null);
+
   // Sample data for artists
   const featuredArtists = [
     {
@@ -91,6 +95,12 @@ const Index = () => {
     }
   ];
 
+  const openAuthModal = (type: 'artist' | 'owner') => {
+    setUserType(type);
+    setAuthInitialTab('register');
+    setShowAuthModal(true);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -115,10 +125,16 @@ const Index = () => {
               La première marketplace française qui met en relation artistes street art et propriétaires de murs.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button className="btn-primary">
+              <Button 
+                className="btn-primary"
+                onClick={() => openAuthModal('artist')}
+              >
                 Je suis un artiste
               </Button>
-              <Button className="btn-secondary">
+              <Button 
+                className="btn-secondary"
+                onClick={() => openAuthModal('owner')}
+              >
                 J'ai un mur disponible
               </Button>
             </div>
@@ -208,10 +224,16 @@ const Index = () => {
             Rejoignez WXLLSPACE aujourd'hui et connectez-vous avec des artistes talentueux ou trouvez le mur parfait pour votre vision artistique.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button className="btn-primary">
+            <Button 
+              className="btn-primary"
+              onClick={() => openAuthModal('artist')}
+            >
               Je suis un artiste
             </Button>
-            <Button className="bg-white text-wxll-dark hover:bg-gray-200 transition-colors px-6 py-3 rounded-md font-medium">
+            <Button 
+              className="bg-white text-wxll-dark hover:bg-gray-200 transition-colors px-6 py-3 rounded-md font-medium"
+              onClick={() => openAuthModal('owner')}
+            >
               J'ai un mur disponible
             </Button>
           </div>
@@ -219,6 +241,13 @@ const Index = () => {
       </section>
       
       <Footer />
+
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        initialTab={authInitialTab}
+      />
     </div>
   );
 };

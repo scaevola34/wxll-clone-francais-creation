@@ -150,23 +150,23 @@ const Index = () => {
         <div className="container mx-auto px-4 relative z-10 text-white">
           <div className="max-w-4xl">
             <div className="mb-6">
-              <span className="inline-block bg-wxll-blue/20 backdrop-blur-sm text-wxll-blue border border-wxll-blue/30 px-4 py-2 rounded-full text-sm font-medium mb-6">
+              <span className="inline-block bg-wxll-artist/20 backdrop-blur-sm text-wxll-artist border border-wxll-artist/30 px-4 py-2 rounded-full text-sm font-medium mb-6">
                 🎨 Plateforme #1 du street art en France
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-8 leading-tight">
-              Connectez l'art urbain <br/>
-              <span className="text-wxll-blue">aux espaces urbains</span>
+              Faites parler les murs <br/>
+              <span className="text-wxll-artist">avec l'art</span>
             </h1>
             <p className="text-xl md:text-2xl mb-12 text-gray-200 max-w-2xl">
-              La première marketplace française qui met en relation artistes street art et propriétaires de murs pour créer des œuvres uniques.
+              La marketplace qui met en relation street artists et propriétaires de murs pour créer des œuvres uniques.
             </p>
             
             {/* Enhanced CTA Section */}
             <div className="grid md:grid-cols-2 gap-6 max-w-2xl">
               <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6 hover:bg-white/15 transition-all group cursor-pointer" onClick={() => openAuthModal('artist')}>
                 <div className="flex items-center mb-4">
-                  <div className="p-3 bg-wxll-blue rounded-lg mr-4">
+                  <div className="p-3 bg-wxll-artist rounded-lg mr-4">
                     <Palette className="h-6 w-6 text-white" />
                   </div>
                   <div>
@@ -174,7 +174,7 @@ const Index = () => {
                     <p className="text-gray-300 text-sm">Trouvez des murs à décorer</p>
                   </div>
                 </div>
-                <Button className="w-full bg-wxll-blue hover:bg-blue-600 group-hover:scale-105 transition-transform">
+                <Button className="w-full bg-wxll-artist hover:bg-wxll-artist-dark group-hover:scale-105 transition-transform">
                   Commencer gratuitement
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -182,7 +182,7 @@ const Index = () => {
               
               <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6 hover:bg-white/15 transition-all group cursor-pointer" onClick={() => openAuthModal('owner')}>
                 <div className="flex items-center mb-4">
-                  <div className="p-3 bg-wxll-blue rounded-lg mr-4">
+                  <div className="p-3 bg-wxll-wall-owner rounded-lg mr-4">
                     <MapPin className="h-6 w-6 text-white" />
                   </div>
                   <div>
@@ -190,7 +190,7 @@ const Index = () => {
                     <p className="text-gray-300 text-sm">Trouvez des artistes talentueux</p>
                   </div>
                 </div>
-                <Button className="w-full bg-transparent border border-wxll-blue text-wxll-blue hover:bg-wxll-blue hover:text-white group-hover:scale-105 transition-all">
+                <Button className="w-full bg-wxll-wall-owner hover:bg-wxll-wall-owner-dark text-white group-hover:scale-105 transition-all">
                   Publier mon mur
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -235,7 +235,7 @@ const Index = () => {
           
           <div className="text-center">
             <Link to="/artistes">
-              <Button variant="outline" size="lg" className="group hover:shadow-lg transition-all">
+              <Button variant="outline" size="lg" className="group hover:shadow-lg transition-all border-wxll-artist text-wxll-artist hover:bg-wxll-artist hover:text-white">
                 Découvrir tous les artistes
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
@@ -267,7 +267,7 @@ const Index = () => {
           
           <div className="text-center">
             <Link to="/murs">
-              <Button variant="outline" size="lg" className="group hover:shadow-lg transition-all">
+              <Button variant="outline" size="lg" className="group hover:shadow-lg transition-all border-wxll-wall-owner text-wxll-wall-owner hover:bg-wxll-wall-owner hover:text-white">
                 Explorer tous les murs
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
@@ -311,7 +311,7 @@ const Index = () => {
           <div className="flex flex-col sm:flex-row justify-center gap-6 max-w-md mx-auto">
             <Button 
               size="lg"
-              className="flex-1 bg-wxll-blue hover:bg-blue-600 hover:scale-105 transition-all shadow-lg"
+              className="flex-1 bg-wxll-artist hover:bg-wxll-artist-dark hover:scale-105 transition-all shadow-lg"
               onClick={() => openAuthModal('artist')}
             >
               <Palette className="mr-2 h-5 w-5" />
@@ -319,7 +319,7 @@ const Index = () => {
             </Button>
             <Button 
               size="lg"
-              className="flex-1 bg-white text-wxll-dark hover:bg-gray-100 hover:scale-105 transition-all shadow-lg"
+              className="flex-1 bg-wxll-wall-owner hover:bg-wxll-wall-owner-dark text-white hover:scale-105 transition-all shadow-lg"
               onClick={() => openAuthModal('owner')}
             >
               <MapPin className="mr-2 h-5 w-5" />

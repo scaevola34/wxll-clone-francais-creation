@@ -11,7 +11,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Star } from 'lucide-react';
+import { ArrowRight, Star, MapPin, Palette, Heart } from 'lucide-react';
 
 interface Artist {
   id: string;
@@ -30,7 +30,7 @@ interface ArtistCarouselProps {
 
 const ArtistCarousel: React.FC<ArtistCarouselProps> = ({ artists }) => {
   return (
-    <div className="relative w-full px-4 md:px-10">
+    <div className="relative w-full">
       <Carousel
         opts={{
           align: "start",
@@ -38,34 +38,70 @@ const ArtistCarousel: React.FC<ArtistCarouselProps> = ({ artists }) => {
         }}
         className="w-full"
       >
-        <CarouselContent className="-ml-4">
+        <CarouselContent className="-ml-2 md:-ml-4">
           {artists.map((artist) => (
-            <CarouselItem key={artist.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
-              <Link to={`/artistes/${artist.id}`} className="block group">
-                <Card className="overflow-hidden border border-border/50 hover:border-primary/50 transition-all hover:shadow-md">
-                  <div className="relative h-48 overflow-hidden bg-muted">
+            <CarouselItem key={artist.id} className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
+              <div className="group h-full">
+                <Card className="overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 bg-white h-full group-hover:-translate-y-2">
+                  {/* Image Section with Overlay */}
+                  <div className="relative h-56 overflow-hidden bg-gradient-to-br from-wxll-blue/20 to-purple-600/20">
                     <img
                       src={artist.imageUrl}
                       alt={`Oeuvre de ${artist.name}`}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                    
+                    {/* Heart Icon */}
+                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <Button size="icon" variant="ghost" className="bg-white/20 backdrop-blur-sm hover:bg-white/30">
+                        <Heart className="h-4 w-4 text-white" />
+                      </Button>
+                    </div>
+                    
+                    {/* Quick Info Overlay */}
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div className="flex items-center justify-between text-white">
+                        <div className="flex items-center space-x-2">
+                          <MapPin className="h-4 w-4" />
+                          <span className="text-sm font-medium">{artist.location}</span>
+                        </div>
+                        {artist.rating && (
+                          <div className="flex items-center space-x-1">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            <span className="text-sm font-medium">{artist.rating}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                   
-                  <CardContent className="p-5 pt-6 relative">
-                    <div className="absolute -top-8 left-5">
-                      <Avatar className="h-16 w-16 border-4 border-background shadow-md">
+                  <CardContent className="p-6 relative bg-white">
+                    {/* Avatar positioned to overlap image */}
+                    <div className="absolute -top-8 left-6">
+                      <Avatar className="h-16 w-16 border-4 border-white shadow-xl ring-2 ring-wxll-blue/20">
                         <AvatarImage src={artist.imageUrl} alt={artist.name} />
-                        <AvatarFallback>{artist.name.substring(0, 2)}</AvatarFallback>
+                        <AvatarFallback className="bg-wxll-blue text-white font-bold">
+                          {artist.name.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
                       </Avatar>
                     </div>
                     
-                    <div className="pt-6">
-                      <h3 className="font-bold text-xl mb-1">{artist.name}</h3>
-                      <p className="text-muted-foreground text-sm mb-3">{artist.location}</p>
+                    <div className="pt-8">
+                      {/* Artist Name and Style */}
+                      <div className="mb-4">
+                        <h3 className="font-bold text-xl mb-2 text-wxll-dark group-hover:text-wxll-blue transition-colors">
+                          {artist.name}
+                        </h3>
+                        <div className="flex items-center gap-2 mb-3">
+                          <Palette className="h-4 w-4 text-wxll-blue" />
+                          <span className="text-sm font-medium text-gray-600">{artist.style}</span>
+                        </div>
+                      </div>
                       
+                      {/* Rating Stars */}
                       {artist.rating && (
-                        <div className="flex items-center mb-3">
+                        <div className="flex items-center mb-4">
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
@@ -75,40 +111,58 @@ const ArtistCarousel: React.FC<ArtistCarouselProps> = ({ artists }) => {
                               } mr-0.5`}
                             />
                           ))}
+                          <span className="ml-2 text-sm text-gray-600">({artist.rating}/5)</span>
                         </div>
                       )}
                       
+                      {/* Tags */}
                       <div className="flex flex-wrap gap-2 mb-4">
-                        <span className="inline-block bg-wxll-light text-wxll-dark text-xs font-medium px-3 py-1 rounded-full">
+                        <span className="inline-block bg-wxll-blue/10 text-wxll-blue text-xs font-medium px-3 py-1.5 rounded-full border border-wxll-blue/20">
                           {artist.style}
                         </span>
                         {artist.specialties?.slice(0, 1).map((specialty, index) => (
-                          <span key={index} className="inline-block bg-muted text-muted-foreground text-xs font-medium px-3 py-1 rounded-full">
+                          <span key={index} className="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1.5 rounded-full">
                             {specialty}
                           </span>
                         ))}
                       </div>
                       
+                      {/* Project Count */}
                       {artist.projectsCount !== undefined && (
-                        <p className="text-sm text-muted-foreground">
-                          {artist.projectsCount} projet{artist.projectsCount !== 1 ? 's' : ''} réalisé{artist.projectsCount !== 1 ? 's' : ''}
-                        </p>
+                        <div className="mb-6">
+                          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <span className="text-sm text-gray-600">Projets réalisés</span>
+                            <span className="font-bold text-wxll-dark">{artist.projectsCount}</span>
+                          </div>
+                        </div>
                       )}
                       
-                      <div className="mt-4 flex justify-between items-center">
-                        <span className="text-sm text-primary group-hover:underline">Voir le profil</span>
-                        <ArrowRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />
-                      </div>
+                      {/* CTA Button */}
+                      <Link to={`/artistes/${artist.id}`} className="block">
+                        <Button className="w-full bg-wxll-blue hover:bg-blue-600 group-hover:shadow-lg transition-all">
+                          <span>Voir le profil</span>
+                          <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                      </Link>
                     </div>
                   </CardContent>
                 </Card>
-              </Link>
+              </div>
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="hidden md:flex absolute -left-4" />
-        <CarouselNext className="hidden md:flex absolute -right-4" />
+        
+        {/* Enhanced Navigation */}
+        <CarouselPrevious className="hidden md:flex -left-6 bg-white shadow-lg border-0 hover:shadow-xl transition-all hover:scale-110" />
+        <CarouselNext className="hidden md:flex -right-6 bg-white shadow-lg border-0 hover:shadow-xl transition-all hover:scale-110" />
       </Carousel>
+      
+      {/* Progress Indicator */}
+      <div className="flex justify-center mt-8 gap-2">
+        {artists.map((_, index) => (
+          <div key={index} className="w-2 h-2 rounded-full bg-gray-300"></div>
+        ))}
+      </div>
     </div>
   );
 };

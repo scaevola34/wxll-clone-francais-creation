@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Users, MapPin, Palette, Shield } from 'lucide-react';
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -136,59 +136,107 @@ const Index = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      {/* Hero Section */}
-      <section className="relative h-[80vh] flex items-center">
+      {/* Enhanced Hero Section */}
+      <section className="relative h-[85vh] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
             src="https://images.unsplash.com/photo-1551639325-8d9c370e5151?q=80&w=2071&auto=format&fit=crop" 
             alt="Street Art Banner" 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover scale-105"
           />
-          <div className="absolute inset-0 bg-black/50"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30"></div>
         </div>
         
         <div className="container mx-auto px-4 relative z-10 text-white">
-          <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              Connectez l'art urbain aux espaces urbains
+          <div className="max-w-4xl">
+            <div className="mb-6">
+              <span className="inline-block bg-wxll-blue/20 backdrop-blur-sm text-wxll-blue border border-wxll-blue/30 px-4 py-2 rounded-full text-sm font-medium mb-6">
+                🎨 Plateforme #1 du street art en France
+              </span>
+            </div>
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-8 leading-tight">
+              Connectez l'art urbain <br/>
+              <span className="text-wxll-blue">aux espaces urbains</span>
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-gray-200">
-              La première marketplace française qui met en relation artistes street art et propriétaires de murs.
+            <p className="text-xl md:text-2xl mb-12 text-gray-200 max-w-2xl">
+              La première marketplace française qui met en relation artistes street art et propriétaires de murs pour créer des œuvres uniques.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button 
-                className="btn-primary"
-                onClick={() => openAuthModal('artist')}
-              >
-                Je suis un artiste
-              </Button>
-              <Button 
-                className="btn-secondary"
-                onClick={() => openAuthModal('owner')}
-              >
-                J'ai un mur disponible
-              </Button>
+            
+            {/* Enhanced CTA Section */}
+            <div className="grid md:grid-cols-2 gap-6 max-w-2xl">
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6 hover:bg-white/15 transition-all group cursor-pointer" onClick={() => openAuthModal('artist')}>
+                <div className="flex items-center mb-4">
+                  <div className="p-3 bg-wxll-blue rounded-lg mr-4">
+                    <Palette className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Je suis un artiste</h3>
+                    <p className="text-gray-300 text-sm">Trouvez des murs à décorer</p>
+                  </div>
+                </div>
+                <Button className="w-full bg-wxll-blue hover:bg-blue-600 group-hover:scale-105 transition-transform">
+                  Commencer gratuitement
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+              
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6 hover:bg-white/15 transition-all group cursor-pointer" onClick={() => openAuthModal('owner')}>
+                <div className="flex items-center mb-4">
+                  <div className="p-3 bg-wxll-blue rounded-lg mr-4">
+                    <MapPin className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">J'ai un mur disponible</h3>
+                    <p className="text-gray-300 text-sm">Trouvez des artistes talentueux</p>
+                  </div>
+                </div>
+                <Button className="w-full bg-transparent border border-wxll-blue text-wxll-blue hover:bg-wxll-blue hover:text-white group-hover:scale-105 transition-all">
+                  Publier mon mur
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            
+            {/* Trust indicators */}
+            <div className="mt-12 flex flex-wrap items-center gap-8 text-sm text-gray-300">
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                <span>500+ artistes vérifiés</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                <span>Paiements sécurisés</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                <span>Partout en France</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
       
+      {/* Enhanced Stats Section */}
+      <StatsSection />
+      
       {/* Featured Artists Section */}
-      <section className="py-20 bg-white">
+      <section className="py-24 bg-white">
         <div className="container mx-auto px-4">
-          <h2 className="section-title text-center">Artistes en vedette</h2>
-          <p className="section-subtitle text-center">
-            Découvrez des artistes talentueux prêts à transformer votre espace
-          </p>
+          <div className="text-center mb-16">
+            <h2 className="section-title">Artistes en vedette</h2>
+            <p className="section-subtitle">
+              Découvrez des artistes talentueux prêts à transformer votre espace en œuvre d'art unique
+            </p>
+          </div>
           
-          <div className="mt-12">
+          <div className="mb-12">
             <ArtistCarousel artists={featuredArtists} />
           </div>
           
-          <div className="mt-12 text-center">
+          <div className="text-center">
             <Link to="/artistes">
-              <Button variant="outline" className="group">
-                Voir tous les artistes
+              <Button variant="outline" size="lg" className="group hover:shadow-lg transition-all">
+                Découvrir tous les artistes
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
@@ -196,30 +244,31 @@ const Index = () => {
         </div>
       </section>
       
-      {/* Stats Section */}
-      <StatsSection />
-      
       {/* How It Works Section */}
       <HowItWorks />
       
       {/* Featured Walls Section */}
-      <section className="py-20 bg-white">
+      <section className="py-24 bg-wxll-light/50">
         <div className="container mx-auto px-4">
-          <h2 className="section-title text-center">Murs disponibles</h2>
-          <p className="section-subtitle text-center">
-            Explorez les espaces qui attendent d'être transformés par votre créativité
-          </p>
+          <div className="text-center mb-16">
+            <h2 className="section-title">Murs disponibles</h2>
+            <p className="section-subtitle">
+              Explorez les espaces qui attendent d'être transformés par votre créativité artistique
+            </p>
+          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             {featuredWalls.map(wall => (
-              <WallCard key={wall.id} {...wall} />
+              <div key={wall.id} className="transform hover:scale-105 transition-transform duration-300">
+                <WallCard {...wall} />
+              </div>
             ))}
           </div>
           
-          <div className="mt-12 text-center">
+          <div className="text-center">
             <Link to="/murs">
-              <Button variant="outline" className="group">
-                Voir tous les murs
+              <Button variant="outline" size="lg" className="group hover:shadow-lg transition-all">
+                Explorer tous les murs
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
@@ -228,43 +277,58 @@ const Index = () => {
       </section>
       
       {/* Testimonials Section */}
-      <section className="py-20 bg-wxll-light">
+      <section className="py-24 bg-white">
         <div className="container mx-auto px-4">
-          <h2 className="section-title text-center">Ce qu'ils disent</h2>
-          <p className="section-subtitle text-center">
-            Découvrez les expériences de nos utilisateurs avec WXLLSPACE
-          </p>
+          <div className="text-center mb-16">
+            <h2 className="section-title">Ils nous font confiance</h2>
+            <p className="section-subtitle">
+              Découvrez les témoignages de notre communauté d'artistes et propriétaires
+            </p>
+          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <TestimonialCard key={index} {...testimonial} />
+              <div key={index} className="transform hover:scale-105 transition-transform duration-300">
+                <TestimonialCard {...testimonial} />
+              </div>
             ))}
           </div>
         </div>
       </section>
       
-      {/* Call to Action */}
-      <section className="py-20 bg-wxll-dark text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Prêt à donner vie à votre projet street art?
+      {/* Enhanced Call to Action */}
+      <section className="py-24 bg-gradient-to-r from-wxll-dark via-gray-900 to-wxll-dark text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550684376-efcbd6e3f031?q=80&w=2070&auto=format&fit=crop')] opacity-10 bg-cover bg-center"></div>
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <h2 className="text-4xl md:text-5xl font-bold mb-8">
+            Prêt à donner vie à votre projet?
           </h2>
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Rejoignez WXLLSPACE aujourd'hui et connectez-vous avec des artistes talentueux ou trouvez le mur parfait pour votre vision artistique.
+          <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
+            Rejoignez WXLLSPACE aujourd'hui et connectez-vous avec une communauté passionnée. 
+            Que vous soyez artiste ou propriétaire, votre prochaine collaboration vous attend.
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
+          
+          <div className="flex flex-col sm:flex-row justify-center gap-6 max-w-md mx-auto">
             <Button 
-              className="btn-primary"
+              size="lg"
+              className="flex-1 bg-wxll-blue hover:bg-blue-600 hover:scale-105 transition-all shadow-lg"
               onClick={() => openAuthModal('artist')}
             >
-              Je suis un artiste
+              <Palette className="mr-2 h-5 w-5" />
+              Je suis artiste
             </Button>
             <Button 
-              className="bg-white text-wxll-dark hover:bg-gray-200 transition-colors px-6 py-3 rounded-md font-medium"
+              size="lg"
+              className="flex-1 bg-white text-wxll-dark hover:bg-gray-100 hover:scale-105 transition-all shadow-lg"
               onClick={() => openAuthModal('owner')}
             >
-              J'ai un mur disponible
+              <MapPin className="mr-2 h-5 w-5" />
+              J'ai un mur
             </Button>
+          </div>
+          
+          <div className="mt-12 text-sm text-gray-400">
+            <p>✨ Inscription gratuite • ⚡ Mise en relation rapide • 🔒 Paiements sécurisés</p>
           </div>
         </div>
       </section>

@@ -1,7 +1,9 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Maximize2, Users, User, Home, Sun, Clock } from 'lucide-react';
+import { MapPin, Maximize2, Users, User, Home, Sun, Clock, Heart } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useFavorites } from '@/contexts/FavoritesContext';
 
 interface WallCardProps {
   id: string;
@@ -27,8 +29,16 @@ const WallCard: React.FC<WallCardProps> = ({
   locationType,
   timeframe,
 }) => {
+  const { isWallFavorite, toggleWallFavorite } = useFavorites();
+
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWallFavorite(id);
+  };
+
   return (
-    <Link to={`/murs/${id}`} className="group">
+    <Link to={`/murs/${id}`} className="group block">
       <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
         <div className="relative h-64 overflow-hidden">
           <img
@@ -36,8 +46,27 @@ const WallCard: React.FC<WallCardProps> = ({
             alt={title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
+          
+          {/* Favorite Heart Button */}
+          <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              className="bg-black/20 backdrop-blur-sm hover:bg-black/40"
+              onClick={handleFavoriteClick}
+            >
+              <Heart 
+                className={`h-4 w-4 transition-colors ${
+                  isWallFavorite(id) 
+                    ? 'text-red-500 fill-red-500' 
+                    : 'text-white'
+                }`} 
+              />
+            </Button>
+          </div>
+
           {clientType && (
-            <div className="absolute top-3 left-3 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+            <div className="absolute top-3 right-3 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
               {clientType === 'B2B' ? (
                 <>
                   <Users className="h-3 w-3" />
@@ -52,7 +81,7 @@ const WallCard: React.FC<WallCardProps> = ({
             </div>
           )}
           {locationType && (
-            <div className="absolute top-3 right-3 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+            <div className="absolute bottom-3 right-3 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
               {locationType === 'interior' ? (
                 <>
                   <Home className="h-3 w-3" />
@@ -88,7 +117,7 @@ const WallCard: React.FC<WallCardProps> = ({
             )}
             
             {budget && (
-              <div className="bg-wxll-light text-wxll-dark text-xs font-medium px-2 py-1 rounded-full inline-block">
+              <div className="bg-wxll-wall-owner/10 text-wxll-wall-owner text-xs font-medium px-2 py-1 rounded-full inline-block border border-wxll-wall-owner/20">
                 Budget: {budget}
               </div>
             )}
@@ -98,7 +127,7 @@ const WallCard: React.FC<WallCardProps> = ({
             <span className="text-sm text-gray-600">Voir le mur</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-wxll-blue group-hover:translate-x-1 transition-transform"
+              className="h-5 w-5 text-wxll-wall-owner group-hover:translate-x-1 transition-transform"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

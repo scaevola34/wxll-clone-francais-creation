@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, MapPin, Palette, Heart } from 'lucide-react';
+import { useFavorites } from '@/contexts/FavoritesContext';
 
 interface Artist {
   id: string;
@@ -29,6 +30,14 @@ interface ArtistCarouselProps {
 }
 
 const ArtistCarousel: React.FC<ArtistCarouselProps> = ({ artists }) => {
+  const { isArtistFavorite, toggleArtistFavorite } = useFavorites();
+
+  const handleFavoriteClick = (e: React.MouseEvent, artistId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleArtistFavorite(artistId);
+  };
+
   return (
     <div className="relative w-full">
       <Carousel
@@ -52,10 +61,21 @@ const ArtistCarousel: React.FC<ArtistCarouselProps> = ({ artists }) => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                     
-                    {/* Heart Icon */}
+                    {/* Heart Icon with Favorite State */}
                     <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <Button size="icon" variant="ghost" className="bg-white/20 backdrop-blur-sm hover:bg-white/30">
-                        <Heart className="h-4 w-4 text-white" />
+                      <Button 
+                        size="icon" 
+                        variant="ghost" 
+                        className="bg-white/20 backdrop-blur-sm hover:bg-white/30"
+                        onClick={(e) => handleFavoriteClick(e, artist.id)}
+                      >
+                        <Heart 
+                          className={`h-4 w-4 transition-colors ${
+                            isArtistFavorite(artist.id) 
+                              ? 'text-red-500 fill-red-500' 
+                              : 'text-white'
+                          }`} 
+                        />
                       </Button>
                     </div>
                     

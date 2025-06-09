@@ -114,6 +114,14 @@
     @apply bg-transparent border-2 border-wxll-blue text-wxll-blue px-6 py-3 rounded-lg hover:bg-wxll-blue hover:text-white transition-all font-medium shadow-sm hover:shadow-md;
   }
 
+  .btn-artist {
+    @apply bg-wxll-artist text-white px-6 py-3 rounded-lg hover:bg-wxll-artist-dark transition-all font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5;
+  }
+
+  .btn-wall-owner {
+    @apply bg-wxll-wall-owner text-white px-6 py-3 rounded-lg hover:bg-wxll-wall-owner-dark transition-all font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5;
+  }
+
   .section-title {
     @apply text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-wxll-dark tracking-tight;
   }
@@ -128,6 +136,14 @@
 
   .gradient-text {
     @apply bg-gradient-to-r from-wxll-blue to-purple-600 bg-clip-text text-transparent;
+  }
+
+  .gradient-artist {
+    @apply bg-gradient-to-r from-wxll-artist to-wxll-artist-light bg-clip-text text-transparent;
+  }
+
+  .gradient-wall-owner {
+    @apply bg-gradient-to-r from-wxll-wall-owner to-wxll-wall-owner-light bg-clip-text text-transparent;
   }
 
   .glass-effect {
@@ -148,6 +164,14 @@
     100% {
       transform: translateY(0px);
     }
+  }
+
+  .artist-theme {
+    @apply bg-gradient-to-br from-wxll-artist/5 to-wxll-artist-light/10;
+  }
+
+  .wall-owner-theme {
+    @apply bg-gradient-to-br from-wxll-wall-owner/5 to-wxll-wall-owner-light/10;
   }
 }
 

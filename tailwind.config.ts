@@ -56,7 +56,17 @@ export default {
 				wxll: {
 					dark: '#1A1F2C',
 					blue: '#33C3F0',
-					light: '#F6F6F7'
+					light: '#F6F6F7',
+					artist: {
+						DEFAULT: '#8B5CF6',
+						light: '#A78BFA',
+						dark: '#7C3AED'
+					},
+					'wall-owner': {
+						DEFAULT: '#10B981',
+						light: '#34D399',
+						dark: '#059669'
+					}
 				}
 			},
 			borderRadius: {

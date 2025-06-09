@@ -44,7 +44,7 @@ const ArtistCarousel: React.FC<ArtistCarouselProps> = ({ artists }) => {
               <div className="group h-full">
                 <Card className="overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 bg-white h-full group-hover:-translate-y-2">
                   {/* Image Section with Overlay */}
-                  <div className="relative h-56 overflow-hidden bg-gradient-to-br from-wxll-blue/20 to-purple-600/20">
+                  <div className="relative h-56 overflow-hidden bg-gradient-to-br from-wxll-artist/20 to-wxll-artist-light/20">
                     <img
                       src={artist.imageUrl}
                       alt={`Oeuvre de ${artist.name}`}
@@ -79,9 +79,9 @@ const ArtistCarousel: React.FC<ArtistCarouselProps> = ({ artists }) => {
                   <CardContent className="p-6 relative bg-white">
                     {/* Avatar positioned to overlap image */}
                     <div className="absolute -top-8 left-6">
-                      <Avatar className="h-16 w-16 border-4 border-white shadow-xl ring-2 ring-wxll-blue/20">
+                      <Avatar className="h-16 w-16 border-4 border-white shadow-xl ring-2 ring-wxll-artist/20">
                         <AvatarImage src={artist.imageUrl} alt={artist.name} />
-                        <AvatarFallback className="bg-wxll-blue text-white font-bold">
+                        <AvatarFallback className="bg-wxll-artist text-white font-bold">
                           {artist.name.substring(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -90,11 +90,11 @@ const ArtistCarousel: React.FC<ArtistCarouselProps> = ({ artists }) => {
                     <div className="pt-8">
                       {/* Artist Name and Style */}
                       <div className="mb-4">
-                        <h3 className="font-bold text-xl mb-2 text-wxll-dark group-hover:text-wxll-blue transition-colors">
+                        <h3 className="font-bold text-xl mb-2 text-wxll-dark group-hover:text-wxll-artist transition-colors">
                           {artist.name}
                         </h3>
                         <div className="flex items-center gap-2 mb-3">
-                          <Palette className="h-4 w-4 text-wxll-blue" />
+                          <Palette className="h-4 w-4 text-wxll-artist" />
                           <span className="text-sm font-medium text-gray-600">{artist.style}</span>
                         </div>
                       </div>
@@ -117,7 +117,7 @@ const ArtistCarousel: React.FC<ArtistCarouselProps> = ({ artists }) => {
                       
                       {/* Tags */}
                       <div className="flex flex-wrap gap-2 mb-4">
-                        <span className="inline-block bg-wxll-blue/10 text-wxll-blue text-xs font-medium px-3 py-1.5 rounded-full border border-wxll-blue/20">
+                        <span className="inline-block bg-wxll-artist/10 text-wxll-artist text-xs font-medium px-3 py-1.5 rounded-full border border-wxll-artist/20">
                           {artist.style}
                         </span>
                         {artist.specialties?.slice(0, 1).map((specialty, index) => (
@@ -130,16 +130,16 @@ const ArtistCarousel: React.FC<ArtistCarouselProps> = ({ artists }) => {
                       {/* Project Count */}
                       {artist.projectsCount !== undefined && (
                         <div className="mb-6">
-                          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center justify-between p-3 bg-wxll-artist/5 rounded-lg border border-wxll-artist/10">
                             <span className="text-sm text-gray-600">Projets réalisés</span>
-                            <span className="font-bold text-wxll-dark">{artist.projectsCount}</span>
+                            <span className="font-bold text-wxll-artist">{artist.projectsCount}</span>
                           </div>
                         </div>
                       )}
                       
                       {/* CTA Button */}
                       <Link to={`/artistes/${artist.id}`} className="block">
-                        <Button className="w-full bg-wxll-blue hover:bg-blue-600 group-hover:shadow-lg transition-all">
+                        <Button className="w-full btn-artist group-hover:shadow-lg transition-all">
                           <span>Voir le profil</span>
                           <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                         </Button>

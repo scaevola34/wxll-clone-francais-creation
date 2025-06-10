@@ -136,12 +136,12 @@ const Index = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      {/* Enhanced Hero Section with new brick wall image */}
+      {/* Enhanced Hero Section with new cover image */}
       <section className="relative h-[85vh] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
             src="/lovable-uploads/a978ae8c-d651-44ef-9ca1-3466286cdd78.png" 
-            alt="Brick Wall Background" 
+            alt="Street Art Cover" 
             className="w-full h-full object-cover scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30"></div>

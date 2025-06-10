@@ -59,17 +59,10 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
             <span>{rating}</span>
           </div>
         </div>
-        {/* Avatar et infos sous la photo */}
-        <div className="flex items-center px-4 -mt-8">
-          <img
-            src={imageUrl}
-            alt={name}
-            className="w-16 h-16 rounded-full border-4 border-white shadow -mt-8 bg-gray-100 object-cover"
-          />
-          <div className="ml-4">
-            <h3 className="text-xl font-bold">{name}</h3>
-            <p className="text-gray-600">{style}</p>
-          </div>
+        {/* Infos sous la photo, sans avatar */}
+        <div className="px-4 pt-4">
+          <h3 className="text-xl font-bold">{name}</h3>
+          <p className="text-gray-600">{style}</p>
         </div>
         {/* Zone d'action */}
         <div className="p-4">
@@ -100,5 +93,6 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
 };
 
 export default ArtistCard;
+
 
 

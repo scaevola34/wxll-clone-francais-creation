@@ -20,26 +20,24 @@ const StatsSection = () => {
           .from('artists')
           .select('*', { count: 'exact', head: true });
         
-        // Fetch walls count  
+        // Fetch walls count from wall_owners table
         const { count: wallsCount } = await supabase
-          .from('walls')
+          .from('wall_owners')
           .select('*', { count: 'exact', head: true });
         
-        // Fetch projects count
+        // Fetch projects count from projects table
         const { count: projectsCount } = await supabase
           .from('projects')
           .select('*', { count: 'exact', head: true });
         
         console.log('Stats from Supabase:', { artistsCount, wallsCount, projectsCount });
         
-        // Update stats if we have data, otherwise keep default values
-        if (artistsCount !== null || wallsCount !== null || projectsCount !== null) {
-          setStats({
-            artists: artistsCount || 500,
-            walls: wallsCount || 750,
-            projects: projectsCount || 1200
-          });
-        }
+        // Update stats with real data, use defaults if null
+        setStats({
+          artists: artistsCount || 500,
+          walls: wallsCount || 750,
+          projects: projectsCount || 1200
+        });
       } catch (error) {
         console.log('Stats will use default values until Supabase tables are ready:', error);
         // Keep default values if Supabase is not ready yet

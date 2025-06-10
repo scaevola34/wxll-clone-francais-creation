@@ -1,112 +1,147 @@
 
 import React from 'react';
-import { Palette, MapPin, MessageSquare, CheckCircle } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Search, MessageCircle, Palette, Shield, Star, Handshake } from 'lucide-react';
 
 const HowItWorks = () => {
-  const artistSteps = [
+  const steps = [
     {
-      icon: <Palette className="w-8 h-8 text-white" />,
-      title: "Créez votre profil",
-      description: "Mettez en avant votre style, vos réalisations et votre expertise."
+      icon: <Search className="w-8 h-8 text-wxll-artist" />,
+      title: "Trouvez l'artiste parfait",
+      description: "Parcourez notre galerie d'artistes vérifiés et découvrez celui qui correspond à votre vision artistique.",
+      details: "Filtrez par style, localisation et budget pour trouver l'artiste idéal pour votre projet."
     },
     {
-      icon: <MapPin className="w-8 h-8 text-white" />,
-      title: "Trouvez des murs",
-      description: "Parcourez les opportunités de fresques et trouvez les projets qui vous correspondent."
+      icon: <MessageCircle className="w-8 h-8 text-wxll-wall-owner" />,
+      title: "Échangez en direct",
+      description: "Discutez directement avec l'artiste pour affiner votre projet et établir les détails de la collaboration.",
+      details: "Notre messagerie intégrée facilite les échanges et permet de partager des références visuelles."
     },
     {
-      icon: <MessageSquare className="w-8 h-8 text-white" />,
-      title: "Discutez avec les propriétaires",
-      description: "Échangez directement sur la plateforme pour définir votre vision artistique."
+      icon: <Palette className="w-8 h-8 text-wxll-blue" />,
+      title: "Création de l'œuvre",
+      description: "L'artiste réalise votre fresque sur mesure, en respectant vos attentes et son style unique.",
+      details: "Suivez l'avancement de votre projet et recevez des photos des étapes de création."
     },
     {
-      icon: <CheckCircle className="w-8 h-8 text-white" />,
-      title: "Réalisez votre œuvre",
-      description: "Concrétisez votre projet une fois les détails finalisés et partagez le résultat."
+      icon: <Star className="w-8 h-8 text-wxll-artist" />,
+      title: "Admirer le résultat",
+      description: "Profitez de votre nouvelle œuvre d'art urbain qui transforme votre espace en galerie unique.",
+      details: "Partagez votre satisfaction et aidez la communauté en laissant un avis sur l'artiste."
     }
   ];
 
-  const ownerSteps = [
+  const guarantees = [
     {
-      icon: <MapPin className="w-8 h-8 text-white" />,
-      title: "Publiez votre mur",
-      description: "Décrivez votre espace, vos attentes et votre budget pour attirer les artistes."
+      icon: <Shield className="w-6 h-6 text-wxll-blue" />,
+      title: "Artistes vérifiés",
+      description: "Tous nos artistes sont sélectionnés pour leur talent et leur professionnalisme"
     },
     {
-      icon: <Palette className="w-8 h-8 text-white" />,
-      title: "Découvrez des artistes",
-      description: "Explorez les profils d'artistes talentueux et leurs styles variés."
+      icon: <Handshake className="w-6 h-6 text-wxll-blue" />,
+      title: "Paiement sécurisé",
+      description: "Transactions protégées avec paiement échelonné selon l'avancement"
     },
     {
-      icon: <MessageSquare className="w-8 h-8 text-white" />,
-      title: "Communiquez vos idées",
-      description: "Discutez directement avec les artistes pour définir votre projet."
-    },
-    {
-      icon: <CheckCircle className="w-8 h-8 text-white" />,
-      title: "Transformez votre espace",
-      description: "Assistez à la métamorphose de votre mur en œuvre d'art unique."
+      icon: <Star className="w-6 h-6 text-wxll-blue" />,
+      title: "Satisfaction garantie",
+      description: "Support client dédié pour vous accompagner tout au long du projet"
     }
   ];
 
   return (
-    <section className="py-20 bg-wxll-light">
+    <section className="py-24 bg-gradient-to-br from-wxll-light/30 to-white">
       <div className="container mx-auto px-4">
-        <h2 className="section-title text-center">Comment ça marche</h2>
-        <p className="section-subtitle text-center">
-          WXLLSPACE connecte facilement les artistes et les propriétaires de murs pour créer des œuvres uniques
-        </p>
+        {/* Section Header */}
+        <div className="text-center mb-20">
+          <h2 className="section-title">Comment ça marche ?</h2>
+          <p className="section-subtitle max-w-3xl mx-auto">
+            WXLLSPACE simplifie la rencontre entre artistes talentueux et propriétaires de murs. 
+            En quelques étapes, transformez votre espace en œuvre d'art unique.
+          </p>
+        </div>
 
-        <div className="mt-16">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-            <div className="artist-theme rounded-2xl p-8">
-              <h3 className="text-2xl font-bold mb-8 text-center gradient-artist">Pour les Artistes</h3>
-              <div className="space-y-8">
-                {artistSteps.map((step, index) => (
-                  <div key={`artist-${index}`} className="flex items-start group">
-                    <div className="flex-shrink-0 mr-4">
-                      <div className="relative">
-                        <div className="w-14 h-14 bg-wxll-artist rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                          {step.icon}
-                        </div>
-                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-wxll-artist-dark rounded-full flex items-center justify-center text-white font-bold text-xs">
-                          {index + 1}
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-semibold mb-2 text-wxll-dark">{step.title}</h4>
-                      <p className="text-gray-600 text-sm">{step.description}</p>
+        {/* Steps */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+          {steps.map((step, index) => (
+            <div key={index} className="relative">
+              {/* Connection Line */}
+              {index < steps.length - 1 && (
+                <div className="hidden lg:block absolute top-12 left-full w-full h-0.5 bg-gradient-to-r from-wxll-blue/30 to-transparent z-0" />
+              )}
+              
+              <Card className="relative z-10 border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white group hover:-translate-y-2">
+                <CardContent className="p-8 text-center">
+                  {/* Step Number */}
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <div className="w-8 h-8 bg-wxll-blue text-white rounded-full flex items-center justify-center text-sm font-bold">
+                      {index + 1}
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="wall-owner-theme rounded-2xl p-8">
-              <h3 className="text-2xl font-bold mb-8 text-center gradient-wall-owner">Pour les Propriétaires</h3>
-              <div className="space-y-8">
-                {ownerSteps.map((step, index) => (
-                  <div key={`owner-${index}`} className="flex items-start group">
-                    <div className="flex-shrink-0 mr-4">
-                      <div className="relative">
-                        <div className="w-14 h-14 bg-wxll-wall-owner rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                          {step.icon}
-                        </div>
-                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-wxll-wall-owner-dark rounded-full flex items-center justify-center text-white font-bold text-xs">
-                          {index + 1}
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-semibold mb-2 text-wxll-dark">{step.title}</h4>
-                      <p className="text-gray-600 text-sm">{step.description}</p>
+                  
+                  {/* Icon */}
+                  <div className="flex justify-center mb-6 mt-4">
+                    <div className="p-4 bg-gradient-to-br from-wxll-light/20 to-wxll-blue/10 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                      {step.icon}
                     </div>
                   </div>
-                ))}
-              </div>
+                  
+                  {/* Content */}
+                  <h3 className="text-xl font-bold text-wxll-dark mb-3 group-hover:text-wxll-blue transition-colors">
+                    {step.title}
+                  </h3>
+                  <p className="text-gray-600 mb-4 leading-relaxed">
+                    {step.description}
+                  </p>
+                  <p className="text-sm text-gray-500 italic">
+                    {step.details}
+                  </p>
+                </CardContent>
+              </Card>
             </div>
+          ))}
+        </div>
+
+        {/* Guarantees Section */}
+        <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-bold text-wxll-dark mb-4">
+              Pourquoi choisir WXLLSPACE ?
+            </h3>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Une plateforme sécurisée qui met la qualité et la confiance au cœur de chaque collaboration artistique.
+            </p>
           </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {guarantees.map((guarantee, index) => (
+              <div key={index} className="text-center group">
+                <div className="flex justify-center mb-4">
+                  <div className="p-3 bg-wxll-blue/10 rounded-xl group-hover:bg-wxll-blue/20 transition-colors">
+                    {guarantee.icon}
+                  </div>
+                </div>
+                <h4 className="text-lg font-semibold text-wxll-dark mb-2">
+                  {guarantee.title}
+                </h4>
+                <p className="text-gray-600 leading-relaxed">
+                  {guarantee.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Call to Action */}
+        <div className="text-center mt-16">
+          <div className="inline-flex items-center gap-2 bg-wxll-blue/10 text-wxll-blue px-6 py-3 rounded-full text-sm font-medium mb-4">
+            <Star className="w-4 h-4" />
+            <span>Rejoignez plus de {steps.length * 250}+ utilisateurs satisfaits</span>
+          </div>
+          <p className="text-gray-600 max-w-xl mx-auto">
+            Prêt à donner vie à votre projet artistique ? Commencez dès maintenant et découvrez 
+            le potentiel créatif de votre mur.
+          </p>
         </div>
       </div>
     </section>

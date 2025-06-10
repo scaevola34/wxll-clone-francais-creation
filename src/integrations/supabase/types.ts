@@ -9,41 +9,151 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      artist_projects: {
+        Row: {
+          artist_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          location: string | null
+          title: string
+          year: number | null
+        }
+        Insert: {
+          artist_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          title: string
+          year?: number | null
+        }
+        Update: {
+          artist_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          title?: string
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_projects_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artists: {
         Row: {
           bio: string | null
           contact_email: string | null
           coverage_area: string | null
           created_at: string | null
+          description: string | null
+          experience_years: number | null
           id: string
           instagram_handle: string | null
+          location: string | null
           name: string
           previous_works_urls: string[] | null
+          profile_image_url: string | null
+          projects_count: number | null
+          style: string | null
           visibility: boolean | null
+          website: string | null
         }
         Insert: {
           bio?: string | null
           contact_email?: string | null
           coverage_area?: string | null
           created_at?: string | null
+          description?: string | null
+          experience_years?: number | null
           id?: string
           instagram_handle?: string | null
+          location?: string | null
           name: string
           previous_works_urls?: string[] | null
+          profile_image_url?: string | null
+          projects_count?: number | null
+          style?: string | null
           visibility?: boolean | null
+          website?: string | null
         }
         Update: {
           bio?: string | null
           contact_email?: string | null
           coverage_area?: string | null
           created_at?: string | null
+          description?: string | null
+          experience_years?: number | null
           id?: string
           instagram_handle?: string | null
+          location?: string | null
           name?: string
           previous_works_urls?: string[] | null
+          profile_image_url?: string | null
+          projects_count?: number | null
+          style?: string | null
           visibility?: boolean | null
+          website?: string | null
         }
         Relationships: []
+      }
+      projects: {
+        Row: {
+          artist_id: string | null
+          completed_at: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          status: string | null
+          title: string
+          wall_owner_id: string | null
+        }
+        Insert: {
+          artist_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          status?: string | null
+          title: string
+          wall_owner_id?: string | null
+        }
+        Update: {
+          artist_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          status?: string | null
+          title?: string
+          wall_owner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_wall_owner_id_fkey"
+            columns: ["wall_owner_id"]
+            isOneToOne: false
+            referencedRelation: "wall_owners"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       wall_owners: {
         Row: {

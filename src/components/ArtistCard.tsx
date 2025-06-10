@@ -7,6 +7,7 @@ interface ArtistCardProps {
   style: string;
   location: string;
   imageUrl: string;
+  profile_image_url?: string; // Nouvelle prop pour l'image Supabase
   rating?: number;
 }
 
@@ -16,17 +17,25 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
   style,
   location,
   imageUrl,
-  rating = 4.8, // valeur par défaut si non fournie
+  profile_image_url,
+  rating = 4.8,
 }) => {
+  // Priorité : profile_image_url (Supabase) puis imageUrl puis placeholder
+  const displayImage = profile_image_url || imageUrl || '/placeholder.svg';
+
   return (
     <Link to={`/artistes/${id}`} className="group">
       <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
         {/* Image de couverture */}
         <div className="relative h-64 overflow-hidden">
           <img
-            src={imageUrl}
+            src={displayImage}
             alt={`Oeuvre de ${name}`}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={(e) => {
+              // Fallback si l'image ne charge pas
+              e.currentTarget.src = '/placeholder.svg';
+            }}
           />
           {/* Localisation, bien visible en bas à gauche */}
           <div className="absolute bottom-4 left-4 flex items-center gap-2 bg-black/60 px-3 py-1 rounded text-white text-sm">
@@ -59,7 +68,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
             <span>{rating}</span>
           </div>
         </div>
-        {/* Infos sous la photo, sans avatar */}
+        {/* Infos sous la photo */}
         <div className="px-4 pt-4">
           <h3 className="text-xl font-bold">{name}</h3>
           <p className="text-gray-600">{style}</p>
@@ -93,6 +102,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
 };
 
 export default ArtistCard;
+
 
 
 

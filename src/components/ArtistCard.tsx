@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -60,3 +59,4 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
 };
 
 export default ArtistCard;
+

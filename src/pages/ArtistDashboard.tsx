@@ -12,20 +12,39 @@ const ArtistDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [projects, setProjects] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   useEffect(() => {
-    fetchArtistData();
-    fetchProjects();
-    fetchMessages();
+    getCurrentUser();
   }, []);
+
+  useEffect(() => {
+    if (currentUserId) {
+      fetchArtistData();
+      fetchProjects();
+      fetchMessages();
+    }
+  }, [currentUserId]);
+
+  const getCurrentUser = async () => {
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      
+      if (error) throw error;
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération de l\'utilisateur:', error);
+    }
+  };
 
   const fetchArtistData = async () => {
     try {
-      // Remplace 'ARTIST_ID' par l'ID réel de l'artiste connecté
       const { data, error } = await supabase
         .from('artists')
         .select('*')
-        .eq('id', 'ARTIST_ID') // À remplacer par l'ID de l'utilisateur connecté
+        .eq('id', currentUserId)
         .single();
 
       if (error) throw error;
@@ -39,11 +58,10 @@ const ArtistDashboard = () => {
 
   const fetchProjects = async () => {
     try {
-      // Cette requête sera à adapter selon ta structure de table projects
       const { data, error } = await supabase
         .from('projects')
         .select('*')
-        .eq('artist_id', 'ARTIST_ID'); // À remplacer par l'ID de l'utilisateur connecté
+        .eq('artist_id', currentUserId);
 
       if (error) throw error;
       setProjects(data || []);
@@ -54,11 +72,10 @@ const ArtistDashboard = () => {
 
   const fetchMessages = async () => {
     try {
-      // Cette requête sera à adapter selon ta structure de table messages
       const { data, error } = await supabase
         .from('messages')
         .select('*')
-        .eq('receiver_id', 'ARTIST_ID') // À remplacer par l'ID de l'utilisateur connecté
+        .eq('receiver_id', currentUserId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -73,11 +90,10 @@ const ArtistDashboard = () => {
       const { error } = await supabase
         .from('artists')
         .update({ profile_image_url: imageUrl })
-        .eq('id', 'ARTIST_ID'); // À remplacer par l'ID de l'utilisateur connecté
+        .eq('id', currentUserId);
 
       if (error) throw error;
       
-      // Mettre à jour l'état local
       setArtist(prev => prev ? { ...prev, profile_image_url: imageUrl } : null);
       console.log('Image de profil mise à jour avec succès');
     } catch (error) {

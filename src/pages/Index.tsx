@@ -136,12 +136,12 @@ const Index = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      {/* Enhanced Hero Section with new cover image */}
+      {/* Enhanced Hero Section */}
       <section className="relative h-[85vh] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
-            src="/lovable-uploads/a978ae8c-d651-44ef-9ca1-3466286cdd78.png" 
-            alt="Street Art Cover" 
+            src="https://images.unsplash.com/photo-1551639325-8d9c370e5151?q=80&w=2071&auto=format&fit=crop" 
+            alt="Street Art Banner" 
             className="w-full h-full object-cover scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30"></div>
@@ -340,7 +340,6 @@ const Index = () => {
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         initialTab={authInitialTab}
-        userType={userType}
       />
     </div>
   );

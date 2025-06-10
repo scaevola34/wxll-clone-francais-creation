@@ -1,186 +1,438 @@
-
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import ImageUpload from '@/components/ui/ImageUpload';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from '@/components/ui/card';
-import { User, Edit, LogOut, PlusCircle, Building, MapPin } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Calendar, MapPin, Star, Eye, MessageSquare, Settings, Upload, Home, Users, Plus } from 'lucide-react';
 
 const OwnerDashboard = () => {
-  const navigate = useNavigate();
+  const [owner, setOwner] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [walls, setWalls] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [currentUserId, setCurrentUserId] = useState(null);
 
-  const handleLogout = () => {
-    // In a real app, this would clear auth tokens and user session
-    navigate('/');
+  useEffect(() => {
+    getCurrentUser();
+  }, []);
+
+  useEffect(() => {
+    if (currentUserId) {
+      fetchOwnerData();
+      fetchWalls();
+      fetchProjects();
+      fetchMessages();
+    }
+  }, [currentUserId]);
+
+  const getCurrentUser = async () => {
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      
+      if (error) throw error;
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération de l\'utilisateur:', error);
+    }
   };
 
-  return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
+  const fetchOwnerData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('wall_owners')
+        .select('*')
+        .eq('id', currentUserId)
+        .single();
+
+      if (error) throw error;
+      setOwner(data);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des données propriétaire:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchWalls = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('walls')
+        .select('*')
+        .eq('owner_id', currentUserId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setWalls(data || []);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des murs:', error);
+    }
+  };
+
+  const fetchProjects = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*, artists(name), walls(title)')
+        .eq('owner_id', currentUserId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setProjects(data || []);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des projets:', error);
+    }
+  };
+
+  const fetchMessages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('receiver_id', currentUserId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setMessages(data || []);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des messages:', error);
+    }
+  };
+
+  const updateProfileImage = async (imageUrl: string) => {
+    try {
+      const { error } = await supabase
+        .from('wall_owners')
+        .update({ image_url: imageUrl })
+        .eq('id', currentUserId);
+
+      if (error) throw error;
       
-      <div className="flex-grow container mx-auto px-4 py-12">
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Sidebar */}
-          <aside className="md:w-1/4">
+      setOwner(prev => prev ? { ...prev, image_url: imageUrl } : null);
+      console.log('Image de profil mise à jour avec succès');
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour de l\'image:', error);
+      alert('Erreur lors de la mise à jour de l\'image');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-lg text-gray-600">Chargement du dashboard...</div>
+      </div>
+    );
+  }
+
+  if (!owner) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-lg text-gray-600">Aucune donnée propriétaire trouvée</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Bonjour {owner.name} !
+          </h1>
+          <p className="text-gray-600">
+            Gérez vos murs et connectez-vous avec des artistes street art depuis votre dashboard.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Colonne principale */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Photo de profil */}
             <Card>
               <CardHeader>
-                <div className="flex items-center space-x-4">
-                  <div className="relative">
-                    <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
-                      <User size={40} className="text-gray-400" />
-                    </div>
-                    <Button 
-                      size="icon" 
-                      variant="outline" 
-                      className="absolute bottom-0 right-0 rounded-full bg-white"
-                    >
-                      <Edit size={14} />
-                    </Button>
-                  </div>
-                  <div>
-                    <CardTitle>Thomas Moreau</CardTitle>
-                    <CardDescription>Propriétaire de mur</CardDescription>
-                  </div>
-                </div>
+                <CardTitle className="flex items-center gap-2">
+                  <Upload className="h-5 w-5" />
+                  Photo de profil
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <nav className="space-y-2">
-                  <Button variant="ghost" className="w-full justify-start">
-                    <User className="mr-2" size={18} />
-                    Profil
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start">
-                    <Building className="mr-2" size={18} />
-                    Mes murs
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start">
-                    <LogOut className="mr-2" size={18} />
-                    Déconnexion
-                  </Button>
-                </nav>
+                <ImageUpload
+                  currentImageUrl={owner?.image_url}
+                  onImageUploaded={updateProfileImage}
+                  bucket="profile-images"
+                />
+                <p className="text-sm text-gray-500 mt-4">
+                  Ajoutez une photo de profil pour vous présenter aux artistes.
+                </p>
               </CardContent>
             </Card>
-          </aside>
-          
-          {/* Main content */}
-          <main className="md:w-3/4">
+
+            {/* Statistiques */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Mes murs</p>
+                      <p className="text-2xl font-bold text-gray-900">{walls.length}</p>
+                    </div>
+                    <Home className="h-8 w-8 text-wxll-green" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Projets</p>
+                      <p className="text-2xl font-bold text-gray-900">{projects.length}</p>
+                    </div>
+                    <Calendar className="h-8 w-8 text-wxll-blue" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Messages</p>
+                      <p className="text-2xl font-bold text-gray-900">{messages.length}</p>
+                    </div>
+                    <MessageSquare className="h-8 w-8 text-yellow-500" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Mes murs */}
             <Card>
-              <CardHeader>
-                <CardTitle>Mon profil</CardTitle>
-                <CardDescription>Gérez vos informations personnelles</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Nom complet</Label>
-                      <Input id="name" defaultValue="Thomas Moreau" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input id="email" type="email" defaultValue="thomas.moreau@example.com" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Téléphone</Label>
-                      <Input id="phone" defaultValue="+33 6 98 76 54 32" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="company">Entreprise (optionnel)</Label>
-                      <Input id="company" defaultValue="Café Le Parisien" />
-                    </div>
-                  </div>
-                </form>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button variant="outline">Annuler</Button>
-                <Button>Sauvegarder</Button>
-              </CardFooter>
-            </Card>
-            
-            <Card className="mt-8">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Mes murs</span>
-                  <Button size="sm">
-                    <PlusCircle className="mr-2" size={16} />
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Mes murs</CardTitle>
+                <Link to="/ajouter-mur">
+                  <Button className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
                     Ajouter un mur
                   </Button>
+                </Link>
+              </CardHeader>
+              <CardContent>
+                {walls.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {walls.slice(0, 4).map((wall) => (
+                      <div key={wall.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <h3 className="font-semibold text-lg">{wall.title || 'Mur sans titre'}</h3>
+                            <p className="text-sm text-gray-600 flex items-center gap-1">
+                              <MapPin className="h-4 w-4" />
+                              {wall.location || 'Localisation non définie'}
+                            </p>
+                          </div>
+                          <Badge 
+                            variant={wall.status === 'available' ? 'default' : 'secondary'}
+                          >
+                            {wall.status === 'available' ? 'Disponible' : 'Occupé'}
+                          </Badge>
+                        </div>
+                        
+                        {wall.image_url && (
+                          <img 
+                            src={wall.image_url} 
+                            alt={wall.title}
+                            className="w-full h-32 object-cover rounded-md mb-3"
+                          />
+                        )}
+                        
+                        <p className="text-sm text-gray-700 mb-3">
+                          {wall.description?.substring(0, 100) || 'Aucune description'}
+                          {wall.description?.length > 100 && '...'}
+                        </p>
+                        
+                        <div className="flex gap-2">
+                          <Link to={`/murs/${wall.id}`}>
+                            <Button variant="outline" size="sm">
+                              Voir
+                            </Button>
+                          </Link>
+                          <Link to={`/murs/${wall.id}/edit`}>
+                            <Button variant="outline" size="sm">
+                              Modifier
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Home className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500 mb-4">
+                      Vous n'avez pas encore ajouté de mur.
+                    </p>
+                    <Link to="/ajouter-mur">
+                      <Button>
+                        Ajouter mon premier mur
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Projets récents */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Projets récents</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {projects.length > 0 ? (
+                  <div className="space-y-4">
+                    {projects.slice(0, 3).map((project) => (
+                      <div key={project.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div>
+                          <h3 className="font-semibold">{project.walls?.title || 'Projet'}</h3>
+                          <p className="text-sm text-gray-600 flex items-center gap-1">
+                            <Users className="h-4 w-4" />
+                            Artiste: {project.artists?.name || 'Non assigné'}
+                          </p>
+                        </div>
+                        <Badge variant="outline">{project.status || 'En cours'}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-8">
+                    Aucun projet pour le moment. Ajoutez un mur pour commencer !
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Profil rapide */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Eye className="h-5 w-5" />
+                  Mon profil
                 </CardTitle>
-                <CardDescription>Gérez vos murs disponibles pour les artistes</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {[1, 2].map((item) => (
-                    <Card key={item}>
-                      <div className="flex flex-col md:flex-row">
-                        <div className="md:w-1/3">
-                          <div className="h-48 md:h-full bg-gray-200">
-                            <img 
-                              src={`https://images.unsplash.com/photo-${item === 1 ? '1555680202-c86f0e12f086' : '1566159266269-2ecbc9a5d4c6'}?q=80&w=300&auto=format&fit=crop`}
-                              alt={`Mur ${item}`}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        </div>
-                        <div className="md:w-2/3 p-4">
-                          <div className="flex justify-between">
-                            <h3 className="font-semibold text-lg">
-                              {item === 1 ? "Façade de café" : "Mur extérieur d'atelier"}
-                            </h3>
-                            <Button variant="ghost" size="icon">
-                              <Edit size={16} />
-                            </Button>
-                          </div>
-                          <div className="flex items-center text-sm text-gray-500 mt-1">
-                            <MapPin size={16} className="mr-1" />
-                            {item === 1 ? "Paris, 11ème" : "Lyon, Centre"}
-                          </div>
-                          <div className="mt-2">
-                            <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 mr-2">
-                              {item === 1 ? "Extérieur" : "Intérieur"}
-                            </span>
-                            <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                              {item === 1 ? "B2C" : "B2B"}
-                            </span>
-                          </div>
-                          <p className="text-sm mt-2">
-                            {item === 1 
-                              ? "Façade de café donnant sur une rue passante. Bonne visibilité. Idéal pour une fresque colorée." 
-                              : "Mur intérieur de notre atelier créatif. Recherche une œuvre inspirante pour notre équipe."}
-                          </p>
-                          <div className="flex justify-between items-center mt-4">
-                            <div>
-                              <span className="text-sm font-medium">Dimensions:</span>
-                              <span className="text-sm ml-2">{item === 1 ? "8m x 4m" : "6m x 3m"}</span>
-                            </div>
-                            <div>
-                              <span className="text-sm font-medium">Budget:</span>
-                              <span className="text-sm ml-2">{item === 1 ? "2000€ - 3500€" : "1500€ - 2500€"}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={owner.image_url || '/placeholder-owner.png'}
+                      alt={owner.name}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <div>
+                      <h3 className="font-semibold">{owner.name}</h3>
+                      <p className="text-sm text-gray-600">Propriétaire de murs</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <MapPin className="h-4 w-4 text-gray-400" />
+                      <span>{owner.location || 'Localisation non définie'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Home className="h-4 w-4 text-gray-400" />
+                      <span>{walls.length} mur{walls.length > 1 ? 's' : ''}</span>
+                    </div>
+                  </div>
+
+                  <Link to={`/proprietaires/${owner.id}`}>
+                    <Button variant="outline" className="w-full">
+                      Voir mon profil public
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
-          </main>
+
+            {/* Actions rapides */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Actions rapides
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Link to="/ajouter-mur">
+                    <Button className="w-full">
+                      Ajouter un nouveau mur
+                    </Button>
+                  </Link>
+                  
+                  <Link to="/artistes">
+                    <Button variant="outline" className="w-full">
+                      Explorer les artistes
+                    </Button>
+                  </Link>
+                  
+                  <Link to="/messages">
+                    <Button variant="outline" className="w-full">
+                      Mes messages
+                    </Button>
+                  </Link>
+                  
+                  <Link to="/settings">
+                    <Button variant="outline" className="w-full">
+                      Paramètres du compte
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Messages récents */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Messages récents</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {messages.length > 0 ? (
+                  <div className="space-y-3">
+                    {messages.slice(0, 3).map((message, index) => (
+                      <div key={index} className="p-3 border border-gray-200 rounded-lg">
+                        <p className="text-sm font-medium">Nouveau message</p>
+                        <p className="text-xs text-gray-500">Il y a {Math.floor(Math.random() * 24)} heures</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-sm">Aucun message récent</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Conseils */}
+            <Card className="bg-wxll-light border-wxll-green">
+              <CardHeader>
+                <CardTitle className="text-wxll-dark">💡 Conseil</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-wxll-dark">
+                  Ajoutez des photos de qualité à vos murs pour attirer plus d'artistes ! 
+                  Les annonces avec photos reçoivent 3x plus de demandes.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-      
-      <Footer />
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -13,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, MapPin, Palette, Heart } from 'lucide-react';
 import { useFavorites } from '@/contexts/FavoritesContext';
+import { useArtists } from '@/hooks/useArtists';
 
 interface Artist {
   id: string;
@@ -25,11 +25,8 @@ interface Artist {
   projectsCount?: number;
 }
 
-interface ArtistCarouselProps {
-  artists: Artist[];
-}
-
-const ArtistCarousel: React.FC<ArtistCarouselProps> = ({ artists }) => {
+const ArtistCarousel: React.FC = () => {
+  const { artists, loading } = useArtists();
   const { isArtistFavorite, toggleArtistFavorite } = useFavorites();
 
   const handleFavoriteClick = (e: React.MouseEvent, artistId: string) => {
@@ -37,6 +34,22 @@ const ArtistCarousel: React.FC<ArtistCarouselProps> = ({ artists }) => {
     e.stopPropagation();
     toggleArtistFavorite(artistId);
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="text-lg text-gray-600">Chargement des artistes...</div>
+      </div>
+    );
+  }
+
+  if (!artists || artists.length === 0) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="text-lg text-gray-600">Aucun artiste trouvé</div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full">
@@ -55,7 +68,7 @@ const ArtistCarousel: React.FC<ArtistCarouselProps> = ({ artists }) => {
                   {/* Image Section with Overlay */}
                   <div className="relative h-56 overflow-hidden bg-gradient-to-br from-wxll-artist/20 to-wxll-artist-light/20">
                     <img
-                      src={artist.imageUrl}
+                      src={artist.imageUrl || '/placeholder-artist.jpg'}
                       alt={`Oeuvre de ${artist.name}`}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     />
@@ -188,3 +201,4 @@ const ArtistCarousel: React.FC<ArtistCarouselProps> = ({ artists }) => {
 };
 
 export default ArtistCarousel;
+

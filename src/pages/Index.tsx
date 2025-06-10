@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Users, MapPin, Palette, Shield } from 'lucide-react';
+import { ArrowRight, Users, MapPin, Palette, Shield, Building, Home } from 'lucide-react';
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -13,93 +13,17 @@ import TestimonialCard from '@/components/TestimonialCard';
 import StatsSection from '@/components/StatsSection';
 import AuthModal from '@/components/AuthModal';
 import ArtistCarousel from '@/components/ArtistCarousel';
+import WallCarousel from '@/components/WallCarousel';
+import { useArtists } from '@/hooks/useArtists';
+import { useWalls } from '@/hooks/useWalls';
 
 const Index = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authInitialTab, setAuthInitialTab] = useState('register');
   const [userType, setUserType] = useState<'artist' | 'owner' | null>(null);
 
-  // Enhanced data for artists with additional fields
-  const featuredArtists = [
-    {
-      id: "1",
-      name: "Sophie Durand",
-      style: "Graffiti Abstrait",
-      location: "Paris",
-      imageUrl: "https://images.unsplash.com/photo-1607000975631-8bdfb8aaa279?q=80&w=1974&auto=format&fit=crop",
-      rating: 5,
-      specialties: ["Murals", "Street Art"],
-      projectsCount: 24
-    },
-    {
-      id: "2",
-      name: "Marc Lefèvre",
-      style: "Muralisme",
-      location: "Lyon",
-      imageUrl: "https://images.unsplash.com/photo-1574014629736-e5efc9b7732e?q=80&w=1964&auto=format&fit=crop",
-      rating: 4,
-      specialties: ["Trompe-l'œil", "Fresque"],
-      projectsCount: 18
-    },
-    {
-      id: "3",
-      name: "Emma Bernard",
-      style: "Street Art Figuratif",
-      location: "Marseille",
-      imageUrl: "https://images.unsplash.com/photo-1623944887776-2f6e8acb83f3?q=80&w=1964&auto=format&fit=crop",
-      rating: 5,
-      specialties: ["Portrait", "Urban Art"],
-      projectsCount: 32
-    },
-    {
-      id: "4",
-      name: "Thomas Martin",
-      style: "Calligraffiti",
-      location: "Bordeaux",
-      imageUrl: "https://images.unsplash.com/photo-1584837140804-599ddb86a9f3?q=80&w=1964&auto=format&fit=crop",
-      rating: 4,
-      specialties: ["Typography", "Lettering"],
-      projectsCount: 15
-    },
-    {
-      id: "5",
-      name: "Julie Moreau",
-      style: "Pop Art Urbain",
-      location: "Nantes",
-      imageUrl: "https://images.unsplash.com/photo-1581368135153-a506cf13531c?q=80&w=1964&auto=format&fit=crop",
-      rating: 5,
-      specialties: ["Collage", "Street Art"],
-      projectsCount: 28
-    }
-  ];
-
-  // Sample data for walls
-  const featuredWalls = [
-    {
-      id: "1",
-      title: "Mur d'expression urbaine",
-      location: "Paris, 11ème",
-      size: "8m x 4m",
-      imageUrl: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?q=80&w=2070&auto=format&fit=crop",
-      budget: "2000€ - 3500€"
-    },
-    {
-      id: "2",
-      title: "Façade commerciale",
-      location: "Lyon, Centre",
-      size: "12m x 5m",
-      imageUrl: "https://images.unsplash.com/photo-1566159266269-2ecbc9a5d4c6?q=80&w=1963&auto=format&fit=crop",
-      budget: "4000€ - 6000€"
-    },
-    {
-      id: "3",
-      title: "Mur intérieur d'entreprise",
-      location: "Bordeaux",
-      size: "6m x 3m",
-      imageUrl: "https://images.unsplash.com/photo-1508930572500-16235d0a1e4c?q=80&w=1968&auto=format&fit=crop",
-      budget: "1500€ - 2500€"
-    }
-  ];
+  const { artists, loading: artistsLoading } = useArtists();
+  const { walls, loading: wallsLoading } = useWalls();
 
   // Sample testimonials
   const testimonials = [
@@ -140,8 +64,8 @@ const Index = () => {
       <section className="relative h-[85vh] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://images.unsplash.com/photo-1551639325-8d9c370e5151?q=80&w=2071&auto=format&fit=crop" 
-            alt="Street Art Banner" 
+            src="/lovable-uploads/43b7f1bd-60a5-4bff-aeaa-2873676d8ee2.png" 
+            alt="Urban Wall Background" 
             className="w-full h-full object-cover scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30"></div>
@@ -180,7 +104,7 @@ const Index = () => {
                 </Button>
               </div>
               
-              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6 hover:bg-white/15 transition-all group cursor-pointer" onClick={() => openAuthModal('owner')}>
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6 hover:bg-white/15 transition-all group">
                 <div className="flex items-center mb-4">
                   <div className="p-3 bg-wxll-wall-owner rounded-lg mr-4">
                     <MapPin className="h-6 w-6 text-white" />
@@ -190,10 +114,22 @@ const Index = () => {
                     <p className="text-gray-300 text-sm">Trouvez des artistes talentueux</p>
                   </div>
                 </div>
-                <Button className="w-full bg-wxll-wall-owner hover:bg-wxll-wall-owner-dark text-white group-hover:scale-105 transition-all">
-                  Publier mon mur
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                <div className="grid grid-cols-1 gap-3">
+                  <Button 
+                    className="w-full bg-wxll-wall-owner hover:bg-wxll-wall-owner-dark text-white group-hover:scale-105 transition-all"
+                    onClick={() => openAuthModal('owner')}
+                  >
+                    <Home className="mr-2 h-4 w-4" />
+                    Je suis un particulier
+                  </Button>
+                  <Button 
+                    className="w-full bg-wxll-wall-owner hover:bg-wxll-wall-owner-dark text-white group-hover:scale-105 transition-all"
+                    onClick={() => openAuthModal('owner')}
+                  >
+                    <Building className="mr-2 h-4 w-4" />
+                    Je suis un professionnel
+                  </Button>
+                </div>
               </div>
             </div>
             
@@ -230,7 +166,13 @@ const Index = () => {
           </div>
           
           <div className="mb-12">
-            <ArtistCarousel artists={featuredArtists} />
+            {artistsLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="text-lg text-gray-600">Chargement des artistes...</div>
+              </div>
+            ) : (
+              <ArtistCarousel artists={artists} />
+            )}
           </div>
           
           <div className="text-center">
@@ -257,12 +199,14 @@ const Index = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {featuredWalls.map(wall => (
-              <div key={wall.id} className="transform hover:scale-105 transition-transform duration-300">
-                <WallCard {...wall} />
+          <div className="mb-12">
+            {wallsLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="text-lg text-gray-600">Chargement des murs...</div>
               </div>
-            ))}
+            ) : (
+              <WallCarousel walls={walls} />
+            )}
           </div>
           
           <div className="text-center">

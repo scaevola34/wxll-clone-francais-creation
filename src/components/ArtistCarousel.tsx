@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -12,7 +13,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, MapPin, Palette, Heart } from 'lucide-react';
 import { useFavorites } from '@/contexts/FavoritesContext';
-import { useArtists } from '@/hooks/useArtists';
 
 interface Artist {
   id: string;
@@ -25,8 +25,11 @@ interface Artist {
   projectsCount?: number;
 }
 
-const ArtistCarousel: React.FC = () => {
-  const { artists, loading } = useArtists();
+interface ArtistCarouselProps {
+  artists: Artist[];
+}
+
+const ArtistCarousel: React.FC<ArtistCarouselProps> = ({ artists }) => {
   const { isArtistFavorite, toggleArtistFavorite } = useFavorites();
 
   const handleFavoriteClick = (e: React.MouseEvent, artistId: string) => {
@@ -34,14 +37,6 @@ const ArtistCarousel: React.FC = () => {
     e.stopPropagation();
     toggleArtistFavorite(artistId);
   };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <div className="text-lg text-gray-600">Chargement des artistes...</div>
-      </div>
-    );
-  }
 
   if (!artists || artists.length === 0) {
     return (
@@ -201,4 +196,3 @@ const ArtistCarousel: React.FC = () => {
 };
 
 export default ArtistCarousel;
-

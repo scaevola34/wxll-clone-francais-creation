@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Palette, MapPin, User, Settings } from 'lucide-react';
+import { Menu, X, Palette, MapPin, User, Settings, LogOut } from 'lucide-react';
 import AuthModal from './AuthModal';
+import { useAuth } from '@/hooks/useAuth';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,6 +11,7 @@ const Navbar = () => {
   const [authInitialTab, setAuthInitialTab] = useState('login');
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
+  const { user, isAuthenticated, logout } = useAuth();
 
   // Handle scroll effect
   useEffect(() => {
@@ -33,6 +35,11 @@ const Navbar = () => {
   const openAuth = (tab: string = 'login') => {
     setAuthInitialTab(tab);
     setShowAuthModal(true);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    setIsOpen(false);
   };
 
   const isActive = (path: string) => location.pathname === path;
@@ -97,49 +104,72 @@ const Navbar = () => {
               )}
             </Link>
             
-            {/* Dashboard Links */}
-            <Link 
-              to="/artiste/profil" 
-              className={`relative text-wxll-dark hover:text-wxll-blue transition-colors font-medium py-2 flex items-center gap-1 ${
-                isActive('/artiste/profil') ? 'text-wxll-blue' : ''
-              }`}
-            >
-              <User size={16} />
-              Dashboard Artiste
-              {isActive('/artiste/profil') && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-wxll-blue rounded-full"></div>
-              )}
-            </Link>
-            <Link 
-              to="/proprietaire/profil" 
-              className={`relative text-wxll-dark hover:text-wxll-blue transition-colors font-medium py-2 flex items-center gap-1 ${
-                isActive('/proprietaire/profil') ? 'text-wxll-blue' : ''
-              }`}
-            >
-              <Settings size={16} />
-              Dashboard Propriétaire
-              {isActive('/proprietaire/profil') && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-wxll-blue rounded-full"></div>
-              )}
-            </Link>
+            {/* Dashboard Links - seulement si connecté */}
+            {isAuthenticated && (
+              <>
+                <Link 
+                  to="/artiste/profil" 
+                  className={`relative text-wxll-dark hover:text-wxll-blue transition-colors font-medium py-2 flex items-center gap-1 ${
+                    isActive('/artiste/profil') ? 'text-wxll-blue' : ''
+                  }`}
+                >
+                  <User size={16} />
+                  Dashboard Artiste
+                  {isActive('/artiste/profil') && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-wxll-blue rounded-full"></div>
+                  )}
+                </Link>
+                <Link 
+                  to="/proprietaire/profil" 
+                  className={`relative text-wxll-dark hover:text-wxll-blue transition-colors font-medium py-2 flex items-center gap-1 ${
+                    isActive('/proprietaire/profil') ? 'text-wxll-blue' : ''
+                  }`}
+                >
+                  <Settings size={16} />
+                  Dashboard Propriétaire
+                  {isActive('/proprietaire/profil') && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-wxll-blue rounded-full"></div>
+                  )}
+                </Link>
+              </>
+            )}
             
-            {/* CTA Buttons */}
+            {/* Auth Buttons */}
             <div className="flex items-center space-x-3 ml-4">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => openAuth('login')}
-                className="text-wxll-dark hover:text-wxll-blue hover:bg-wxll-blue/5"
-              >
-                Connexion
-              </Button>
-              <Button 
-                size="sm"
-                className="bg-wxll-blue hover:bg-blue-600 shadow-md hover:shadow-lg transition-all"
-                onClick={() => openAuth('register')}
-              >
-                S'inscrire
-              </Button>
+              {isAuthenticated ? (
+                <div className="flex items-center space-x-3">
+                  <span className="text-sm text-gray-600">
+                    Bonjour {user?.email?.split('@')[0]}
+                  </span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={handleLogout}
+                    className="text-wxll-dark hover:text-red-600 hover:bg-red-50"
+                  >
+                    <LogOut size={16} className="mr-1" />
+                    Déconnexion
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => openAuth('login')}
+                    className="text-wxll-dark hover:text-wxll-blue hover:bg-wxll-blue/5"
+                  >
+                    Connexion
+                  </Button>
+                  <Button 
+                    size="sm"
+                    className="bg-wxll-blue hover:bg-blue-600 shadow-md hover:shadow-lg transition-all"
+                    onClick={() => openAuth('register')}
+                  >
+                    S'inscrire
+                  </Button>
+                </>
+              )}
             </div>
           </div>
           
@@ -204,67 +234,89 @@ const Navbar = () => {
                   ❓ Comment ça marche
                 </Link>
                 
-                {/* Dashboard Links Mobile */}
-                <Link 
-                  to="/artiste/profil" 
-                  className={`block py-3 px-4 rounded-lg transition-colors font-medium ${
-                    isActive('/artiste/profil') 
-                      ? 'bg-wxll-blue text-white' 
-                      : 'text-wxll-dark hover:bg-wxll-blue/10 hover:text-wxll-blue'
-                  }`}
-                  onClick={toggleMenu}
-                >
-                  👨‍🎨 Dashboard Artiste
-                </Link>
-                <Link 
-                  to="/proprietaire/profil" 
-                  className={`block py-3 px-4 rounded-lg transition-colors font-medium ${
-                    isActive('/proprietaire/profil') 
-                      ? 'bg-wxll-blue text-white' 
-                      : 'text-wxll-dark hover:bg-wxll-blue/10 hover:text-wxll-blue'
-                  }`}
-                  onClick={toggleMenu}
-                >
-                  🏢 Dashboard Propriétaire
-                </Link>
+                {/* Dashboard Links Mobile - seulement si connecté */}
+                {isAuthenticated && (
+                  <>
+                    <Link 
+                      to="/artiste/profil" 
+                      className={`block py-3 px-4 rounded-lg transition-colors font-medium ${
+                        isActive('/artiste/profil') 
+                          ? 'bg-wxll-blue text-white' 
+                          : 'text-wxll-dark hover:bg-wxll-blue/10 hover:text-wxll-blue'
+                      }`}
+                      onClick={toggleMenu}
+                    >
+                      👨‍🎨 Dashboard Artiste
+                    </Link>
+                    <Link 
+                      to="/proprietaire/profil" 
+                      className={`block py-3 px-4 rounded-lg transition-colors font-medium ${
+                        isActive('/proprietaire/profil') 
+                          ? 'bg-wxll-blue text-white' 
+                          : 'text-wxll-dark hover:bg-wxll-blue/10 hover:text-wxll-blue'
+                      }`}
+                      onClick={toggleMenu}
+                    >
+                      🏢 Dashboard Propriétaire
+                    </Link>
+                  </>
+                )}
               </div>
               
-              {/* Mobile CTA Buttons */}
+              {/* Mobile Auth Buttons */}
               <div className="space-y-3 pt-4 border-t border-gray-200">
-                <Button 
-                  variant="outline"
-                  className="w-full justify-start text-left"
-                  onClick={() => {
-                    toggleMenu();
-                    openAuth('login');
-                  }}
-                >
-                  Connexion
-                </Button>
-                
-                <div className="grid grid-cols-1 gap-3">
-                  <Button 
-                    className="w-full bg-wxll-blue hover:bg-blue-600 justify-start"
-                    onClick={() => {
-                      toggleMenu();
-                      openAuth('register');
-                    }}
-                  >
-                    <Palette className="mr-2 h-4 w-4" />
-                    Je suis artiste
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    className="w-full border-wxll-blue text-wxll-blue hover:bg-wxll-blue hover:text-white justify-start"
-                    onClick={() => {
-                      toggleMenu();
-                      openAuth('register');
-                    }}
-                  >
-                    <MapPin className="mr-2 h-4 w-4" />
-                    J'ai un mur
-                  </Button>
-                </div>
+                {isAuthenticated ? (
+                  <div className="space-y-3">
+                    <div className="text-center text-sm text-gray-600">
+                      Connecté en tant que {user?.email?.split('@')[0]}
+                    </div>
+                    <Button 
+                      variant="outline"
+                      className="w-full justify-center text-red-600 hover:bg-red-50"
+                      onClick={handleLogout}
+                    >
+                      <LogOut size={16} className="mr-2" />
+                      Déconnexion
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <Button 
+                      variant="outline"
+                      className="w-full justify-center"
+                      onClick={() => {
+                        toggleMenu();
+                        openAuth('login');
+                      }}
+                    >
+                      Connexion
+                    </Button>
+                    
+                    <div className="grid grid-cols-1 gap-3">
+                      <Button 
+                        className="w-full bg-wxll-blue hover:bg-blue-600 justify-center"
+                        onClick={() => {
+                          toggleMenu();
+                          openAuth('register');
+                        }}
+                      >
+                        <Palette className="mr-2 h-4 w-4" />
+                        Je suis artiste
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        className="w-full border-wxll-blue text-wxll-blue hover:bg-wxll-blue hover:text-white justify-center"
+                        onClick={() => {
+                          toggleMenu();
+                          openAuth('register');
+                        }}
+                      >
+                        <MapPin className="mr-2 h-4 w-4" />
+                        J'ai un mur
+                      </Button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -282,3 +334,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+

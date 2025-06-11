@@ -12,6 +12,8 @@ import HowItWorksPage from "./pages/HowItWorksPage";
 import NotFound from "./pages/NotFound";
 import ArtistProfile from "./pages/ArtistProfile";
 import ArtistDashboard from "./pages/ArtistDashboard";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 import OwnerDashboard from "./pages/OwnerDashboard";
 import VerifyEmail from "./pages/VerifyEmail";
 
@@ -31,6 +33,8 @@ const App = () => (
             <Route path="/murs" element={<Walls />} />
             <Route path="/comment-ca-marche" element={<HowItWorksPage />} />
             <Route path="/a-propos" element={<NotFound />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             <Route path="/artiste/profil" element={<ArtistDashboard />} />
             <Route path="/proprietaire/profil" element={<OwnerDashboard />} />
             <Route path="/verify-email" element={<VerifyEmail />} />

@@ -6,14 +6,12 @@ import { Upload, X, Loader2 } from 'lucide-react';
 interface ImageUploadProps {
   currentImageUrl?: string;
   onImageUploaded: (url: string) => void;
-  bucket: 'profile-images' | 'wall-images';
   className?: string;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
   currentImageUrl,
   onImageUploaded,
-  bucket,
   className = ''
 }) => {
   const [uploading, setUploading] = useState(false);
@@ -32,18 +30,16 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `${fileName}`;
 
-      // Upload vers Supabase Storage
-      let { error: uploadError } = await supabase.storage
-        .from(bucket)
+      const { error: uploadError } = await supabase.storage
+        .from('profile-images')
         .upload(filePath, file);
 
       if (uploadError) {
         throw uploadError;
       }
 
-      // Récupérer l'URL publique
       const { data } = supabase.storage
-        .from(bucket)
+        .from('profile-images')
         .getPublicUrl(filePath);
 
       const imageUrl = data.publicUrl;
@@ -90,13 +86,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         <div className="flex flex-col items-center">
           <input
             type="file"
-            id="single"
+            id="image-upload"
             accept="image/*"
             onChange={uploadImage}
             disabled={uploading}
             className="hidden"
           />
-          <label htmlFor="single">
+          <label htmlFor="image-upload">
             <Button
               type="button"
               disabled={uploading}
@@ -125,4 +121,3 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 };
 
 export default ImageUpload;
-

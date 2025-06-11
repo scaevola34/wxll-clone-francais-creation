@@ -75,7 +75,6 @@ const ArtistDashboard = () => {
   };
 
   const handleLogout = () => {
-    // In a real app, this would clear auth tokens and user session
     navigate('/');
   };
 
@@ -109,18 +108,22 @@ const ArtistDashboard = () => {
                   <div className="relative">
                     <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                       {artist.profile_image_url ? (
-                        <img src={artist.profile_image_url} alt="Photo de profil" className="w-full h-full object-cover" />
+                        <img 
+                          src={artist.profile_image_url} 
+                          alt="Photo de profil" 
+                          className="w-full h-full object-cover"
+                        />
                       ) : (
                         <User size={40} className="text-gray-400" />
                       )}
                     </div>
-                    <div className="absolute bottom-0 right-0">
-                      <ImageUpload
-                        currentImageUrl={artist.profile_image_url}
-                        onImageUploaded={updateProfileImage}
-                        className="w-8 h-8"
-                      />
-                    </div>
+                    <Button 
+                      size="icon" 
+                      variant="outline" 
+                      className="absolute bottom-0 right-0 rounded-full bg-white"
+                    >
+                      <Edit size={14} />
+                    </Button>
                   </div>
                   <div>
                     <CardTitle>{artist.name || 'Nom non défini'}</CardTitle>
@@ -143,6 +146,19 @@ const ArtistDashboard = () => {
                     Déconnexion
                   </Button>
                 </nav>
+              </CardContent>
+            </Card>
+
+            {/* Upload d'image séparé */}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle>Photo de profil</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ImageUpload
+                  currentImageUrl={artist.profile_image_url}
+                  onImageUploaded={updateProfileImage}
+                />
               </CardContent>
             </Card>
           </aside>
@@ -216,4 +232,27 @@ const ArtistDashboard = () => {
                           src={`https://picsum.photos/seed/${item}/300/300`} 
                           alt={`Œuvre ${item}`}
                           className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        <Button size="icon" variant="ghost" className="text-white">
+                          <Edit size={18} />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </main>
+        </div>
+      </div>
+      
+      <Footer />
+    </div>
+  );
+};
+
+export default ArtistDashboard;
+
 

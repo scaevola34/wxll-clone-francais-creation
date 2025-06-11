@@ -16,7 +16,7 @@ const Register = () => {
     password: '',
     confirmPassword: '',
     name: '',
-    userType: 'artist'
+    userType: 'artist' // 'artist' ou 'owner'
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -78,11 +78,7 @@ const Register = () => {
           // Table artists : utilise contact_email
           const { data: insertResult, error: insertError } = await supabase
             .from('artists')
-            .insert([{
-              id: data.user.id,
-              name: formData.name,
-              contact_email: formData.email
-            }]);
+            .insert([{ id: data.user.id, name: formData.name, contact_email: formData.email }]);
 
           if (insertError) {
             console.error('❌ Erreur artistes:', insertError);
@@ -95,11 +91,7 @@ const Register = () => {
           // Table wall_owners : utilise email
           const { data: insertResult, error: insertError } = await supabase
             .from('wall_owners')
-            .insert([{
-              id: data.user.id,
-              name: formData.name,
-              email: formData.email
-            }]);
+            .insert([{ id: data.user.id, name: formData.name, email: formData.email }]);
 
           if (insertError) {
             console.error('❌ Erreur wall_owners:', insertError);
@@ -151,6 +143,7 @@ const Register = () => {
                 </Alert>
               )}
 
+              {/* Type d'utilisateur */}
               <div className="space-y-2">
                 <Label>Je suis...</Label>
                 <div className="grid grid-cols-2 gap-2">
@@ -275,6 +268,3 @@ const Register = () => {
 };
 
 export default Register;
-
-
-

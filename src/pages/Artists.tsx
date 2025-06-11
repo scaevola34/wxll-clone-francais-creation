@@ -1,5 +1,5 @@
-
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, SlidersHorizontal, X } from 'lucide-react';
@@ -18,10 +18,24 @@ import {
 } from "@/components/ui/select";
 
 const Artists = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [styleFilter, setStyleFilter] = useState('');
-  const [locationFilter, setLocationFilter] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Initialize state from URL parameters
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+  const [styleFilter, setStyleFilter] = useState(searchParams.get('style') || '');
+  const [locationFilter, setLocationFilter] = useState(searchParams.get('location') || '');
+  
   const { artists, loading } = useArtists();
+
+  // Update URL when filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (searchTerm) params.set('search', searchTerm);
+    if (styleFilter) params.set('style', styleFilter);
+    if (locationFilter) params.set('location', locationFilter);
+    
+    setSearchParams(params, { replace: true });
+  }, [searchTerm, styleFilter, locationFilter, setSearchParams]);
 
   // Get unique styles and locations for filters
   const uniqueStyles = useMemo(() => {
@@ -52,6 +66,7 @@ const Artists = () => {
     setStyleFilter('');
     setLocationFilter('');
     setSearchTerm('');
+    setSearchParams({}, { replace: true });
   };
 
   const getActiveFilterCount = () => {

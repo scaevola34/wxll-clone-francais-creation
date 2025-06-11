@@ -155,6 +155,41 @@ export type Database = {
           },
         ]
       }
+      reviews: {
+        Row: {
+          artist_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+          reviewer_name: string
+        }
+        Insert: {
+          artist_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          reviewer_name: string
+        }
+        Update: {
+          artist_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          reviewer_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wall_owners: {
         Row: {
           budget_max: number | null
@@ -220,7 +255,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_artist_rating: {
+        Args: { artist_uuid: string }
+        Returns: number
+      }
     }
     Enums: {
       owner_type_enum: "individuel" | "copropriété" | "syndic" | "collectivité"

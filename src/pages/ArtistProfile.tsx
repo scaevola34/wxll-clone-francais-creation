@@ -1,12 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { MapPin, Mail, Heart, Instagram, ExternalLink } from 'lucide-react';
+import { MapPin, Mail, Heart, Instagram, ExternalLink, Camera } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import ReviewsSection from '@/components/ReviewsSection';
+import ImageUpload from '@/components/ui/ImageUpload';
 import { supabase } from '@/lib/supabaseClient';
+import { useReviews } from '@/hooks/useReviews';
 
 interface Artist {
   id: string;
@@ -36,6 +38,8 @@ const ArtistProfile = () => {
   const [artist, setArtist] = useState<Artist | null>(null);
   const [projects, setProjects] = useState<ArtistProject[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showImageUpload, setShowImageUpload] = useState(false);
+  const { averageRating } = useReviews(id);
 
   useEffect(() => {
     const fetchArtistData = async () => {
@@ -78,6 +82,28 @@ const ArtistProfile = () => {
     fetchArtistData();
   }, [id]);
 
+  const handleImageUpload = async (imageUrl: string) => {
+    if (!id || !imageUrl) return;
+    
+    try {
+      const { error } = await supabase
+        .from('artists')
+        .update({ profile_image_url: imageUrl })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error updating profile image:', error);
+        return;
+      }
+
+      // Update local state
+      setArtist(prev => prev ? { ...prev, profile_image_url: imageUrl } : null);
+      setShowImageUpload(false);
+    } catch (error) {
+      console.error('Error updating profile image:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -110,19 +136,68 @@ const ArtistProfile = () => {
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
             {/* Image Section */}
-            <div className="relative h-[500px] rounded-xl overflow-hidden">
+            <div className="relative h-[500px] rounded-xl overflow-hidden group">
               <img 
                 src={artist.profile_image_url || 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1964&auto=format&fit=crop'} 
                 alt={artist.name}
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+              
+              {/* Upload button overlay */}
+              <button
+                onClick={() => setShowImageUpload(!showImageUpload)}
+                className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-gray-700 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+              >
+                <Camera className="w-5 h-5" />
+              </button>
+              
+              {/* Image upload panel */}
+              {showImageUpload && (
+                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-8">
+                  <div className="bg-white rounded-lg p-6 max-w-md w-full">
+                    <h3 className="text-lg font-semibold mb-4">Changer la photo de profil</h3>
+                    <ImageUpload
+                      currentImageUrl={artist.profile_image_url}
+                      onImageUploaded={handleImageUpload}
+                      bucket="artist-images"
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowImageUpload(false)}
+                      className="mt-4 w-full"
+                    >
+                      Annuler
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Info Section */}
             <div className="space-y-6">
               <div>
                 <h1 className="text-4xl font-bold mb-2 gradient-artist">{artist.name}</h1>
+                
+                {/* Display dynamic rating */}
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="flex items-center">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <span
+                        key={star}
+                        className={`text-lg ${
+                          star <= Math.round(averageRating) ? 'text-yellow-400' : 'text-gray-300'
+                        }`}
+                      >
+                        ★
+                      </span>
+                    ))}
+                  </div>
+                  <span className="text-wxll-artist font-medium">
+                    {averageRating.toFixed(1)}
+                  </span>
+                </div>
+
                 {artist.instagram_handle && (
                   <div className="flex items-center text-wxll-artist mb-3">
                     <Instagram className="w-4 h-4 mr-2" />
@@ -187,6 +262,9 @@ const ArtistProfile = () => {
               </div>
             </div>
           </div>
+
+          {/* Reviews Section */}
+          <ReviewsSection artistId={id!} artistName={artist.name} />
 
           {/* Previous Realizations Section */}
           {projects.length > 0 && (

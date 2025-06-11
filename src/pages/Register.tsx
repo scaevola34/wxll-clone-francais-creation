@@ -51,7 +51,9 @@ const Register = () => {
     }
 
     try {
-      // Inscription Supabase UNIQUEMENT - le trigger s'occupera du reste
+      console.log('🚀 Début inscription avec:', { email: formData.email, userType: formData.userType });
+      
+      // Inscription Supabase
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -63,16 +65,51 @@ const Register = () => {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erreur signUp:', error);
+        throw error;
+      }
+
+      console.log('✅ SignUp réussi, user:', data.user?.id);
+
+      // INSERTION MANUELLE dans la bonne table avec DEBUGGING
+      if (data?.user) {
+        const userData = {
+          id: data.user.id,
+          name: formData.name,
+          email: formData.email,
+          created_at: new Date().toISOString()
+        };
+
+        const tableName = formData.userType === 'artist' ? 'artists' : 'wall_owners';
+        
+        console.log(`🗄️ Insertion dans table "${tableName}" avec:`, userData);
+
+        const { data: insertResult, error: insertError } = await supabase
+          .from(tableName)
+          .insert([userData]);
+
+        if (insertError) {
+          console.error('❌ Erreur insertion profil:', insertError);
+          setError(`Erreur création profil: ${insertError.message}`);
+          return;
+        } else {
+          console.log('✅ Insertion profil réussie:', insertResult);
+        }
+      } else {
+        console.error('❌ Pas de data.user après signUp');
+        setError('Erreur lors de la création du compte');
+        return;
+      }
 
       setMessage('Inscription réussie ! Vous pouvez maintenant vous connecter.');
       
-      // Redirection après un délai
       setTimeout(() => {
         navigate('/login');
       }, 2000);
       
     } catch (error) {
+      console.error('❌ Erreur générale:', error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -231,3 +268,4 @@ const Register = () => {
 };
 
 export default Register;
+

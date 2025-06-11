@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Palette, MapPin } from 'lucide-react';
+import { Menu, X, Palette, MapPin, User, Settings } from 'lucide-react';
 import AuthModal from './AuthModal';
 
 const Navbar = () => {
@@ -98,6 +97,32 @@ const Navbar = () => {
               )}
             </Link>
             
+            {/* Dashboard Links */}
+            <Link 
+              to="/artiste/profil" 
+              className={`relative text-wxll-dark hover:text-wxll-blue transition-colors font-medium py-2 flex items-center gap-1 ${
+                isActive('/artiste/profil') ? 'text-wxll-blue' : ''
+              }`}
+            >
+              <User size={16} />
+              Dashboard Artiste
+              {isActive('/artiste/profil') && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-wxll-blue rounded-full"></div>
+              )}
+            </Link>
+            <Link 
+              to="/proprietaire/profil" 
+              className={`relative text-wxll-dark hover:text-wxll-blue transition-colors font-medium py-2 flex items-center gap-1 ${
+                isActive('/proprietaire/profil') ? 'text-wxll-blue' : ''
+              }`}
+            >
+              <Settings size={16} />
+              Dashboard Propriétaire
+              {isActive('/proprietaire/profil') && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-wxll-blue rounded-full"></div>
+              )}
+            </Link>
+            
             {/* CTA Buttons */}
             <div className="flex items-center space-x-3 ml-4">
               <Button 
@@ -178,6 +203,30 @@ const Navbar = () => {
                 >
                   ❓ Comment ça marche
                 </Link>
+                
+                {/* Dashboard Links Mobile */}
+                <Link 
+                  to="/artiste/profil" 
+                  className={`block py-3 px-4 rounded-lg transition-colors font-medium ${
+                    isActive('/artiste/profil') 
+                      ? 'bg-wxll-blue text-white' 
+                      : 'text-wxll-dark hover:bg-wxll-blue/10 hover:text-wxll-blue'
+                  }`}
+                  onClick={toggleMenu}
+                >
+                  👨‍🎨 Dashboard Artiste
+                </Link>
+                <Link 
+                  to="/proprietaire/profil" 
+                  className={`block py-3 px-4 rounded-lg transition-colors font-medium ${
+                    isActive('/proprietaire/profil') 
+                      ? 'bg-wxll-blue text-white' 
+                      : 'text-wxll-dark hover:bg-wxll-blue/10 hover:text-wxll-blue'
+                  }`}
+                  onClick={toggleMenu}
+                >
+                  🏢 Dashboard Propriétaire
+                </Link>
               </div>
               
               {/* Mobile CTA Buttons */}
@@ -221,7 +270,7 @@ const Navbar = () => {
           </div>
         )}
       </nav>
-
+      
       {/* Auth Modal */}
       <AuthModal 
         isOpen={showAuthModal} 

@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Eye, EyeOff, Mail, Lock, User, MapPin } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -16,7 +16,7 @@ const Register = () => {
     password: '',
     confirmPassword: '',
     name: '',
-    userType: 'artist' // 'artist' ou 'owner'
+    userType: 'artist'
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -37,7 +37,6 @@ const Register = () => {
     setError(null);
     setMessage(null);
 
-    // Validation
     if (formData.password !== formData.confirmPassword) {
       setError('Les mots de passe ne correspondent pas');
       setLoading(false);
@@ -51,9 +50,8 @@ const Register = () => {
     }
 
     try {
-      console.log('🚀 Début inscription avec:', { email: formData.email, userType: formData.userType });
+      console.log('🚀 Début inscription:', { email: formData.email, userType: formData.userType });
       
-      // Inscription Supabase
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -65,41 +63,33 @@ const Register = () => {
         }
       });
 
-      if (error) {
-        console.error('❌ Erreur signUp:', error);
-        throw error;
-      }
+      if (error) throw error;
 
       console.log('✅ SignUp réussi, user:', data.user?.id);
 
-      // INSERTION MANUELLE avec colonnes correctes pour chaque table
+      // INSERTION UNIFIÉE - même code pour les deux tables
       if (data?.user) {
-        if (formData.userType === 'artist') {
-          // Table artists : utilise contact_email
-          const { data: insertResult, error: insertError } = await supabase
-            .from('artists')
-            .insert([{ id: data.user.id, name: formData.name, contact_email: formData.email }]);
+        const tableName = formData.userType === 'artist' ? 'artists' : 'wall_owners';
+        
+        const userData = {
+          id: data.user.id,
+          name: formData.name,
+          contact_email: formData.email  // ✅ Même colonne pour les deux !
+        };
+        
+        console.log(`🗄️ Insertion ${tableName}:`, userData);
+        
+        const { error: insertError } = await supabase
+          .from(tableName)
+          .insert([userData]);
 
-          if (insertError) {
-            console.error('❌ Erreur artistes:', insertError);
-            setError(`Erreur création profil: ${insertError.message}`);
-            return;
-          }
-          console.log('✅ Insertion artistes réussie:', insertResult);
-          
-        } else {
-          // Table wall_owners : utilise email
-          const { data: insertResult, error: insertError } = await supabase
-            .from('wall_owners')
-            .insert([{ id: data.user.id, name: formData.name, email: formData.email }]);
-
-          if (insertError) {
-            console.error('❌ Erreur wall_owners:', insertError);
-            setError(`Erreur création profil: ${insertError.message}`);
-            return;
-          }
-          console.log('✅ Insertion wall_owners réussie:', insertResult);
+        if (insertError) {
+          console.error(`❌ Erreur ${tableName}:`, insertError);
+          setError(`Erreur création profil: ${insertError.message}`);
+          return;
         }
+        
+        console.log(`✅ Insertion ${tableName} réussie`);
       }
 
       setMessage('Inscription réussie ! Vous pouvez maintenant vous connecter.');
@@ -143,7 +133,6 @@ const Register = () => {
                 </Alert>
               )}
 
-              {/* Type d'utilisateur */}
               <div className="space-y-2">
                 <Label>Je suis...</Label>
                 <div className="grid grid-cols-2 gap-2">
@@ -268,3 +257,4 @@ const Register = () => {
 };
 
 export default Register;
+

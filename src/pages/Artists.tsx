@@ -1,66 +1,79 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
 import ArtistCard from '@/components/ArtistCard';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { useArtists } from '@/hooks/useArtists';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const Artists = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [styleFilter, setStyleFilter] = useState('');
+  const [locationFilter, setLocationFilter] = useState('');
+  const { artists, loading } = useArtists();
 
-  // Sample artists data (in a real app, this would come from an API)
-  const artists = [
-    {
-      id: "1",
-      name: "Sophie Durand",
-      style: "Graffiti Abstrait",
-      location: "Paris",
-      imageUrl: "https://images.unsplash.com/photo-1607000975631-8bdfb8aaa279?q=80&w=1974&auto=format&fit=crop"
-    },
-    {
-      id: "2",
-      name: "Marc Lefèvre",
-      style: "Muralisme",
-      location: "Lyon",
-      imageUrl: "https://images.unsplash.com/photo-1574014629736-e5efc9b7732e?q=80&w=1964&auto=format&fit=crop"
-    },
-    {
-      id: "3",
-      name: "Emma Bernard",
-      style: "Street Art Figuratif",
-      location: "Marseille",
-      imageUrl: "https://images.unsplash.com/photo-1623944887776-2f6e8acb83f3?q=80&w=1964&auto=format&fit=crop"
-    },
-    {
-      id: "4",
-      name: "Thomas Martin",
-      style: "Calligraffiti",
-      location: "Bordeaux",
-      imageUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2064&auto=format&fit=crop"
-    },
-    {
-      id: "5",
-      name: "Julie Dubois",
-      style: "Art Urbain",
-      location: "Toulouse",
-      imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1964&auto=format&fit=crop"
-    },
-    {
-      id: "6",
-      name: "Lucas Petit",
-      style: "Pop Art Urbain",
-      location: "Nantes",
-      imageUrl: "https://images.unsplash.com/photo-1561059488-916d69792237?q=80&w=2069&auto=format&fit=crop"
-    }
-  ];
+  // Get unique styles and locations for filters
+  const uniqueStyles = useMemo(() => {
+    const styles = artists.map(artist => artist.style).filter(Boolean);
+    return [...new Set(styles)];
+  }, [artists]);
 
-  const filteredArtists = artists.filter(artist =>
-    artist.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    artist.style.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    artist.location.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const uniqueLocations = useMemo(() => {
+    const locations = artists.map(artist => artist.location).filter(Boolean);
+    return [...new Set(locations)];
+  }, [artists]);
+
+  const filteredArtists = useMemo(() => {
+    return artists.filter(artist => {
+      const matchesSearch = 
+        artist.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (artist.style && artist.style.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (artist.location && artist.location.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      const matchesStyle = !styleFilter || artist.style === styleFilter;
+      const matchesLocation = !locationFilter || artist.location === locationFilter;
+      
+      return matchesSearch && matchesStyle && matchesLocation;
+    });
+  }, [artists, searchTerm, styleFilter, locationFilter]);
+
+  const resetFilters = () => {
+    setStyleFilter('');
+    setLocationFilter('');
+    setSearchTerm('');
+  };
+
+  const getActiveFilterCount = () => {
+    let count = 0;
+    if (styleFilter) count++;
+    if (locationFilter) count++;
+    return count;
+  };
+
+  const activeFilterCount = getActiveFilterCount();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow flex items-center justify-center">
+          <div className="text-lg text-gray-600">Chargement des artistes...</div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -85,17 +98,127 @@ const Artists = () => {
                 />
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               </div>
-              <Button variant="outline" className="flex items-center gap-2">
-                <SlidersHorizontal className="h-4 w-4" />
-                Filtres
-              </Button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="flex items-center gap-2 relative">
+                    <SlidersHorizontal className="h-4 w-4" />
+                    Filtres
+                    {activeFilterCount > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-wxll-blue text-white w-5 h-5 rounded-full text-xs flex items-center justify-center">
+                        {activeFilterCount}
+                      </span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-4">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-medium">Filtres</h3>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-gray-500 hover:text-wxll-blue" 
+                        onClick={resetFilters}
+                      >
+                        <X className="mr-1 h-4 w-4" />
+                        Réinitialiser
+                      </Button>
+                    </div>
+                    
+                    <div>
+                      <Label className="block mb-2">Style artistique</Label>
+                      <Select value={styleFilter} onValueChange={setStyleFilter}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Tous les styles" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">Tous les styles</SelectItem>
+                          {uniqueStyles.map((style) => (
+                            <SelectItem key={style} value={style}>{style}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label className="block mb-2">Localisation</Label>
+                      <Select value={locationFilter} onValueChange={setLocationFilter}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Toutes les villes" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">Toutes les villes</SelectItem>
+                          {uniqueLocations.map((location) => (
+                            <SelectItem key={location} value={location}>{location}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredArtists.map((artist) => (
-                <ArtistCard key={artist.id} {...artist} />
-              ))}
-            </div>
+            {activeFilterCount > 0 && (
+              <div className="flex items-center gap-2 mb-4 text-sm">
+                <span>Filtres actifs:</span>
+                {styleFilter && (
+                  <span className="bg-gray-100 px-2 py-1 rounded-full flex items-center">
+                    Style: {styleFilter}
+                    <button
+                      className="ml-1 text-gray-500 hover:text-gray-700"
+                      onClick={() => setStyleFilter('')}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
+                {locationFilter && (
+                  <span className="bg-gray-100 px-2 py-1 rounded-full flex items-center">
+                    Ville: {locationFilter}
+                    <button
+                      className="ml-1 text-gray-500 hover:text-gray-700"
+                      onClick={() => setLocationFilter('')}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
+                <button
+                  className="text-wxll-blue hover:underline text-sm"
+                  onClick={resetFilters}
+                >
+                  Tout effacer
+                </button>
+              </div>
+            )}
+
+            {filteredArtists.length === 0 ? (
+              <div className="text-center py-10">
+                <p className="text-lg text-gray-500">Aucun artiste ne correspond à vos critères de recherche.</p>
+                <Button 
+                  variant="outline" 
+                  className="mt-4"
+                  onClick={resetFilters}
+                >
+                  Réinitialiser les filtres
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredArtists.map((artist) => (
+                  <ArtistCard 
+                    key={artist.id} 
+                    id={artist.id}
+                    name={artist.name}
+                    style={artist.style || 'Style non spécifié'}
+                    location={artist.location || 'Localisation non spécifiée'}
+                    imageUrl={artist.imageUrl}
+                    rating={artist.rating}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </section>
       </main>

@@ -74,7 +74,27 @@ const ArtistProfile = () => {
                 {artist.instagram && (
                   <div className="flex items-center text-wxll-artist mb-3">
                     <Instagram className="w-4 h-4 mr-2" />
-                    <span className="text-sm font-medium">{artist.instagram}</span>
+                    <a 
+                      href={`https://instagram.com/${artist.instagram.replace('@', '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium hover:underline"
+                    >
+                      {artist.instagram}
+                    </a>
+                  </div>
+                )}
+                {artist.website && (
+                  <div className="flex items-center text-wxll-artist mb-3">
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    <a 
+                      href={artist.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium hover:underline"
+                    >
+                      Site web
+                    </a>
                   </div>
                 )}
                 <div className="flex items-center text-gray-600 mb-4">
@@ -108,27 +128,6 @@ const ArtistProfile = () => {
                   <Heart className="w-4 h-4" />
                   Suivre
                 </Button>
-              </div>
-
-              <div className="flex items-center gap-4 pt-4 border-t border-wxll-artist/20">
-                {artist.instagram && (
-                  <a 
-                    href={`https://instagram.com/${artist.instagram.replace('@', '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-wxll-artist hover:text-wxll-artist-dark transition-colors"
-                  >
-                    <Instagram className="w-5 h-5" />
-                  </a>
-                )}
-                <a 
-                  href={artist.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-wxll-artist hover:text-wxll-artist-dark transition-colors"
-                >
-                  <ExternalLink className="w-5 h-5" />
-                </a>
               </div>
             </div>
           </div>

@@ -165,6 +165,7 @@ export type Database = {
           desired_timing: Database["public"]["Enums"]["timing_enum"] | null
           height_m: number
           id: string
+          image_url: string | null
           indoor: boolean
           location_postal_code: string
           owner_type: Database["public"]["Enums"]["owner_type_enum"]
@@ -183,6 +184,7 @@ export type Database = {
           desired_timing?: Database["public"]["Enums"]["timing_enum"] | null
           height_m: number
           id?: string
+          image_url?: string | null
           indoor: boolean
           location_postal_code: string
           owner_type: Database["public"]["Enums"]["owner_type_enum"]
@@ -201,6 +203,7 @@ export type Database = {
           desired_timing?: Database["public"]["Enums"]["timing_enum"] | null
           height_m?: number
           id?: string
+          image_url?: string | null
           indoor?: boolean
           location_postal_code?: string
           owner_type?: Database["public"]["Enums"]["owner_type_enum"]

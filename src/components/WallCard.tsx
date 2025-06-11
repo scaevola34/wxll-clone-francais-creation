@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Maximize2, Users, User, Home, Sun, Clock, Heart } from 'lucide-react';
+import { MapPin, Maximize2, Users, User, Home, Sun, Clock, Heart, Building } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useFavorites } from '@/contexts/FavoritesContext';
 
@@ -14,7 +14,7 @@ interface WallCardProps {
   budget?: string;
   clientType?: string;
   locationType?: string;
-  area?: number;
+  surfaceType?: string;
   timeframe?: string;
 }
 
@@ -27,6 +27,7 @@ const WallCard: React.FC<WallCardProps> = ({
   budget,
   clientType,
   locationType,
+  surfaceType,
   timeframe,
 }) => {
   const { isWallFavorite, toggleWallFavorite } = useFavorites();
@@ -69,7 +70,7 @@ const WallCard: React.FC<WallCardProps> = ({
             <div className="absolute top-3 right-3 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
               {clientType === 'B2B' ? (
                 <>
-                  <Users className="h-3 w-3" />
+                  <Building className="h-3 w-3" />
                   B2B
                 </>
               ) : (
@@ -108,10 +109,18 @@ const WallCard: React.FC<WallCardProps> = ({
           </div>
           
           <div className="flex flex-wrap gap-2 mb-3">
+            {surfaceType && (
+              <div className="bg-gray-100 text-wxll-dark text-xs font-medium px-2 py-1 rounded-full inline-flex items-center gap-1">
+                <Building className="h-3 w-3" />
+                {surfaceType}
+              </div>
+            )}
+            
             {timeframe && (
               <div className="bg-gray-100 text-wxll-dark text-xs font-medium px-2 py-1 rounded-full inline-flex items-center gap-1">
                 <Clock className="h-3 w-3" />
-                {timeframe === 'asap' ? 'Dès que possible' : 
+                {timeframe === 'urgent' ? 'Urgent' :
+                 timeframe === 'asap' ? 'Dès que possible' : 
                  timeframe === '3months' ? '< 3 mois' : 'Dans l\'année'}
               </div>
             )}

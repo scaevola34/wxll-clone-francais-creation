@@ -3,9 +3,8 @@ import React from 'react';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { SlidersHorizontal, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -16,29 +15,36 @@ import {
 
 export interface WallFiltersProps {
   filters: {
-    clientType: string[];
+    ownerType: string[];
     locationType: string[];
+    surfaceType: string[];
     minArea: number;
     maxArea: number;
     timeframe: string;
   };
   setFilters: React.Dispatch<React.SetStateAction<{
-    clientType: string[];
+    ownerType: string[];
     locationType: string[];
+    surfaceType: string[];
     minArea: number;
     maxArea: number;
     timeframe: string;
   }>>;
   resetFilters: () => void;
+  uniqueSurfaceTypes: string[];
 }
 
-const WallFilters: React.FC<WallFiltersProps> = ({ filters, setFilters, resetFilters }) => {
-  const handleClientTypeChange = (value: string[]) => {
-    setFilters(prev => ({ ...prev, clientType: value }));
+const WallFilters: React.FC<WallFiltersProps> = ({ filters, setFilters, resetFilters, uniqueSurfaceTypes }) => {
+  const handleOwnerTypeChange = (value: string[]) => {
+    setFilters(prev => ({ ...prev, ownerType: value }));
   };
 
   const handleLocationTypeChange = (value: string[]) => {
     setFilters(prev => ({ ...prev, locationType: value }));
+  };
+
+  const handleSurfaceTypeChange = (value: string[]) => {
+    setFilters(prev => ({ ...prev, surfaceType: value }));
   };
 
   const handleAreaChange = (value: number[]) => {
@@ -68,34 +74,50 @@ const WallFilters: React.FC<WallFiltersProps> = ({ filters, setFilters, resetFil
         </Button>
       </div>
       
-      <div>
-        <Label className="block mb-2">Type de client</Label>
+      <div className="border-2 border-gray-200 rounded-lg p-3">
+        <Label className="block mb-2 font-medium">Type de propriétaire</Label>
         <ToggleGroup 
           type="multiple" 
           className="flex gap-2"
-          value={filters.clientType} 
-          onValueChange={handleClientTypeChange}
+          value={filters.ownerType} 
+          onValueChange={handleOwnerTypeChange}
         >
-          <ToggleGroupItem value="B2B" className="flex-1">B2B</ToggleGroupItem>
-          <ToggleGroupItem value="B2C" className="flex-1">B2C</ToggleGroupItem>
+          <ToggleGroupItem value="individual" className="flex-1 border-2">Particulier</ToggleGroupItem>
+          <ToggleGroupItem value="business" className="flex-1 border-2">Professionnel</ToggleGroupItem>
         </ToggleGroup>
       </div>
 
-      <div>
-        <Label className="block mb-2">Localisation</Label>
+      <div className="border-2 border-gray-200 rounded-lg p-3">
+        <Label className="block mb-2 font-medium">Localisation</Label>
         <ToggleGroup 
           type="multiple" 
           className="flex gap-2" 
           value={filters.locationType}
           onValueChange={handleLocationTypeChange}
         >
-          <ToggleGroupItem value="interior" className="flex-1">Intérieur</ToggleGroupItem>
-          <ToggleGroupItem value="exterior" className="flex-1">Extérieur</ToggleGroupItem>
+          <ToggleGroupItem value="indoor" className="flex-1 border-2">Intérieur</ToggleGroupItem>
+          <ToggleGroupItem value="outdoor" className="flex-1 border-2">Extérieur</ToggleGroupItem>
         </ToggleGroup>
       </div>
 
-      <div>
-        <Label className="block mb-2">Surface (m²): {filters.minArea} - {filters.maxArea}</Label>
+      <div className="border-2 border-gray-200 rounded-lg p-3">
+        <Label className="block mb-2 font-medium">Type de surface</Label>
+        <ToggleGroup 
+          type="multiple" 
+          className="grid grid-cols-2 gap-2" 
+          value={filters.surfaceType}
+          onValueChange={handleSurfaceTypeChange}
+        >
+          {uniqueSurfaceTypes.map(type => (
+            <ToggleGroupItem key={type} value={type} className="border-2">
+              {type}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+      </div>
+
+      <div className="border-2 border-gray-200 rounded-lg p-3">
+        <Label className="block mb-2 font-medium">Surface (m²): {filters.minArea} - {filters.maxArea}</Label>
         <Slider 
           defaultValue={[filters.minArea, filters.maxArea]} 
           max={200}
@@ -105,16 +127,17 @@ const WallFilters: React.FC<WallFiltersProps> = ({ filters, setFilters, resetFil
         />
       </div>
 
-      <div>
-        <Label className="block mb-2">Délai de réalisation</Label>
+      <div className="border-2 border-gray-200 rounded-lg p-3">
+        <Label className="block mb-2 font-medium">Délai de réalisation</Label>
         <Select 
           value={filters.timeframe}
           onValueChange={handleTimeframeChange}
         >
-          <SelectTrigger>
+          <SelectTrigger className="border-2">
             <SelectValue placeholder="Sélectionner un délai" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="urgent">Urgent</SelectItem>
             <SelectItem value="asap">Dès que possible</SelectItem>
             <SelectItem value="3months">Moins de 3 mois</SelectItem>
             <SelectItem value="year">Dans l'année</SelectItem>

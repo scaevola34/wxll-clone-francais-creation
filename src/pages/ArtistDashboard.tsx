@@ -1,6 +1,6 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,14 +16,84 @@ import {
   CardTitle 
 } from '@/components/ui/card';
 import { User, Edit, LogOut, PlusCircle, Image } from 'lucide-react';
+import ImageUpload from '@/components/ui/ImageUpload';
 
 const ArtistDashboard = () => {
   const navigate = useNavigate();
+  const [artist, setArtist] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getCurrentUser();
+  }, []);
+
+  const getCurrentUser = async () => {
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) throw error;
+      if (user) {
+        fetchArtistData(user.id);
+      } else {
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération de l\'utilisateur:', error);
+      setLoading(false);
+    }
+  };
+
+  const fetchArtistData = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from('artists')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      if (error) throw error;
+      setArtist(data);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des données artiste:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateProfileImage = async (imageUrl) => {
+    try {
+      if (!artist) return;
+      const { error } = await supabase
+        .from('artists')
+        .update({ profile_image_url: imageUrl })
+        .eq('id', artist.id);
+      if (error) throw error;
+      setArtist(prev => prev ? { ...prev, profile_image_url: imageUrl } : null);
+      console.log('Image de profil mise à jour avec succès');
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour de l\'image:', error);
+      alert('Erreur lors de la mise à jour de l\'image');
+    }
+  };
 
   const handleLogout = () => {
     // In a real app, this would clear auth tokens and user session
     navigate('/');
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div>Chargement du profil...</div>
+      </div>
+    );
+  }
+
+  if (!artist) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div>Profil non trouvé.</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -37,20 +107,24 @@ const ArtistDashboard = () => {
               <CardHeader>
                 <div className="flex items-center space-x-4">
                   <div className="relative">
-                    <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
-                      <User size={40} className="text-gray-400" />
+                    <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                      {artist.profile_image_url ? (
+                        <img src={artist.profile_image_url} alt="Photo de profil" className="w-full h-full object-cover" />
+                      ) : (
+                        <User size={40} className="text-gray-400" />
+                      )}
                     </div>
-                    <Button 
-                      size="icon" 
-                      variant="outline" 
-                      className="absolute bottom-0 right-0 rounded-full bg-white"
-                    >
-                      <Edit size={14} />
-                    </Button>
+                    <div className="absolute bottom-0 right-0">
+                      <ImageUpload
+                        currentImageUrl={artist.profile_image_url}
+                        onImageUploaded={updateProfileImage}
+                        className="w-8 h-8"
+                      />
+                    </div>
                   </div>
                   <div>
-                    <CardTitle>Sophie Durand</CardTitle>
-                    <CardDescription>Artiste street art</CardDescription>
+                    <CardTitle>{artist.name || 'Nom non défini'}</CardTitle>
+                    <CardDescription>{artist.style || 'Artiste street art'}</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -64,7 +138,7 @@ const ArtistDashboard = () => {
                     <Image className="mr-2" size={18} />
                     Mon portfolio
                   </Button>
-                  <Button variant="ghost" className="w-full justify-start">
+                  <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
                     <LogOut className="mr-2" size={18} />
                     Déconnexion
                   </Button>
@@ -85,25 +159,25 @@ const ArtistDashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="name">Nom complet</Label>
-                      <Input id="name" defaultValue="Sophie Durand" />
+                      <Input id="name" defaultValue={artist.name || ''} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email">Email</Label>
-                      <Input id="email" type="email" defaultValue="sophie.durand@example.com" />
+                      <Input id="email" type="email" defaultValue={artist.email || ''} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="phone">Téléphone</Label>
-                      <Input id="phone" defaultValue="+33 6 12 34 56 78" />
+                      <Input id="phone" defaultValue={artist.phone || ''} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="location">Localisation</Label>
-                      <Input id="location" defaultValue="Paris" />
+                      <Input id="location" defaultValue={artist.location || ''} />
                     </div>
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="style">Style artistique</Label>
-                    <Input id="style" defaultValue="Graffiti Abstrait" />
+                    <Input id="style" defaultValue={artist.style || ''} />
                   </div>
                   
                   <div className="space-y-2">
@@ -111,7 +185,7 @@ const ArtistDashboard = () => {
                     <Textarea 
                       id="bio" 
                       rows={5}
-                      defaultValue="Artiste urbaine passionnée par les formes abstraites et les couleurs vives. Mon travail explore les thèmes de la nature et de l'urbanisation."
+                      defaultValue={artist.bio || ''}
                     />
                   </div>
                 </form>
@@ -142,25 +216,4 @@ const ArtistDashboard = () => {
                           src={`https://picsum.photos/seed/${item}/300/300`} 
                           alt={`Œuvre ${item}`}
                           className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        <Button size="icon" variant="ghost" className="text-white">
-                          <Edit size={18} />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </main>
-        </div>
-      </div>
-      
-      <Footer />
-    </div>
-  );
-};
 
-export default ArtistDashboard;

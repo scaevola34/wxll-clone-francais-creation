@@ -72,16 +72,16 @@ const Register = () => {
 
       console.log('✅ SignUp réussi, user:', data.user?.id);
 
-      // INSERTION MANUELLE dans la bonne table avec DEBUGGING
+      // INSERTION MANUELLE avec colonnes correctes
       if (data?.user) {
+        const tableName = formData.userType === 'artist' ? 'artists' : 'wall_owners';
+        
+        // Insertion avec la colonne 'contact_email' au lieu de 'email'
         const userData = {
           id: data.user.id,
           name: formData.name,
-          email: formData.email,
-          created_at: new Date().toISOString()
+          contact_email: formData.email
         };
-
-        const tableName = formData.userType === 'artist' ? 'artists' : 'wall_owners';
         
         console.log(`🗄️ Insertion dans table "${tableName}" avec:`, userData);
 
@@ -96,10 +96,6 @@ const Register = () => {
         } else {
           console.log('✅ Insertion profil réussie:', insertResult);
         }
-      } else {
-        console.error('❌ Pas de data.user après signUp');
-        setError('Erreur lors de la création du compte');
-        return;
       }
 
       setMessage('Inscription réussie ! Vous pouvez maintenant vous connecter.');
@@ -268,4 +264,5 @@ const Register = () => {
 };
 
 export default Register;
+
 

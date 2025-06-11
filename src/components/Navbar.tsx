@@ -137,7 +137,193 @@ const Navbar = () => {
                 <span className="text-sm text-gray-600">
                   Bonjour {user?.email?.split('@')[0]}
                 </span>
-                <Button
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={handleLogout}
+                  className="text-wxll-dark hover:text-red-600 hover:bg-red-50"
+                >
+                  <LogOut size={16} className="mr-1" />
+                  Déconnexion
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-wxll-dark hover:text-wxll-blue hover:bg-wxll-blue/5"
+                  >
+                    Connexion
+                  </Button>
+                </Link>
+                <Link to="/register">
+                  <Button 
+                    size="sm"
+                    className="bg-wxll-blue hover:bg-blue-600 shadow-md hover:shadow-lg transition-all"
+                  >
+                    S'inscrire
+                  </Button>
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+        
+        {/* Mobile Menu Button */}
+        <button 
+          className="lg:hidden p-2 text-wxll-dark hover:text-wxll-blue transition-colors"
+          onClick={toggleMenu}
+          aria-label="Toggle menu"
+        >
+          {isOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+      
+      {/* Mobile Navigation */}
+      {isOpen && (
+        <div className="lg:hidden bg-white/95 backdrop-blur-md absolute left-0 right-0 shadow-xl border-t animate-fade-in">
+          <div className="container mx-auto px-4 py-6">
+            {/* Navigation Links */}
+            <div className="space-y-4 mb-6">
+              <Link 
+                to="/" 
+                className={`block py-3 px-4 rounded-lg transition-colors font-medium ${
+                  isActive('/') 
+                    ? 'bg-wxll-blue text-white' 
+                    : 'text-wxll-dark hover:bg-wxll-blue/10 hover:text-wxll-blue'
+                }`}
+                onClick={toggleMenu}
+              >
+                🏠 Accueil
+              </Link>
+              <Link 
+                to="/artistes" 
+                className={`block py-3 px-4 rounded-lg transition-colors font-medium ${
+                  isActive('/artistes') 
+                    ? 'bg-wxll-blue text-white' 
+                    : 'text-wxll-dark hover:bg-wxll-blue/10 hover:text-wxll-blue'
+                }`}
+                onClick={toggleMenu}
+              >
+                🎨 Artistes
+              </Link>
+              <Link 
+                to="/murs" 
+                className={`block py-3 px-4 rounded-lg transition-colors font-medium ${
+                  isActive('/murs') 
+                    ? 'bg-wxll-blue text-white' 
+                    : 'text-wxll-dark hover:bg-wxll-blue/10 hover:text-wxll-blue'
+                }`}
+                onClick={toggleMenu}
+              >
+                🧱 Murs
+              </Link>
+              <Link 
+                to="/comment-ca-marche" 
+                className={`block py-3 px-4 rounded-lg transition-colors font-medium ${
+                  isActive('/comment-ca-marche') 
+                    ? 'bg-wxll-blue text-white' 
+                    : 'text-wxll-dark hover:bg-wxll-blue/10 hover:text-wxll-blue'
+                }`}
+                onClick={toggleMenu}
+              >
+                ❓ Comment ça marche
+              </Link>
+              
+              {/* Dashboard Links Mobile - seulement le bon type si connecté */}
+              {isAuthenticated && userType && (
+                <>
+                  {userType === 'artist' && (
+                    <Link 
+                      to="/artiste/profil" 
+                      className={`block py-3 px-4 rounded-lg transition-colors font-medium ${
+                        isActive('/artiste/profil') 
+                          ? 'bg-wxll-blue text-white' 
+                          : 'text-wxll-dark hover:bg-wxll-blue/10 hover:text-wxll-blue'
+                      }`}
+                      onClick={toggleMenu}
+                    >
+                      👨‍🎨 Mon Dashboard
+                    </Link>
+                  )}
+                  
+                  {userType === 'owner' && (
+                    <Link 
+                      to="/proprietaire/profil" 
+                      className={`block py-3 px-4 rounded-lg transition-colors font-medium ${
+                        isActive('/proprietaire/profil') 
+                          ? 'bg-wxll-blue text-white' 
+                          : 'text-wxll-dark hover:bg-wxll-blue/10 hover:text-wxll-blue'
+                      }`}
+                      onClick={toggleMenu}
+                    >
+                      🏢 Mon Dashboard
+                    </Link>
+                  )}
+                </>
+              )}
+            </div>
+            
+            {/* Mobile Auth Buttons */}
+            <div className="space-y-3 pt-4 border-t border-gray-200">
+              {isAuthenticated ? (
+                <div className="space-y-3">
+                  <div className="text-center text-sm text-gray-600">
+                    Connecté en tant que {user?.email?.split('@')[0]}
+                  </div>
+                  <Button 
+                    variant="outline"
+                    className="w-full justify-center text-red-600 hover:bg-red-50"
+                    onClick={handleLogout}
+                  >
+                    <LogOut size={16} className="mr-2" />
+                    Déconnexion
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <Link to="/login" onClick={toggleMenu}>
+                    <Button 
+                      variant="outline"
+                      className="w-full justify-center"
+                    >
+                      Connexion
+                    </Button>
+                  </Link>
+                  
+                  <div className="grid grid-cols-1 gap-3">
+                    <Link to="/register" onClick={toggleMenu}>
+                      <Button 
+                        className="w-full bg-wxll-blue hover:bg-blue-600 justify-center"
+                      >
+                        <Palette className="mr-2 h-4 w-4" />
+                        Je suis artiste
+                      </Button>
+                    </Link>
+                    <Link to="/register" onClick={toggleMenu}>
+                      <Button 
+                        variant="outline"
+                        className="w-full border-wxll-blue text-wxll-blue hover:bg-wxll-blue hover:text-white justify-center"
+                      >
+                        <MapPin className="mr-2 h-4 w-4" />
+                        J'ai un mur
+                      </Button>
+                    </Link>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </nav>
+  );
+};
+
+export default Navbar;
+
 
 
 

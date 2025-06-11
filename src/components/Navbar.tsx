@@ -2,13 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Menu, X, Palette, MapPin, User, Settings, LogOut } from 'lucide-react';
-import AuthModal from './AuthModal';
 import { useAuth } from '@/hooks/useAuth';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authInitialTab, setAuthInitialTab] = useState('login');
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const { user, isAuthenticated, logout } = useAuth();
@@ -30,11 +27,6 @@ const Navbar = () => {
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
-  };
-
-  const openAuth = (tab: string = 'login') => {
-    setAuthInitialTab(tab);
-    setShowAuthModal(true);
   };
 
   const handleLogout = async () => {
@@ -134,7 +126,7 @@ const Navbar = () => {
               </>
             )}
             
-            {/* Auth Buttons */}
+            {/* Auth Buttons - MODIFIÉ : utilise Link au lieu de modal */}
             <div className="flex items-center space-x-3 ml-4">
               {isAuthenticated ? (
                 <div className="flex items-center space-x-3">
@@ -153,21 +145,23 @@ const Navbar = () => {
                 </div>
               ) : (
                 <>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => openAuth('login')}
-                    className="text-wxll-dark hover:text-wxll-blue hover:bg-wxll-blue/5"
-                  >
-                    Connexion
-                  </Button>
-                  <Button 
-                    size="sm"
-                    className="bg-wxll-blue hover:bg-blue-600 shadow-md hover:shadow-lg transition-all"
-                    onClick={() => openAuth('register')}
-                  >
-                    S'inscrire
-                  </Button>
+                  <Link to="/login">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      className="text-wxll-dark hover:text-wxll-blue hover:bg-wxll-blue/5"
+                    >
+                      Connexion
+                    </Button>
+                  </Link>
+                  <Link to="/register">
+                    <Button 
+                      size="sm"
+                      className="bg-wxll-blue hover:bg-blue-600 shadow-md hover:shadow-lg transition-all"
+                    >
+                      S'inscrire
+                    </Button>
+                  </Link>
                 </>
               )}
             </div>
@@ -186,152 +180,6 @@ const Navbar = () => {
         {/* Mobile Navigation */}
         {isOpen && (
           <div className="lg:hidden bg-white/95 backdrop-blur-md absolute left-0 right-0 shadow-xl border-t animate-fade-in">
-            <div className="container mx-auto px-4 py-6">
-              {/* Navigation Links */}
-              <div className="space-y-4 mb-6">
-                <Link 
-                  to="/" 
-                  className={`block py-3 px-4 rounded-lg transition-colors font-medium ${
-                    isActive('/') 
-                      ? 'bg-wxll-blue text-white' 
-                      : 'text-wxll-dark hover:bg-wxll-blue/10 hover:text-wxll-blue'
-                  }`}
-                  onClick={toggleMenu}
-                >
-                  🏠 Accueil
-                </Link>
-                <Link 
-                  to="/artistes" 
-                  className={`block py-3 px-4 rounded-lg transition-colors font-medium ${
-                    isActive('/artistes') 
-                      ? 'bg-wxll-blue text-white' 
-                      : 'text-wxll-dark hover:bg-wxll-blue/10 hover:text-wxll-blue'
-                  }`}
-                  onClick={toggleMenu}
-                >
-                  🎨 Artistes
-                </Link>
-                <Link 
-                  to="/murs" 
-                  className={`block py-3 px-4 rounded-lg transition-colors font-medium ${
-                    isActive('/murs') 
-                      ? 'bg-wxll-blue text-white' 
-                      : 'text-wxll-dark hover:bg-wxll-blue/10 hover:text-wxll-blue'
-                  }`}
-                  onClick={toggleMenu}
-                >
-                  🧱 Murs
-                </Link>
-                <Link 
-                  to="/comment-ca-marche" 
-                  className={`block py-3 px-4 rounded-lg transition-colors font-medium ${
-                    isActive('/comment-ca-marche') 
-                      ? 'bg-wxll-blue text-white' 
-                      : 'text-wxll-dark hover:bg-wxll-blue/10 hover:text-wxll-blue'
-                  }`}
-                  onClick={toggleMenu}
-                >
-                  ❓ Comment ça marche
-                </Link>
-                
-                {/* Dashboard Links Mobile - seulement si connecté */}
-                {isAuthenticated && (
-                  <>
-                    <Link 
-                      to="/artiste/profil" 
-                      className={`block py-3 px-4 rounded-lg transition-colors font-medium ${
-                        isActive('/artiste/profil') 
-                          ? 'bg-wxll-blue text-white' 
-                          : 'text-wxll-dark hover:bg-wxll-blue/10 hover:text-wxll-blue'
-                      }`}
-                      onClick={toggleMenu}
-                    >
-                      👨‍🎨 Dashboard Artiste
-                    </Link>
-                    <Link 
-                      to="/proprietaire/profil" 
-                      className={`block py-3 px-4 rounded-lg transition-colors font-medium ${
-                        isActive('/proprietaire/profil') 
-                          ? 'bg-wxll-blue text-white' 
-                          : 'text-wxll-dark hover:bg-wxll-blue/10 hover:text-wxll-blue'
-                      }`}
-                      onClick={toggleMenu}
-                    >
-                      🏢 Dashboard Propriétaire
-                    </Link>
-                  </>
-                )}
-              </div>
-              
-              {/* Mobile Auth Buttons */}
-              <div className="space-y-3 pt-4 border-t border-gray-200">
-                {isAuthenticated ? (
-                  <div className="space-y-3">
-                    <div className="text-center text-sm text-gray-600">
-                      Connecté en tant que {user?.email?.split('@')[0]}
-                    </div>
-                    <Button 
-                      variant="outline"
-                      className="w-full justify-center text-red-600 hover:bg-red-50"
-                      onClick={handleLogout}
-                    >
-                      <LogOut size={16} className="mr-2" />
-                      Déconnexion
-                    </Button>
-                  </div>
-                ) : (
-                  <>
-                    <Button 
-                      variant="outline"
-                      className="w-full justify-center"
-                      onClick={() => {
-                        toggleMenu();
-                        openAuth('login');
-                      }}
-                    >
-                      Connexion
-                    </Button>
-                    
-                    <div className="grid grid-cols-1 gap-3">
-                      <Button 
-                        className="w-full bg-wxll-blue hover:bg-blue-600 justify-center"
-                        onClick={() => {
-                          toggleMenu();
-                          openAuth('register');
-                        }}
-                      >
-                        <Palette className="mr-2 h-4 w-4" />
-                        Je suis artiste
-                      </Button>
-                      <Button 
-                        variant="outline"
-                        className="w-full border-wxll-blue text-wxll-blue hover:bg-wxll-blue hover:text-white justify-center"
-                        onClick={() => {
-                          toggleMenu();
-                          openAuth('register');
-                        }}
-                      >
-                        <MapPin className="mr-2 h-4 w-4" />
-                        J'ai un mur
-                      </Button>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-      </nav>
-      
-      {/* Auth Modal */}
-      <AuthModal 
-        isOpen={showAuthModal} 
-        onClose={() => setShowAuthModal(false)} 
-        initialTab={authInitialTab}
-      />
-    </>
-  );
-};
+            <div className="container
 
-export default Navbar;
 

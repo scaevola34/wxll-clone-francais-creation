@@ -24,44 +24,30 @@ const Login = () => {
     setError(null);
 
     try {
-      console.log('🚀 Tentative connexion pour:', email);
-      
       const { data, error } = await supabase.auth.signInWithPassword({ 
         email, 
         password 
       });
 
-      if (error) {
-        console.error('❌ Erreur signIn:', error);
-        throw error;
-      }
-
-      console.log('✅ SignIn réussi, user:', data.user?.id);
+      if (error) throw error;
 
       // REDIRECTION CONDITIONNELLE selon le type d'utilisateur
       if (data.user) {
-        console.log('🔍 Vérification type utilisateur...');
-        
         // Vérifier dans quelle table il existe
-        const { data: artistData, error: artistError } = await supabase
+        const { data: artistData } = await supabase
           .from('artists')
           .select('id')
           .eq('id', data.user.id)
           .single();
 
-        console.log('🎨 Recherche artiste:', { artistData, artistError });
-
-        if (artistData && !artistError) {
-          console.log('✅ Utilisateur trouvé dans artists → redirection /artiste/profil');
+        if (artistData) {
           navigate('/artiste/profil');
         } else {
-          console.log('🏢 Utilisateur non trouvé dans artists → redirection /proprietaire/profil');
           navigate('/proprietaire/profil');
         }
       }
       
     } catch (error) {
-      console.error('❌ Erreur générale login:', error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -155,5 +141,3 @@ const Login = () => {
 };
 
 export default Login;
-
-

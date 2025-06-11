@@ -38,6 +38,8 @@ const App = () => (
             <Route path="/artiste/profil" element={<ArtistDashboard />} />
             <Route path="/proprietaire/profil" element={<OwnerDashboard />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
+           <Route path="/dashboard/artiste" element={<ArtistDashboard />} />
+            <Route path="/dashboard/proprietaire" element={<OwnerDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

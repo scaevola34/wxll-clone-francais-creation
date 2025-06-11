@@ -51,7 +51,7 @@ const Register = () => {
     }
 
     try {
-      // Inscription Supabase
+      // Inscription Supabase UNIQUEMENT - le trigger s'occupera du reste
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -65,32 +65,12 @@ const Register = () => {
 
       if (error) throw error;
 
-      // Insertion dans la table appropriée
-      if (data.user) {
-        const userData = {
-          id: data.user.id,
-          name: formData.name,
-          email: formData.email,
-          created_at: new Date().toISOString()
-        };
-
-        const tableName = formData.userType === 'artist' ? 'artists' : 'wall_owners';
-        
-        const { error: insertError } = await supabase
-          .from(tableName)
-          .insert([userData]);
-
-        if (insertError) {
-          console.error('Erreur insertion:', insertError);
-        }
-      }
-
-      setMessage('Inscription réussie ! Vérifiez votre email pour confirmer votre compte.');
+      setMessage('Inscription réussie ! Vous pouvez maintenant vous connecter.');
       
       // Redirection après un délai
       setTimeout(() => {
         navigate('/login');
-      }, 3000);
+      }, 2000);
       
     } catch (error) {
       setError(error.message);
@@ -251,4 +231,3 @@ const Register = () => {
 };
 
 export default Register;
-

@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,6 +15,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import OwnerDashboard from "./pages/OwnerDashboard";
 import VerifyEmail from "./pages/VerifyEmail";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -35,11 +35,42 @@ const App = () => (
             <Route path="/a-propos" element={<NotFound />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/artiste/profil" element={<ArtistDashboard />} />
-            <Route path="/proprietaire/profil" element={<OwnerDashboard />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
-           <Route path="/dashboard/artiste" element={<ArtistDashboard />} />
-            <Route path="/dashboard/proprietaire" element={<OwnerDashboard />} />
+            
+            {/* Routes protégées */}
+            <Route 
+              path="/artiste/profil" 
+              element={
+                <ProtectedRoute>
+                  <ArtistDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/proprietaire/profil" 
+              element={
+                <ProtectedRoute>
+                  <OwnerDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard/artiste" 
+              element={
+                <ProtectedRoute>
+                  <ArtistDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard/proprietaire" 
+              element={
+                <ProtectedRoute>
+                  <OwnerDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

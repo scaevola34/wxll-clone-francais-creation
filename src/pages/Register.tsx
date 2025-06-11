@@ -16,7 +16,7 @@ const Register = () => {
     password: '',
     confirmPassword: '',
     name: '',
-    userType: 'artist' // 'artist' ou 'owner'
+    userType: 'artist'
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -72,29 +72,41 @@ const Register = () => {
 
       console.log('✅ SignUp réussi, user:', data.user?.id);
 
-      // INSERTION MANUELLE avec colonnes correctes
+      // INSERTION MANUELLE avec colonnes correctes pour chaque table
       if (data?.user) {
-        const tableName = formData.userType === 'artist' ? 'artists' : 'wall_owners';
-        
-        // Insertion avec la colonne 'contact_email' au lieu de 'email'
-        const userData = {
-          id: data.user.id,
-          name: formData.name,
-          contact_email: formData.email
-        };
-        
-        console.log(`🗄️ Insertion dans table "${tableName}" avec:`, userData);
+        if (formData.userType === 'artist') {
+          // Table artists : utilise contact_email
+          const { data: insertResult, error: insertError } = await supabase
+            .from('artists')
+            .insert([{
+              id: data.user.id,
+              name: formData.name,
+              contact_email: formData.email
+            }]);
 
-        const { data: insertResult, error: insertError } = await supabase
-          .from(tableName)
-          .insert([userData]);
-
-        if (insertError) {
-          console.error('❌ Erreur insertion profil:', insertError);
-          setError(`Erreur création profil: ${insertError.message}`);
-          return;
+          if (insertError) {
+            console.error('❌ Erreur artistes:', insertError);
+            setError(`Erreur création profil: ${insertError.message}`);
+            return;
+          }
+          console.log('✅ Insertion artistes réussie:', insertResult);
+          
         } else {
-          console.log('✅ Insertion profil réussie:', insertResult);
+          // Table wall_owners : utilise email
+          const { data: insertResult, error: insertError } = await supabase
+            .from('wall_owners')
+            .insert([{
+              id: data.user.id,
+              name: formData.name,
+              email: formData.email
+            }]);
+
+          if (insertError) {
+            console.error('❌ Erreur wall_owners:', insertError);
+            setError(`Erreur création profil: ${insertError.message}`);
+            return;
+          }
+          console.log('✅ Insertion wall_owners réussie:', insertResult);
         }
       }
 
@@ -139,7 +151,6 @@ const Register = () => {
                 </Alert>
               )}
 
-              {/* Type d'utilisateur */}
               <div className="space-y-2">
                 <Label>Je suis...</Label>
                 <div className="grid grid-cols-2 gap-2">
@@ -264,5 +275,6 @@ const Register = () => {
 };
 
 export default Register;
+
 
 

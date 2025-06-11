@@ -47,7 +47,7 @@ const Walls = () => {
   // Get unique surface types for filters
   const uniqueSurfaceTypes = useMemo(() => {
     const types = walls.map(wall => wall.surface_type).filter(Boolean);
-    return [...new Set(types)];
+    return [...new Set(types)] as string[];
   }, [walls]);
 
   const filteredWalls = useMemo(() => {

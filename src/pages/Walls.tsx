@@ -1,66 +1,27 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+
+import React, { useState, useMemo } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, SlidersHorizontal, X, Camera } from 'lucide-react';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
 import WallCard from '@/components/WallCard';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useWalls } from '@/hooks/useWalls';
 import WallFilters from '@/components/WallFilters';
-import ImageUpload from '@/components/ui/ImageUpload';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { supabase } from '@/lib/supabaseClient';
 
 const Walls = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  
-  // Initialize state from URL parameters
-  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+  const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
-    ownerType: searchParams.get('ownerType')?.split(',').filter(Boolean) || [],
-    locationType: searchParams.get('locationType')?.split(',').filter(Boolean) || [],
-    surfaceType: searchParams.get('surfaceType')?.split(',').filter(Boolean) || [],
-    minArea: parseInt(searchParams.get('minArea') || '0'),
-    maxArea: parseInt(searchParams.get('maxArea') || '200'),
-    timeframe: searchParams.get('timeframe') || '',
+    ownerType: [] as string[],
+    locationType: [] as string[],
+    surfaceType: [] as string[],
+    minArea: 0,
+    maxArea: 200,
+    timeframe: '',
   });
 
   const { walls, loading } = useWalls();
-  const [showImageUpload, setShowImageUpload] = useState<string | null>(null);
-
-  // Update URL when filters change
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (searchTerm) params.set('search', searchTerm);
-    if (filters.ownerType.length > 0) params.set('ownerType', filters.ownerType.join(','));
-    if (filters.locationType.length > 0) params.set('locationType', filters.locationType.join(','));
-    if (filters.surfaceType.length > 0) params.set('surfaceType', filters.surfaceType.join(','));
-    if (filters.minArea > 0) params.set('minArea', filters.minArea.toString());
-    if (filters.maxArea < 200) params.set('maxArea', filters.maxArea.toString());
-    if (filters.timeframe) params.set('timeframe', filters.timeframe);
-    
-    setSearchParams(params, { replace: true });
-  }, [searchTerm, filters, setSearchParams]);
-
-  const handleImageUpload = async (wallId: string, imageUrl: string) => {
-    try {
-      const { error } = await supabase
-        .from('wall_owners')
-        .update({ image_url: imageUrl })
-        .eq('id', wallId);
-
-      if (error) {
-        console.error('Error updating wall image:', error);
-        return;
-      }
-
-      setShowImageUpload(null);
-      // Optionally refresh the walls list here
-    } catch (error) {
-      console.error('Error updating wall image:', error);
-    }
-  };
 
   const resetFilters = () => {
     setFilters({
@@ -71,8 +32,6 @@ const Walls = () => {
       maxArea: 200,
       timeframe: '',
     });
-    setSearchTerm('');
-    setSearchParams({}, { replace: true });
   };
 
   const getActiveFilterCount = () => {
@@ -88,7 +47,7 @@ const Walls = () => {
   // Get unique surface types for filters
   const uniqueSurfaceTypes = useMemo(() => {
     const types = walls.map(wall => wall.surface_type).filter(Boolean);
-    return [...new Set(types)] as string[];
+    return [...new Set(types)];
   }, [walls]);
 
   const filteredWalls = useMemo(() => {
@@ -270,48 +229,18 @@ const Walls = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredWalls.map((wall) => (
-                  <div key={wall.id} className="relative group">
-                    <WallCard 
-                      id={wall.id}
-                      title={wall.title}
-                      location={wall.location}
-                      size={wall.size}
-                      imageUrl={wall.imageUrl}
-                      budget={wall.budget}
-                      clientType={wall.owner_type === 'individual' ? 'B2C' : 'B2B'}
-                      locationType={wall.indoor ? 'interior' : 'exterior'}
-                      surfaceType={wall.surface_type}
-                    />
-                    
-                    {/* Image upload button overlay */}
-                    <button
-                      onClick={() => setShowImageUpload(wall.id)}
-                      className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-gray-700 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-10"
-                    >
-                      <Camera className="w-4 h-4" />
-                    </button>
-                    
-                    {/* Image upload modal */}
-                    {showImageUpload === wall.id && (
-                      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-8 z-50">
-                        <div className="bg-white rounded-lg p-6 max-w-md w-full">
-                          <h3 className="text-lg font-semibold mb-4">Changer l'image du mur</h3>
-                          <ImageUpload
-                            currentImageUrl={wall.imageUrl}
-                            onImageUploaded={(url) => handleImageUpload(wall.id, url)}
-                            bucket="wall-images"
-                          />
-                          <Button
-                            variant="outline"
-                            onClick={() => setShowImageUpload(null)}
-                            className="mt-4 w-full"
-                          >
-                            Annuler
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <WallCard 
+                    key={wall.id} 
+                    id={wall.id}
+                    title={wall.title}
+                    location={wall.location}
+                    size={wall.size}
+                    imageUrl={wall.imageUrl}
+                    budget={wall.budget}
+                    clientType={wall.owner_type === 'individual' ? 'B2C' : 'B2B'}
+                    locationType={wall.indoor ? 'interior' : 'exterior'}
+                    surfaceType={wall.surface_type}
+                  />
                 ))}
               </div>
             )}
@@ -325,5 +254,3 @@ const Walls = () => {
 };
 
 export default Walls;
-
-</edits_to_apply>

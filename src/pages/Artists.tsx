@@ -2,8 +2,6 @@
 import React, { useState } from 'react';
 import { useArtists } from '@/hooks/useArtists';
 import ArtistCard from '@/components/ArtistCard';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';

@@ -90,7 +90,7 @@ const Navbar = () => {
               isActive('/comment-ca-marche') ? 'text-wxll-blue' : ''
             }`}
           >
-            Comment ça marche
+            Comment ça marche ?
             {isActive('/comment-ca-marche') && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-wxll-blue rounded-full"></div>
             )}

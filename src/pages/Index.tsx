@@ -4,8 +4,6 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Users, MapPin, Palette, Shield, Building, Home } from 'lucide-react';
 
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import ArtistCard from '@/components/ArtistCard';
 import WallCard from '@/components/WallCard';
 import HowItWorks from '@/components/HowItWorks';

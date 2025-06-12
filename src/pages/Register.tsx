@@ -1,58 +1,63 @@
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UserPlus, Palette, Building2, ArrowLeft } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowLeft, User, Building2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 const Register = () => {
-  const navigate = useNavigate();
+  const [step, setStep] = useState(1);
+  const [userType, setUserType] = useState<'artist' | 'owner' | ''>('');
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    nomComplet: '',
-    userType: 'artist'
-  });
+  const navigate = useNavigate();
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  // Common fields
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  // Artist fields
+  const [artistName, setArtistName] = useState('');
+  const [location, setLocation] = useState('');
+  const [instagram, setInstagram] = useState('');
+  const [style, setStyle] = useState('');
+
+  // Wall owner fields
+  const [ownerName, setOwnerName] = useState('');
+  const [ownerType, setOwnerType] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [wallWidth, setWallWidth] = useState('');
+  const [wallHeight, setWallHeight] = useState('');
+  const [surfaceType, setSurfaceType] = useState('');
+  const [isIndoor, setIsIndoor] = useState(false);
+
+  const handleUserTypeSelect = (type: 'artist' | 'owner') => {
+    setUserType(type);
+    setStep(2);
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validation
-    if (!formData.email || !formData.password || !formData.nomComplet) {
+    if (password !== confirmPassword) {
       toast({
-        title: "❌ Champs requis",
-        description: "Veuillez remplir tous les champs obligatoires.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "❌ Mots de passe différents",
+        title: "❌ Erreur",
         description: "Les mots de passe ne correspondent pas.",
         variant: "destructive",
       });
       return;
     }
 
-    if (formData.password.length < 6) {
+    if (password.length < 6) {
       toast({
-        title: "❌ Mot de passe trop court",
+        title: "❌ Erreur",
         description: "Le mot de passe doit contenir au moins 6 caractères.",
         variant: "destructive",
       });
@@ -61,20 +66,15 @@ const Register = () => {
 
     try {
       setLoading(true);
-      console.log('🚀 Début inscription:', {
-        email: formData.email,
-        userType: formData.userType
-      });
 
-      // 1. Créer le compte utilisateur
+      // Create user account
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
+        email,
+        password,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
           data: {
-            nom_complet: formData.nomComplet,
-            user_type: formData.userType
+            user_type: userType,
+            full_name: userType === 'artist' ? artistName : ownerName,
           }
         }
       });
@@ -82,91 +82,53 @@ const Register = () => {
       if (authError) throw authError;
 
       if (!authData.user) {
-        throw new Error('Erreur lors de la création du compte');
+        throw new Error('User creation failed');
       }
 
-      console.log('✅ SignUp réussi, user:', authData.user.id);
-
-      // 2. Insérer dans la table correspondante selon le type d'utilisateur
-      if (formData.userType === 'artist') {
-        console.log('🗄️ Insertion artists:', {
-          id: authData.user.id,
-          name: formData.nomComplet,
-          contact_email: formData.email
-        });
-
+      // Create profile based on user type
+      if (userType === 'artist') {
         const { error: artistError } = await supabase
           .from('artists')
           .insert({
-            id: authData.user.id,
-            name: formData.nomComplet,
-            contact_email: formData.email
+            name: artistName,
+            contact_email: email,
+            location: location,
+            instagram_handle: instagram,
+            style: style,
+            bio: '',
+            coverage_area: location,
           });
 
-        if (artistError) {
-          console.error('❌ Erreur insertion artists:', artistError);
-          throw artistError;
-        }
-
-        console.log('✅ Insertion artists réussie');
-      } else {
-        console.log('🗄️ Insertion wall_owners:', {
-          id: authData.user.id,
-          Name: formData.nomComplet,
-          contact_email: formData.email
-        });
-
+        if (artistError) throw artistError;
+      } else if (userType === 'owner') {
         const { error: ownerError } = await supabase
           .from('wall_owners')
           .insert({
-            id: authData.user.id,
-            Name: formData.nomComplet,
-            contact_email: formData.email,
-            // Valeurs par défaut requises
-            width_m: 0,
-            height_m: 0,
-            indoor: false,
-            surface_type: 'brick',
-            owner_type: 'individual',
-            location_postal_code: '00000'
+            Name: ownerName,
+            contact_email: email,
+            width_m: parseFloat(wallWidth),
+            height_m: parseFloat(wallHeight),
+            indoor: isIndoor,
+            surface_type: surfaceType,
+            owner_type: ownerType,
+            location_postal_code: postalCode,
           });
 
-        if (ownerError) {
-          console.error('❌ Erreur insertion wall_owners:', ownerError);
-          throw ownerError;
-        }
-
-        console.log('✅ Insertion wall_owners réussie');
+        if (ownerError) throw ownerError;
       }
 
       toast({
-        title: "✅ Inscription réussie !",
-        description: "Votre compte a été créé avec succès. Vous êtes maintenant connecté.",
+        title: "✅ Compte créé !",
+        description: "Votre compte a été créé avec succès. Vérifiez votre email pour confirmer votre compte.",
       });
 
-      // 3. Rediriger vers le bon dashboard
-      if (formData.userType === 'artist') {
-        navigate('/artiste/profil');
-      } else {
-        navigate('/proprietaire/profil');
-      }
+      navigate('/login');
 
     } catch (error: any) {
-      console.error('❌ Erreur inscription:', error);
-      
-      let errorMessage = "Une erreur est survenue lors de l'inscription.";
-      
-      if (error.message?.includes('User already registered')) {
-        errorMessage = "Un compte existe déjà avec cette adresse email.";
-      } else if (error.message?.includes('Invalid email')) {
-        errorMessage = "Adresse email invalide.";
-      } else if (error.message?.includes('Password')) {
-        errorMessage = "Le mot de passe ne respecte pas les critères requis.";
-      }
-
+      console.error('Erreur lors de l\'inscription:', error);
       toast({
-        title: "❌ Erreur d'inscription",
-        description: errorMessage,
+        title: "❌ Erreur",
+        description: error.message || "Une erreur est survenue lors de l'inscription.",
         variant: "destructive",
       });
     } finally {
@@ -174,146 +136,289 @@ const Register = () => {
     }
   };
 
+  const renderStep1 = () => (
+    <Card className="w-full max-w-md shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+      <CardHeader className="text-center pb-2">
+        <CardTitle className="text-2xl font-bold text-gray-900">
+          Choisissez votre profil
+        </CardTitle>
+        <p className="text-gray-600 mt-2">
+          Sélectionnez le type de compte que vous souhaitez créer
+        </p>
+      </CardHeader>
+      
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-1 gap-4">
+          <button
+            onClick={() => handleUserTypeSelect('artist')}
+            className="p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all duration-300 text-left group"
+          >
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                <User className="h-6 w-6 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">Artiste</h3>
+                <p className="text-sm text-gray-600">Je crée du street art et cherche des murs</p>
+              </div>
+            </div>
+          </button>
+          
+          <button
+            onClick={() => handleUserTypeSelect('owner')}
+            className="p-6 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all duration-300 text-left group"
+          >
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                <Building2 className="h-6 w-6 text-green-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">Propriétaire</h3>
+                <p className="text-sm text-gray-600">J'ai un mur à proposer aux artistes</p>
+              </div>
+            </div>
+          </button>
+        </div>
+      </CardContent>
+
+      <CardFooter>
+        <Link to="/login" className="w-full">
+          <Button variant="outline" className="w-full">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Retour à la connexion
+          </Button>
+        </Link>
+      </CardFooter>
+    </Card>
+  );
+
+  const renderStep2 = () => (
+    <Card className="w-full max-w-md shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+      <CardHeader className="text-center pb-2">
+        <CardTitle className="text-2xl font-bold text-gray-900">
+          {userType === 'artist' ? 'Profil Artiste' : 'Profil Propriétaire'}
+        </CardTitle>
+        <p className="text-gray-600 mt-2">
+          Complétez vos informations pour créer votre compte
+        </p>
+      </CardHeader>
+      
+      <form onSubmit={handleRegister}>
+        <CardContent className="space-y-4">
+          {/* Common fields */}
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Mot de passe</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          {userType === 'artist' ? (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="artistName">Nom d'artiste</Label>
+                <Input
+                  id="artistName"
+                  value={artistName}
+                  onChange={(e) => setArtistName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="location">Localisation</Label>
+                <Input
+                  id="location"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="Paris, Lyon, Marseille..."
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="instagram">Instagram (optionnel)</Label>
+                <Input
+                  id="instagram"
+                  value={instagram}
+                  onChange={(e) => setInstagram(e.target.value)}
+                  placeholder="@votre_instagram"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="style">Style artistique</Label>
+                <Select value={style} onValueChange={setStyle}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionnez votre style" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="graffiti">Graffiti</SelectItem>
+                    <SelectItem value="street-art">Street Art</SelectItem>
+                    <SelectItem value="muralism">Muralisme</SelectItem>
+                    <SelectItem value="stencil">Pochoir</SelectItem>
+                    <SelectItem value="abstract">Art Abstrait</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="ownerName">Nom complet</Label>
+                <Input
+                  id="ownerName"
+                  value={ownerName}
+                  onChange={(e) => setOwnerName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Type de propriétaire</Label>
+                <RadioGroup value={ownerType} onValueChange={setOwnerType}>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="particulier" id="particulier" />
+                    <Label htmlFor="particulier">Particulier</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="entreprise" id="entreprise" />
+                    <Label htmlFor="entreprise">Entreprise</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="association" id="association" />
+                    <Label htmlFor="association">Association</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="collectivite" id="collectivite" />
+                    <Label htmlFor="collectivite">Collectivité</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="postalCode">Code postal</Label>
+                <Input
+                  id="postalCode"
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
+                  placeholder="75001"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="wallWidth">Largeur (m)</Label>
+                  <Input
+                    id="wallWidth"
+                    type="number"
+                    value={wallWidth}
+                    onChange={(e) => setWallWidth(e.target.value)}
+                    step="0.1"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="wallHeight">Hauteur (m)</Label>
+                  <Input
+                    id="wallHeight"
+                    type="number"
+                    value={wallHeight}
+                    onChange={(e) => setWallHeight(e.target.value)}
+                    step="0.1"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Type de surface</Label>
+                <Select value={surfaceType} onValueChange={setSurfaceType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionnez le type de surface" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="beton">Béton</SelectItem>
+                    <SelectItem value="brique">Brique</SelectItem>
+                    <SelectItem value="metal">Métal</SelectItem>
+                    <SelectItem value="bois">Bois</SelectItem>
+                    <SelectItem value="autre">Autre</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="indoor"
+                  checked={isIndoor}
+                  onCheckedChange={setIsIndoor}
+                />
+                <Label htmlFor="indoor">Mur intérieur</Label>
+              </div>
+            </>
+          )}
+        </CardContent>
+
+        <CardFooter className="flex flex-col space-y-3">
+          <Button 
+            type="submit" 
+            className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all duration-300"
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                Création en cours...
+              </>
+            ) : (
+              'Créer mon compte'
+            )}
+          </Button>
+          
+          <Button 
+            type="button" 
+            variant="outline" 
+            className="w-full"
+            onClick={() => setStep(1)}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Retour
+          </Button>
+        </CardFooter>
+      </form>
+    </Card>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
-        <CardHeader className="text-center pb-2">
-          <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <UserPlus className="h-8 w-8 text-purple-600" />
-          </div>
-          <CardTitle className="text-2xl font-bold text-gray-900">
-            Rejoindre WXLLSPACE
-          </CardTitle>
-          <p className="text-gray-600 mt-2">
-            Créez votre compte sur la marketplace du street art
-          </p>
-        </CardHeader>
-        
-        <CardContent>
-          <Tabs value={formData.userType} onValueChange={(value) => handleInputChange('userType', value)}>
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="artist" className="flex items-center gap-2">
-                <Palette className="h-4 w-4" />
-                Artiste
-              </TabsTrigger>
-              <TabsTrigger value="owner" className="flex items-center gap-2">
-                <Building2 className="h-4 w-4" />
-                Propriétaire
-              </TabsTrigger>
-            </TabsList>
-
-            <form onSubmit={handleSignUp} className="space-y-4">
-              <TabsContent value="artist" className="space-y-4 mt-0">
-                <div className="text-center mb-4">
-                  <h3 className="font-semibold text-purple-600">🎨 Compte Artiste</h3>
-                  <p className="text-sm text-gray-600">Présentez vos œuvres et trouvez des projets</p>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="owner" className="space-y-4 mt-0">
-                <div className="text-center mb-4">
-                  <h3 className="font-semibold text-blue-600">🏢 Compte Propriétaire</h3>
-                  <p className="text-sm text-gray-600">Proposez vos murs aux artistes</p>
-                </div>
-              </TabsContent>
-
-              <div className="space-y-2">
-                <Label htmlFor="nomComplet" className="text-sm font-medium text-gray-700">
-                  Nom complet *
-                </Label>
-                <Input
-                  id="nomComplet"
-                  type="text"
-                  placeholder="Votre nom complet"
-                  value={formData.nomComplet}
-                  onChange={(e) => handleInputChange('nomComplet', e.target.value)}
-                  required
-                  className="h-12 border-2 focus:border-purple-500 transition-colors"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                  Adresse email *
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="votre.email@exemple.com"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  required
-                  className="h-12 border-2 focus:border-purple-500 transition-colors"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium text-gray-700">
-                  Mot de passe *
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Au moins 6 caractères"
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                  required
-                  className="h-12 border-2 focus:border-purple-500 transition-colors"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
-                  Confirmer le mot de passe *
-                </Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="Répétez votre mot de passe"
-                  value={formData.confirmPassword}
-                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                  required
-                  className="h-12 border-2 focus:border-purple-500 transition-colors"
-                />
-              </div>
-
-              <Button 
-                type="submit" 
-                className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all duration-300 mt-6"
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                    Création en cours...
-                  </>
-                ) : (
-                  <>
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Créer mon compte WXLLSPACE
-                  </>
-                )}
-              </Button>
-            </form>
-
-            <div className="text-center mt-6 space-y-3">
-              <p className="text-sm text-gray-600">
-                Déjà un compte ?{' '}
-                <Link to="/login" className="text-purple-600 hover:text-purple-700 font-medium">
-                  Se connecter
-                </Link>
-              </p>
-              
-              <Link to="/">
-                <Button variant="outline" className="w-full">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Retour à l'accueil
-                </Button>
-              </Link>
-            </div>
-          </Tabs>
-        </CardContent>
-      </Card>
+      {step === 1 ? renderStep1() : renderStep2()}
     </div>
   );
 };

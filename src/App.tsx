@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Artists from "./pages/Artists";
 import Walls from "./pages/Walls";
 import Apropos from "./pages/Apropos";
+import FAQ from "./pages/FAQ";
 import HowItWorksPage from "./pages/HowItWorksPage";
 import NotFound from "./pages/NotFound";
 import ArtistProfile from "./pages/ArtistProfile";
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/a-propos" element={<Apropos />} />
+            <Route path="/faq" element={<FAQ />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
             

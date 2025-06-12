@@ -97,13 +97,11 @@ const Register = () => {
 
         const { error: artistError } = await supabase
           .from('artists')
-          .insert([
-            {
-              id: authData.user.id,
-              name: formData.nomComplet,
-              contact_email: formData.email
-            }
-          ]);
+          .insert({
+            id: authData.user.id,
+            name: formData.nomComplet,
+            contact_email: formData.email
+          });
 
         if (artistError) {
           console.error('❌ Erreur insertion artists:', artistError);
@@ -120,20 +118,18 @@ const Register = () => {
 
         const { error: ownerError } = await supabase
           .from('wall_owners')
-          .insert([
-            {
-              id: authData.user.id,
-              Name: formData.nomComplet,
-              contact_email: formData.email,
-              // Valeurs par défaut requises
-              width_m: 0,
-              height_m: 0,
-              indoor: false,
-              surface_type: 'brick',
-              owner_type: 'individual',
-              location_postal_code: '00000'
-            }
-          ]);
+          .insert({
+            id: authData.user.id,
+            Name: formData.nomComplet,
+            contact_email: formData.email,
+            // Valeurs par défaut requises
+            width_m: 0,
+            height_m: 0,
+            indoor: false,
+            surface_type: 'brick',
+            owner_type: 'individual',
+            location_postal_code: '00000'
+          });
 
         if (ownerError) {
           console.error('❌ Erreur insertion wall_owners:', ownerError);

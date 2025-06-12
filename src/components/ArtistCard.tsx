@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -6,8 +7,13 @@ interface ArtistCardProps {
   name: string;
   style: string;
   location: string;
-  imageUrl: string;
+  imageUrl?: string;
+  profileImageUrl?: string;
   rating?: number;
+  projectsCount?: number;
+  experienceYears?: number;
+  instagramHandle?: string;
+  website?: string;
 }
 
 const ArtistCard: React.FC<ArtistCardProps> = ({
@@ -16,15 +22,22 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
   style,
   location,
   imageUrl,
-  rating = 4.8, // valeur par défaut si non fournie
+  profileImageUrl,
+  rating = 4.8,
+  projectsCount = 0,
+  experienceYears = 0,
+  instagramHandle,
+  website,
 }) => {
+  const displayImage = profileImageUrl || imageUrl || 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1964&auto=format&fit=crop';
+
   return (
     <Link to={`/artistes/${id}`} className="group">
       <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
         {/* Image de couverture */}
         <div className="relative h-64 overflow-hidden">
           <img
-            src={imageUrl}
+            src={displayImage}
             alt={`Oeuvre de ${name}`}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
@@ -63,6 +76,12 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
         <div className="px-4 pt-4">
           <h3 className="text-xl font-bold">{name}</h3>
           <p className="text-gray-600">{style}</p>
+          {experienceYears > 0 && (
+            <p className="text-sm text-gray-500">{experienceYears} ans d'expérience</p>
+          )}
+          {projectsCount > 0 && (
+            <p className="text-sm text-gray-500">{projectsCount} projets réalisés</p>
+          )}
         </div>
         {/* Zone d'action */}
         <div className="p-4">
@@ -93,6 +112,3 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
 };
 
 export default ArtistCard;
-
-
-

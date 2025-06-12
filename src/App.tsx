@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Artists from "./pages/Artists";
 import Walls from "./pages/Walls";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import Apropos from "./pages/Apropos";
 import FAQ from "./pages/FAQ";
 import HowItWorksPage from "./pages/HowItWorksPage";
@@ -30,56 +31,59 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Navbar /> {/* La navbar sera toujours visible */}
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/artistes" element={<Artists />} />
-            <Route path="/artistes/:id" element={<ArtistProfile />} />
-            <Route path="/murs" element={<Walls />} />
-            <Route path="/comment-ca-marche" element={<HowItWorksPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/a-propos" element={<Apropos />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/verify-email" element={<VerifyEmail />} />
-            
-            {/* Routes protégées avec type d'utilisateur spécifique */}
-            <Route 
-              path="/artiste/profil" 
-              element={
-                <ProtectedRoute requireUserType="artist">
-                  <ArtistDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/proprietaire/profil" 
-              element={
-                <ProtectedRoute requireUserType="owner">
-                  <OwnerDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/dashboard/artiste" 
-              element={
-                <ProtectedRoute requireUserType="artist">
-                  <ArtistDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/dashboard/proprietaire" 
-              element={
-                <ProtectedRoute requireUserType="owner">
-                  <OwnerDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <div className="flex flex-col min-h-screen">
+            <Navbar /> {/* Affichée une seule fois, sticky/fixe */}
+            <div className="flex-grow">
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/artistes" element={<Artists />} />
+                <Route path="/artistes/:id" element={<ArtistProfile />} />
+                <Route path="/murs" element={<Walls />} />
+                <Route path="/comment-ca-marche" element={<HowItWorksPage />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/a-propos" element={<Apropos />} />
+                <Route path="/faq" element={<FAQ />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
+                {/* Routes protégées */}
+                <Route 
+                  path="/artiste/profil" 
+                  element={
+                    <ProtectedRoute requireUserType="artist">
+                      <ArtistDashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/proprietaire/profil" 
+                  element={
+                    <ProtectedRoute requireUserType="owner">
+                      <OwnerDashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/dashboard/artiste" 
+                  element={
+                    <ProtectedRoute requireUserType="artist">
+                      <ArtistDashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/dashboard/proprietaire" 
+                  element={
+                    <ProtectedRoute requireUserType="owner">
+                      <OwnerDashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </div>
+            <Footer /> {/* Affiché une seule fois, toujours en bas */}
+          </div>
         </BrowserRouter>
       </TooltipProvider>
     </FavoritesProvider>

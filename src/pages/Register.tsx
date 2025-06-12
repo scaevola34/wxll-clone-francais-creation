@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
@@ -46,6 +45,8 @@ const Register = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('🚀 Début de l\'inscription', { userType, email });
+    
     if (password !== confirmPassword) {
       toast({
         title: "❌ Erreur",
@@ -66,6 +67,7 @@ const Register = () => {
 
     try {
       setLoading(true);
+      console.log('📝 Création du compte utilisateur...');
 
       // Create user account
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -79,14 +81,21 @@ const Register = () => {
         }
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        console.error('❌ Erreur auth:', authError);
+        throw authError;
+      }
 
       if (!authData.user) {
+        console.error('❌ Pas d\'utilisateur créé');
         throw new Error('User creation failed');
       }
 
+      console.log('✅ Utilisateur créé:', authData.user.id);
+
       // Create profile based on user type
       if (userType === 'artist') {
+        console.log('🎨 Création du profil artiste...');
         const { error: artistError } = await supabase
           .from('artists')
           .insert({
@@ -99,8 +108,13 @@ const Register = () => {
             coverage_area: location,
           });
 
-        if (artistError) throw artistError;
+        if (artistError) {
+          console.error('❌ Erreur création artiste:', artistError);
+          throw artistError;
+        }
+        console.log('✅ Profil artiste créé');
       } else if (userType === 'owner') {
+        console.log('🏢 Création du profil propriétaire...');
         const { error: ownerError } = await supabase
           .from('wall_owners')
           .insert({
@@ -114,7 +128,11 @@ const Register = () => {
             location_postal_code: postalCode,
           });
 
-        if (ownerError) throw ownerError;
+        if (ownerError) {
+          console.error('❌ Erreur création propriétaire:', ownerError);
+          throw ownerError;
+        }
+        console.log('✅ Profil propriétaire créé');
       }
 
       toast({
@@ -122,10 +140,11 @@ const Register = () => {
         description: "Votre compte a été créé avec succès. Vérifiez votre email pour confirmer votre compte.",
       });
 
+      console.log('🎉 Inscription terminée, redirection vers login');
       navigate('/login');
 
     } catch (error: any) {
-      console.error('Erreur lors de l\'inscription:', error);
+      console.error('❌ Erreur lors de l\'inscription:', error);
       toast({
         title: "❌ Erreur",
         description: error.message || "Une erreur est survenue lors de l'inscription.",
@@ -378,7 +397,7 @@ const Register = () => {
                 <Checkbox
                   id="indoor"
                   checked={isIndoor}
-                  onCheckedChange={setIsIndoor}
+                  onCheckedChange={(checked) => setIsIndoor(checked === true)}
                 />
                 <Label htmlFor="indoor">Mur intérieur</Label>
               </div>

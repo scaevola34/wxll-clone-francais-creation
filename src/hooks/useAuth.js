@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '../integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useAuth = () => {
   const [user, setUser] = useState(null);
@@ -39,42 +39,50 @@ export const useAuth = () => {
 
   const getUserType = async (userId) => {
     try {
+      console.log('🔍 Vérification du type utilisateur pour:', userId);
+      
       // Vérifier d'abord dans artists
-      const { data: artistData } = await supabase
+      const { data: artistData, error: artistError } = await supabase
         .from('artists')
         .select('id')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
+
+      console.log('👨‍🎨 Résultat artists:', { artistData, artistError });
 
       if (artistData) {
+        console.log('✅ Utilisateur identifié comme artiste');
         setUserType('artist');
         return;
       }
 
       // Sinon vérifier dans wall_owners
-      const { data: ownerData } = await supabase
+      const { data: ownerData, error: ownerError } = await supabase
         .from('wall_owners')
         .select('id')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
+
+      console.log('🏢 Résultat wall_owners:', { ownerData, ownerError });
 
       if (ownerData) {
+        console.log('✅ Utilisateur identifié comme propriétaire');
         setUserType('owner');
         return;
       }
 
-      // Si aucun des deux, utiliser les métadonnées
-      const userMetadata = user?.user_metadata || user?.raw_user_meta_data;
-      setUserType(userMetadata?.user_type || 'artist');
+      console.log('⚠️ Utilisateur non trouvé dans les tables, type par défaut: artist');
+      setUserType('artist');
       
     } catch (error) {
-      console.error('Erreur lors de la récupération du type utilisateur:', error);
+      console.error('❌ Erreur lors de la récupération du type utilisateur:', error);
       setUserType('artist'); // Par défaut
     }
   };
 
   const logout = async () => {
     try {
+      console.log('🚪 Déconnexion en cours...');
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
@@ -82,10 +90,11 @@ export const useAuth = () => {
       setUser(null);
       setUserType(null);
       
+      console.log('✅ Déconnexion réussie');
       // Redirect to home page
       window.location.href = '/';
     } catch (error) {
-      console.error('Erreur lors de la déconnexion:', error);
+      console.error('❌ Erreur lors de la déconnexion:', error);
     }
   };
 

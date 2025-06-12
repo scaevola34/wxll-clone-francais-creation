@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -7,12 +8,14 @@ interface ImageUploadProps {
   currentImageUrl?: string;
   onImageUploaded: (url: string) => void;
   className?: string;
+  bucketName?: string;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
   currentImageUrl,
   onImageUploaded,
-  className = ''
+  className = '',
+  bucketName = 'profile-images'
 }) => {
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentImageUrl || null);
@@ -27,11 +30,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
+      const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
       const filePath = `${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('profile-images')
+        .from(bucketName)
         .upload(filePath, file);
 
       if (uploadError) {
@@ -39,7 +42,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       }
 
       const { data } = supabase.storage
-        .from('profile-images')
+        .from(bucketName)
         .getPublicUrl(filePath);
 
       const imageUrl = data.publicUrl;

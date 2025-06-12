@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -133,20 +134,15 @@ const Navbar = () => {
           {/* Auth Buttons */}
           <div className="flex items-center space-x-3 ml-4">
             {isAuthenticated ? (
-              <div className="flex items-center space-x-3">
-                <span className="text-sm text-gray-600">
-                  Bonjour {user?.email?.split('@')[0]}
-                </span>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={handleLogout}
-                  className="text-wxll-dark hover:text-red-600 hover:bg-red-50"
-                >
-                  <LogOut size={16} className="mr-1" />
-                  Déconnexion
-                </Button>
-              </div>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleLogout}
+                className="text-wxll-dark hover:text-red-600 hover:bg-red-50"
+              >
+                <LogOut size={16} className="mr-1" />
+                Déconnexion
+              </Button>
             ) : (
               <>
                 <Link to="/login">
@@ -269,19 +265,14 @@ const Navbar = () => {
             {/* Mobile Auth Buttons */}
             <div className="space-y-3 pt-4 border-t border-gray-200">
               {isAuthenticated ? (
-                <div className="space-y-3">
-                  <div className="text-center text-sm text-gray-600">
-                    Connecté en tant que {user?.email?.split('@')[0]}
-                  </div>
-                  <Button 
-                    variant="outline"
-                    className="w-full justify-center text-red-600 hover:bg-red-50"
-                    onClick={handleLogout}
-                  >
-                    <LogOut size={16} className="mr-2" />
-                    Déconnexion
-                  </Button>
-                </div>
+                <Button 
+                  variant="outline"
+                  className="w-full justify-center text-red-600 hover:bg-red-50"
+                  onClick={handleLogout}
+                >
+                  <LogOut size={16} className="mr-2" />
+                  Déconnexion
+                </Button>
               ) : (
                 <>
                   <Link to="/login" onClick={toggleMenu}>
@@ -323,8 +314,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
-
-
-
-

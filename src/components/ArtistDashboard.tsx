@@ -69,7 +69,7 @@ export const ArtistDashboard: React.FC = () => {
     if (profile) {
       setFormData({
         nom_complet: profile.nom_complet || '',
-        email: profile.email || '',
+        email: user?.email || '',
         telephone: profile.telephone || '',
         localisation: profile.localisation || '',
         style_artistique: profile.style_artistique || '',
@@ -79,8 +79,13 @@ export const ArtistDashboard: React.FC = () => {
         experience_years: profile.experience_years || 0,
         profile_image_url: profile.profile_image_url || ''
       })
+    } else if (user) {
+      setFormData(prev => ({
+        ...prev,
+        email: user.email || ''
+      }))
     }
-  }, [profile])
+  }, [profile, user])
 
   useEffect(() => {
     if (user) {
@@ -294,6 +299,7 @@ export const ArtistDashboard: React.FC = () => {
                   currentImageUrl={formData.profile_image_url}
                   onImageUploaded={updateProfileImage}
                   className="flex flex-col items-center"
+                  bucketName="profile-images"
                 />
               </CardContent>
             </Card>
@@ -551,6 +557,14 @@ export const ArtistDashboard: React.FC = () => {
                           rows={3}
                         />
                       </div>
+                      <div>
+                        <Label>Photo de l'œuvre</Label>
+                        <ImageUpload
+                          currentImageUrl={newWork.image_url}
+                          onImageUploaded={(url) => setNewWork(prev => ({ ...prev, image_url: url }))}
+                          bucketName="artist-images"
+                        />
+                      </div>
                       <div className="flex gap-2">
                         <Button onClick={handleAddWork} disabled={!newWork.title}>
                           Ajouter l'œuvre
@@ -600,6 +614,11 @@ export const ArtistDashboard: React.FC = () => {
                               onChange={(e) => setEditingWork(prev => prev ? { ...prev, description: e.target.value } : null)}
                               placeholder="Description"
                               rows={2}
+                            />
+                            <ImageUpload
+                              currentImageUrl={editingWork.image_url}
+                              onImageUploaded={(url) => setEditingWork(prev => prev ? { ...prev, image_url: url } : null)}
+                              bucketName="artist-images"
                             />
                             <div className="flex gap-2">
                               <Button size="sm" onClick={() => handleEditWork(editingWork)}>

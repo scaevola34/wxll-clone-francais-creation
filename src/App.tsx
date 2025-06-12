@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +7,7 @@ import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import Index from "./pages/Index";
 import Artists from "./pages/Artists";
 import Walls from "./pages/Walls";
+import Navbar from "./components/Navbar";
 import Apropos from "./pages/Apropos";
 import FAQ from "./pages/FAQ";
 import HowItWorksPage from "./pages/HowItWorksPage";
@@ -30,6 +30,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <Navbar /> {/* La navbar sera toujours visible */}
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/artistes" element={<Artists />} />

@@ -107,6 +107,42 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          biographie: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          localisation: string | null
+          nom_complet: string | null
+          style_artistique: string | null
+          telephone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          biographie?: string | null
+          created_at?: string | null
+          email?: string | null
+          id: string
+          localisation?: string | null
+          nom_complet?: string | null
+          style_artistique?: string | null
+          telephone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          biographie?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          localisation?: string | null
+          nom_complet?: string | null
+          style_artistique?: string | null
+          telephone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           artist_id: string | null
@@ -155,6 +191,41 @@ export type Database = {
           },
         ]
       }
+      reviews: {
+        Row: {
+          artist_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+          reviewer_name: string
+        }
+        Insert: {
+          artist_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          reviewer_name: string
+        }
+        Update: {
+          artist_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          reviewer_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wall_owners: {
         Row: {
           budget_max: number | null
@@ -168,6 +239,7 @@ export type Database = {
           image_url: string | null
           indoor: boolean
           location_postal_code: string
+          Name: string | null
           owner_type: Database["public"]["Enums"]["owner_type_enum"]
           photo_urls: string[] | null
           surface_area_m2: number | null
@@ -187,6 +259,7 @@ export type Database = {
           image_url?: string | null
           indoor: boolean
           location_postal_code: string
+          Name?: string | null
           owner_type: Database["public"]["Enums"]["owner_type_enum"]
           photo_urls?: string[] | null
           surface_area_m2?: number | null
@@ -206,6 +279,7 @@ export type Database = {
           image_url?: string | null
           indoor?: boolean
           location_postal_code?: string
+          Name?: string | null
           owner_type?: Database["public"]["Enums"]["owner_type_enum"]
           photo_urls?: string[] | null
           surface_area_m2?: number | null
@@ -220,7 +294,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_artist_rating: {
+        Args: { artist_uuid: string }
+        Returns: number
+      }
     }
     Enums: {
       owner_type_enum: "individuel" | "copropriété" | "syndic" | "collectivité"

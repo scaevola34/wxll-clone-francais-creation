@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 
@@ -73,7 +74,19 @@ export const useAuth = () => {
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      // Clear state
+      setUser(null);
+      setUserType(null);
+      
+      // Redirect to home page
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    }
   };
 
   return {
@@ -84,4 +97,3 @@ export const useAuth = () => {
     logout
   };
 };
-

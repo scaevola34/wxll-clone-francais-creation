@@ -4,8 +4,6 @@ import { useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { MapPin, Mail, Heart, Instagram, ExternalLink } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 
 const ArtistProfile = () => {
   const { id } = useParams();

@@ -35,7 +35,6 @@ const App = () => (
             <Route path="/artistes/:id" element={<ArtistProfile />} />
             <Route path="/murs" element={<Walls />} />
             <Route path="/comment-ca-marche" element={<HowItWorksPage />} />
-            <Route path="/a-propos" element={<NotFound />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/a-propos" element={<Apropos />} />

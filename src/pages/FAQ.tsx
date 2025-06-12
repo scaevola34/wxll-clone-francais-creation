@@ -1,91 +1,87 @@
-import React, { useState } from "react";
+import { Accordion, AccordionItem } from "@/components/ui/accordion";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-const faqData = [
-  {
-    question: "Qu'est-ce que Wxllspace ?",
-    answer:
-      "Wxllspace est la première marketplace française dédiée au street art, connectant artistes, propriétaires de murs et amateurs d'art urbain.",
-  },
-  {
-    question: "Comment puis-je m'inscrire en tant qu'artiste ?",
-    answer:
-      "Vous pouvez vous inscrire via la page d'inscription en choisissant le rôle 'artiste' et en complétant votre profil pour présenter votre univers et vos œuvres.",
-  },
-  {
-    question: "Comment proposer un mur à décorer ?",
-    answer:
-      "Les propriétaires peuvent proposer un mur en créant un compte propriétaire et en renseignant les détails du mur : localisation, dimensions, budget, accessibilité, etc.",
-  },
-  {
-    question: "Les profils sont-ils vérifiés ?",
-    answer:
-      "Oui, Wxllspace vérifie les profils des artistes et des propriétaires pour garantir la confiance et la qualité des collaborations.",
-  },
-  {
-    question: "Comment fonctionne la mise en relation entre artistes et propriétaires ?",
-    answer:
-      "La plateforme facilite la mise en relation directe via des messages sécurisés et un suivi des projets avec contrat, budget et calendrier clair.",
-  },
-  {
-    question: "Puis-je vendre mes œuvres sur Wxllspace ?",
-    answer:
-      "Oui, les artistes peuvent présenter et vendre leurs créations directement sur la marketplace.",
-  },
-  {
-    question: "Quelles sont les zones géographiques couvertes ?",
-    answer:
-      "Wxllspace valorise l'art urbain partout, en milieu urbain comme rural, dans les villes, villages, zones industrielles, et plus encore.",
-  },
-  {
-    question: "Comment mes données sont-elles protégées ?",
-    answer:
-      "Wxllspace utilise Supabase pour sécuriser les données et gérer les accès, garantissant la confidentialité et la sécurité.",
-  },
-  {
-    question: "Que faire en cas de problème ou de litige ?",
-    answer:
-      "Un support est disponible pour accompagner les utilisateurs et résoudre les éventuels litiges liés aux projets.",
-  },
-  {
-    question: "Comment contacter l'équipe Wxllspace ?",
-    answer:
-      "Vous pouvez nous contacter via la page Contact ou sur nos réseaux sociaux listés dans le footer.",
-  },
-];
-
-const FAQ: React.FC = () => {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
-
-  const toggle = (idx: number) => {
-    setOpenIndex(openIndex === idx ? null : idx);
-  };
-
+const FAQ = () => {
   return (
-    <main className="max-w-2xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-8 text-purple-700">FAQ Wxllspace</h1>
-      <div className="space-y-4">
-        {faqData.map((item, idx) => (
-          <div
-            key={idx}
-            className="border border-gray-200 rounded-lg shadow-sm bg-white"
-          >
-            <button
-              className="w-full text-left px-6 py-4 focus:outline-none flex justify-between items-center"
-              onClick={() => toggle(idx)}
-            >
-              <span className="font-semibold text-gray-800">{item.question}</span>
-              <span className="text-purple-600 text-xl">
-                {openIndex === idx ? "−" : "+"}
-              </span>
-            </button>
-            {openIndex === idx && (
-              <div className="px-6 pb-4 text-gray-700">{item.answer}</div>
-            )}
-          </div>
-        ))}
-      </div>
-    </main>
+    <section className="max-w-3xl mx-auto py-12 px-4">
+      <h2 className="text-3xl font-bold mb-6 text-center">FAQ Wxllspace</h2>
+      <ScrollArea className="h-[75vh] rounded-md border p-4">
+        <Accordion type="multiple" className="w-full">
+          {/* Artistes */}
+          <AccordionItem value="artist-1" title="Qui peut créer un profil artiste ?">
+            Tout artiste urbain peut s’inscrire, qu’il soit professionnel, amateur ou en voie de professionnalisation.
+          </AccordionItem>
+          <AccordionItem value="artist-2" title="Dois-je être déclaré ou avoir un statut pro ?">
+            Non, mais si le mur est rémunéré, tu es responsable de déclarer tes revenus selon ton statut.
+          </AccordionItem>
+          <AccordionItem value="artist-3" title="Comment se passe la mise en relation avec un propriétaire ?">
+            Tu peux envoyer une proposition (style, format, délai, budget). Le propriétaire peut accepter ou ajuster.
+          </AccordionItem>
+          <AccordionItem value="artist-4" title="Suis-je couvert en cas d’accident ?">
+            Non par défaut. Une assurance responsabilité civile est recommandée.
+          </AccordionItem>
+          <AccordionItem value="artist-5" title="Qui possède les droits sur l’œuvre ?">
+            L’artiste reste titulaire. Une convention peut encadrer l’usage par le propriétaire.
+          </AccordionItem>
+          <AccordionItem value="artist-6" title="Et si mon œuvre est effacée ?">
+            Wxllspace ne garantit pas la pérennité. Une discussion en amont permet de cadrer.
+          </AccordionItem>
+
+          {/* Propriétaires Particuliers */}
+          <AccordionItem value="owner-1" title="Mon mur est-il éligible ?">
+            Oui, s’il est stable, accessible et que vous êtes propriétaire ou autorisé.
+          </AccordionItem>
+          <AccordionItem value="owner-2" title="Dois-je rémunérer l’artiste ?">
+            Pas obligatoirement. Cela dépend de l’accord trouvé entre vous.
+          </AccordionItem>
+          <AccordionItem value="owner-3" title="Y a-t-il un risque de nuisance ?">
+            Non, les artistes sont là pour créer une œuvre. Une convention peut tout cadrer.
+          </AccordionItem>
+          <AccordionItem value="owner-4" title="Puis-je choisir un style ?">
+            Oui, vous pouvez exprimer vos souhaits artistiques dans le formulaire.
+          </AccordionItem>
+          <AccordionItem value="owner-5" title="Et si l’œuvre ne me plaît pas ?">
+            La maquette est validée en amont. Vous êtes libre de refuser une proposition.
+          </AccordionItem>
+          <AccordionItem value="owner-6" title="Dois-je prévoir une assurance ?">
+            Oui, notamment en cas d’utilisation de nacelle ou échafaudage.
+          </AccordionItem>
+
+          {/* Collectivités & Pros */}
+          <AccordionItem value="pro-1" title="Puis-je faire appel à plusieurs artistes ?">
+            Oui. Contactez-nous si vous souhaitez lancer un appel à projets.
+          </AccordionItem>
+          <AccordionItem value="pro-2" title="L’œuvre devient-elle ma propriété ?">
+            Non sauf contrat de cession. Une autorisation d’usage peut être convenue.
+          </AccordionItem>
+          <AccordionItem value="pro-3" title="Y a-t-il une charte pour les lieux publics ?">
+            Oui, selon le site (zone classée, contraintes urbaines). Des autorisations peuvent être requises.
+          </AccordionItem>
+          <AccordionItem value="pro-4" title="Proposez-vous des conventions types ?">
+            Oui, pour cadrer la responsabilité, durée, droits, conditions financières…
+          </AccordionItem>
+
+          {/* Sécurité et fonctionnement général */}
+          <AccordionItem value="sec-1" title="Comment sont sécurisées mes données ?">
+            Les données sont stockées sur Supabase avec mots de passe chiffrés. Aucun mot de passe n’est stocké en clair.
+          </AccordionItem>
+          <AccordionItem value="sec-2" title="Que faire en cas d’oubli de mot de passe ?">
+            Utilisez le lien “Mot de passe oublié” pour recevoir un lien sécurisé de réinitialisation.
+          </AccordionItem>
+          <AccordionItem value="sec-3" title="Qui modère les profils ?">
+            L’équipe valide manuellement les premiers comptes. Un système de signalement arrive.
+          </AccordionItem>
+          <AccordionItem value="sec-4" title="Puis-je supprimer mon compte ?">
+            Oui. Depuis votre tableau de bord, vous pouvez demander la suppression.
+          </AccordionItem>
+          <AccordionItem value="sec-5" title="Comment éviter les projets illégaux ?">
+            Les projets sans autorisation ou à contenu haineux sont interdits. Wxllspace se réserve le droit de bannir tout compte.
+          </AccordionItem>
+        </Accordion>
+      </ScrollArea>
+    </section>
   );
 };
 
 export default FAQ;
+

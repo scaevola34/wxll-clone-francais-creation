@@ -99,6 +99,7 @@ const Register = () => {
         const { error: artistError } = await supabase
           .from('artists')
           .insert({
+            id: authData.user.id, // Explicitly set the user ID
             name: artistName,
             contact_email: email,
             location: location,
@@ -118,6 +119,7 @@ const Register = () => {
         const { error: ownerError } = await supabase
           .from('wall_owners')
           .insert({
+            id: authData.user.id, // Explicitly set the user ID
             Name: ownerName,
             contact_email: email,
             width_m: parseFloat(wallWidth),

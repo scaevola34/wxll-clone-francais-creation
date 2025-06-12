@@ -40,11 +40,11 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
             
-            {/* Routes protégées */}
+            {/* Routes protégées avec type d'utilisateur spécifique */}
             <Route 
               path="/artiste/profil" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireUserType="artist">
                   <ArtistDashboard />
                 </ProtectedRoute>
               } 
@@ -52,7 +52,7 @@ const App = () => (
             <Route 
               path="/proprietaire/profil" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireUserType="owner">
                   <OwnerDashboard />
                 </ProtectedRoute>
               } 
@@ -60,7 +60,7 @@ const App = () => (
             <Route 
               path="/dashboard/artiste" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireUserType="artist">
                   <ArtistDashboard />
                 </ProtectedRoute>
               } 
@@ -68,7 +68,7 @@ const App = () => (
             <Route 
               path="/dashboard/proprietaire" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireUserType="owner">
                   <OwnerDashboard />
                 </ProtectedRoute>
               } 

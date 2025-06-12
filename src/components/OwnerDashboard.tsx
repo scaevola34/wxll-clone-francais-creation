@@ -9,8 +9,20 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from '@/hooks/use-toast'
-import { Building, MapPin, Phone, Mail, User as UserIcon, FileText, Globe, Instagram, Clock, Camera } from 'lucide-react'
+import { Building, MapPin, Phone, Mail, User as UserIcon, FileText, Camera, Plus, Edit, Trash2 } from 'lucide-react'
 import ImageUpload from '@/components/ui/ImageUpload'
+
+interface Wall {
+  id: string
+  Name: string
+  location_postal_code: string
+  width_m: number
+  height_m: number
+  surface_type: string
+  indoor: boolean
+  description?: string
+  image_url?: string
+}
 
 export const OwnerDashboard: React.FC = () => {
   const [user, setUser] = useState<User | null>(null)
@@ -20,14 +32,23 @@ export const OwnerDashboard: React.FC = () => {
     email: '',
     telephone: '',
     localisation: '',
-    style_artistique: '',
     biographie: '',
-    instagram_handle: '',
-    website: '',
-    experience_years: 0,
     profile_image_url: ''
   })
   const [saving, setSaving] = useState(false)
+  const [walls, setWalls] = useState<Wall[]>([])
+  const [showAddWall, setShowAddWall] = useState(false)
+  const [editingWall, setEditingWall] = useState<Wall | null>(null)
+  const [newWall, setNewWall] = useState({
+    Name: '',
+    location_postal_code: '',
+    width_m: 0,
+    height_m: 0,
+    surface_type: '',
+    indoor: false,
+    description: '',
+    image_url: ''
+  })
 
   useEffect(() => {
     // Récupérer l'utilisateur connecté au chargement
@@ -53,15 +74,31 @@ export const OwnerDashboard: React.FC = () => {
         email: profile.email || '',
         telephone: profile.telephone || '',
         localisation: profile.localisation || '',
-        style_artistique: profile.style_artistique || '',
         biographie: profile.biographie || '',
-        instagram_handle: profile.instagram_handle || '',
-        website: profile.website || '',
-        experience_years: profile.experience_years || 0,
         profile_image_url: profile.profile_image_url || ''
       })
     }
   }, [profile])
+
+  useEffect(() => {
+    if (user) {
+      fetchWalls()
+    }
+  }, [user])
+
+  const fetchWalls = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('wall_owners')
+        .select('*')
+        .eq('id', user?.id)
+
+      if (error) throw error
+      setWalls(data || [])
+    } catch (error) {
+      console.error('Erreur lors du chargement des murs:', error)
+    }
+  }
 
   const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({
@@ -88,6 +125,51 @@ export const OwnerDashboard: React.FC = () => {
       })
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleAddWall = async () => {
+    try {
+      const { error } = await supabase
+        .from('wall_owners')
+        .insert([{
+          id: user?.id,
+          Name: newWall.Name,
+          location_postal_code: newWall.location_postal_code,
+          width_m: newWall.width_m,
+          height_m: newWall.height_m,
+          surface_type: newWall.surface_type,
+          indoor: newWall.indoor,
+          description: newWall.description,
+          image_url: newWall.image_url,
+          contact_email: user?.email
+        }])
+
+      if (error) throw error
+
+      toast({
+        title: "✅ Mur ajouté",
+        description: "Votre mur a été ajouté avec succès.",
+      })
+
+      setNewWall({
+        Name: '',
+        location_postal_code: '',
+        width_m: 0,
+        height_m: 0,
+        surface_type: '',
+        indoor: false,
+        description: '',
+        image_url: ''
+      })
+      setShowAddWall(false)
+      fetchWalls()
+    } catch (error) {
+      toast({
+        title: "❌ Erreur",
+        description: "Une erreur est survenue lors de l'ajout du mur.",
+        variant: "destructive",
+      })
     }
   }
 
@@ -165,7 +247,8 @@ export const OwnerDashboard: React.FC = () => {
           </div>
 
           {/* Main content */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 space-y-8">
+            {/* Profil Section */}
             <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
               <CardHeader className="bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-t-lg">
                 <CardTitle className="text-2xl font-bold flex items-center gap-3">
@@ -245,55 +328,6 @@ export const OwnerDashboard: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Social et experience */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="space-y-3">
-                      <Label htmlFor="instagram_handle" className="text-lg font-semibold flex items-center gap-2">
-                        <Instagram className="h-5 w-5 text-pink-600" />
-                        Instagram
-                      </Label>
-                      <Input
-                        id="instagram_handle"
-                        type="text"
-                        value={formData.instagram_handle}
-                        onChange={(e) => handleInputChange('instagram_handle', e.target.value)}
-                        placeholder="@votre_instagram"
-                        className="h-12 text-lg border-2 focus:border-pink-500 transition-colors"
-                      />
-                    </div>
-
-                    <div className="space-y-3">
-                      <Label htmlFor="website" className="text-lg font-semibold flex items-center gap-2">
-                        <Globe className="h-5 w-5 text-blue-600" />
-                        Site web
-                      </Label>
-                      <Input
-                        id="website"
-                        type="url"
-                        value={formData.website}
-                        onChange={(e) => handleInputChange('website', e.target.value)}
-                        placeholder="https://votre-site.com"
-                        className="h-12 text-lg border-2 focus:border-blue-500 transition-colors"
-                      />
-                    </div>
-
-                    <div className="space-y-3">
-                      <Label htmlFor="experience_years" className="text-lg font-semibold flex items-center gap-2">
-                        <Clock className="h-5 w-5 text-indigo-600" />
-                        Années d'expérience
-                      </Label>
-                      <Input
-                        id="experience_years"
-                        type="number"
-                        min="0"
-                        value={formData.experience_years}
-                        onChange={(e) => handleInputChange('experience_years', parseInt(e.target.value) || 0)}
-                        placeholder="5"
-                        className="h-12 text-lg border-2 focus:border-indigo-500 transition-colors"
-                      />
-                    </div>
-                  </div>
-
                   {/* Biographie */}
                   <div className="space-y-3">
                     <Label htmlFor="biographie" className="text-lg font-semibold flex items-center gap-2">
@@ -333,6 +367,127 @@ export const OwnerDashboard: React.FC = () => {
                     </Button>
                   </div>
                 </form>
+              </CardContent>
+            </Card>
+
+            {/* Post a Wall Section */}
+            <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+              <CardHeader className="bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-t-lg">
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                    <Building className="h-8 w-8" />
+                    Poster un Mur
+                  </CardTitle>
+                  <Button
+                    onClick={() => setShowAddWall(true)}
+                    className="bg-white text-green-600 hover:bg-gray-100"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Ajouter un mur
+                  </Button>
+                </div>
+              </CardHeader>
+
+              <CardContent className="p-8">
+                {/* Add Wall Form */}
+                {showAddWall && (
+                  <Card className="mb-6 border-2 border-green-200">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Ajouter un nouveau mur</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="new_name">Nom du mur</Label>
+                          <Input
+                            id="new_name"
+                            value={newWall.Name}
+                            onChange={(e) => setNewWall(prev => ({ ...prev, Name: e.target.value }))}
+                            placeholder="Nom de votre mur"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="new_postal_code">Code postal</Label>
+                          <Input
+                            id="new_postal_code"
+                            value={newWall.location_postal_code}
+                            onChange={(e) => setNewWall(prev => ({ ...prev, location_postal_code: e.target.value }))}
+                            placeholder="75001"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="new_width">Largeur (m)</Label>
+                          <Input
+                            id="new_width"
+                            type="number"
+                            step="0.1"
+                            value={newWall.width_m}
+                            onChange={(e) => setNewWall(prev => ({ ...prev, width_m: parseFloat(e.target.value) || 0 }))}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="new_height">Hauteur (m)</Label>
+                          <Input
+                            id="new_height"
+                            type="number"
+                            step="0.1"
+                            value={newWall.height_m}
+                            onChange={(e) => setNewWall(prev => ({ ...prev, height_m: parseFloat(e.target.value) || 0 }))}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="new_surface_type">Type de surface</Label>
+                        <Input
+                          id="new_surface_type"
+                          value={newWall.surface_type}
+                          onChange={(e) => setNewWall(prev => ({ ...prev, surface_type: e.target.value }))}
+                          placeholder="Béton, brique, métal..."
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="new_description">Description</Label>
+                        <Textarea
+                          id="new_description"
+                          value={newWall.description}
+                          onChange={(e) => setNewWall(prev => ({ ...prev, description: e.target.value }))}
+                          placeholder="Décrivez votre mur, son emplacement, vos attentes..."
+                          rows={3}
+                        />
+                      </div>
+                      <div>
+                        <Label>Photo du mur</Label>
+                        <ImageUpload
+                          currentImageUrl={newWall.image_url}
+                          onImageUploaded={(url) => setNewWall(prev => ({ ...prev, image_url: url }))}
+                          bucketName="wall-images"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button onClick={handleAddWall} disabled={!newWall.Name}>
+                          Ajouter le mur
+                        </Button>
+                        <Button variant="outline" onClick={() => setShowAddWall(false)}>
+                          Annuler
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {walls.length === 0 && !showAddWall && (
+                  <div className="text-center py-12">
+                    <Building className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-500 mb-2">Aucun mur posté</h3>
+                    <p className="text-gray-400 mb-4">Ajoutez votre premier mur pour attirer des artistes.</p>
+                    <Button onClick={() => setShowAddWall(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Poster votre premier mur
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

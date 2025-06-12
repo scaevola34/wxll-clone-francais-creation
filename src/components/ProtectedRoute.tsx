@@ -1,40 +1,20 @@
+
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   redirectTo?: string;
+  requireUserType?: 'artist' | 'owner';
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
-  redirectTo = '/login' 
+  redirectTo = '/login',
+  requireUserType
 }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      
-      if (error) {
-        setIsAuthenticated(false);
-      } else {
-        setIsAuthenticated(!!user);
-      }
-    } catch (error) {
-      console.error('Erreur d\'authentification:', error);
-      setIsAuthenticated(false);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { user, userType, loading } = useAuth();
 
   if (loading) {
     return (
@@ -44,8 +24,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  if (!isAuthenticated) {
+  if (!user) {
     return <Navigate to={redirectTo} replace />;
+  }
+
+  // If a specific user type is required and it doesn't match, redirect to appropriate dashboard
+  if (requireUserType && userType && userType !== requireUserType) {
+    const correctDashboard = userType === 'artist' ? '/dashboard/artiste' : '/dashboard/proprietaire';
+    return <Navigate to={correctDashboard} replace />;
   }
 
   return <>{children}</>;

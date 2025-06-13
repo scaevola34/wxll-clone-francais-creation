@@ -25,8 +25,10 @@ export const useArtists = ({ search }: Params = {}) =>
         .select('*');
 
       if (search) {
-        req = req.ilike('name', `%${search}%`);
-      }
+  req = req
+    .not('location', 'is', null)  // Exclure les artistes sans ville
+    .ilike('location', `%${search}%`);  // Rechercher dans la localisation
+}
 
       const { data, error } = await req;
       if (error) throw error;

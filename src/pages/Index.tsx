@@ -55,9 +55,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
+    <>
       {/* Enhanced Hero Section */}
       <section className="relative h-[85vh] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
@@ -274,8 +272,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-      
-      <Footer />
 
       {/* Auth Modal */}
       <AuthModal 
@@ -283,7 +279,7 @@ const Index = () => {
         onClose={() => setShowAuthModal(false)}
         initialTab={authInitialTab}
       />
-    </div>
+    </>
   );
 };
 

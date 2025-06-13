@@ -94,8 +94,6 @@ const HowItWorksPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
       {/* Hero Section */}
       <section className="py-20 bg-gradient-to-br from-wxll-blue/5 to-wxll-artist/5">
         <div className="container mx-auto px-4 text-center">
@@ -270,8 +268,6 @@ const HowItWorksPage = () => {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 };

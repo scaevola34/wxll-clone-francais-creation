@@ -27,14 +27,12 @@ const Artists = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
-        <Navbar />
         <div className="flex items-center justify-center min-h-[50vh]">
           <div className="text-center space-y-4">
             <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent mx-auto"></div>
             <p className="text-lg font-medium text-gray-700">Chargement des artistes...</p>
           </div>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -42,7 +40,6 @@ const Artists = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
-        <Navbar />
         <div className="flex items-center justify-center min-h-[50vh]">
           <Card className="max-w-md mx-auto">
             <CardContent className="p-6 text-center">
@@ -52,15 +49,12 @@ const Artists = () => {
             </CardContent>
           </Card>
         </div>
-        <Footer />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
-      <Navbar />
-      
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
@@ -173,8 +167,6 @@ const Artists = () => {
           </Card>
         )}
       </div>
-
-      <Footer />
     </div>
   );
 };

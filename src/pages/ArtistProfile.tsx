@@ -50,8 +50,6 @@ const ArtistProfile = () => {
 
   return (
     <div className="min-h-screen flex flex-col artist-theme">
-      <Navbar />
-      
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
@@ -180,8 +178,6 @@ const ArtistProfile = () => {
           </section>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

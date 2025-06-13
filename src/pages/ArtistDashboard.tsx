@@ -4,12 +4,8 @@ import { ArtistDashboard as ArtistDashboardComponent } from '@/components/Artist
 
 const ArtistDashboard = () => {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <div className="flex-grow">
-        <ArtistDashboardComponent />
-      </div>
-      <Footer />
+    <div className="min-h-screen bg-gray-50">
+      <ArtistDashboardComponent />
     </div>
   );
 };

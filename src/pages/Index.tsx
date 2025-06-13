@@ -128,25 +128,6 @@ const Index = () => {
                 </div>
               </div>
             </div>
-            
-            {/* Trust indicators */}
-            <div className="mt-12 flex flex-wrap items-center gap-8 text-sm text-gray-300">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                <span>500+ artistes vérifiés</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4" />
-                <span>Paiements sécurisés</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                <span>Partout en France</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
       
       {/* Enhanced Stats Section */}
       <StatsSection />

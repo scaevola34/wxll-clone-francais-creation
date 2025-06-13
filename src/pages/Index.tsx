@@ -44,7 +44,7 @@ const Index = () => {
       name: 'Nicolas Petit',
       role: "Directeur d'agence",
       quote:
-        'La fresque réalisée dans nos locaux a transformé l'ambiance de travail. Le processus de sélection d'artiste était fluide et professionnel.',
+        "La fresque réalisée dans nos locaux a transformé l'ambiance de travail. Le processus de sélection d'artiste était fluide et professionnel.",
       rating: 4,
       imageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2070&auto=format&fit=crop',
     },
@@ -271,4 +271,3 @@ const Index = () => {
 };
 
 export default Index;
-

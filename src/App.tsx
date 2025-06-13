@@ -1,87 +1,91 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { FavoritesProvider } from './contexts/FavoritesContext';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import ProtectedRoute from './components/ProtectedRoute';
+import { FavoritesProvider } from "@/contexts/FavoritesContext";
 
-// Pages
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import GlobalLoader from "./components/GlobalLoader";
+import ScrollToTopButton from "./components/ScrollToTopButton";
+
+/* --- pages --- */
 import Index from "./pages/Index";
 import Artists from "./pages/Artists";
-import ArtistProfile from "./pages/ArtistProfile";
 import Walls from "./pages/Walls";
+import Apropos from "./pages/Apropos";
+import FAQ from "./pages/FAQ";
+import HowItWorksPage from "./pages/HowItWorksPage";
+import NotFound from "./pages/NotFound";
+import ArtistProfile from "./pages/ArtistProfile";
+import ArtistDashboard from "./pages/ArtistDashboard";
+import OwnerDashboard from "./pages/OwnerDashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ResetPassword from "./pages/ResetPassword";
 import VerifyEmail from "./pages/VerifyEmail";
-import ArtistDashboard from "./pages/ArtistDashboard";
-import OwnerDashboard from "./pages/OwnerDashboard";
-import HowItWorksPage from "./pages/HowItWorksPage";
-import Apropos from "./pages/Apropos";
-import FAQ from "./pages/FAQ";
-import NotFound from "./pages/NotFound";
-import Messages from "./pages/Messages";
-import MyProjects from "./pages/MyProjects";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,            // garde les données 1 min en cache
+      refetchOnWindowFocus: false,  // pas de refresh automatique quand on revient sur l’onglet
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <FavoritesProvider>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
+        <Toaster />   {/* shadcn toast */}
+        <Sonner />    {/* sonner notifications */}
         <BrowserRouter>
-          <div className="min-h-screen flex flex-col">
-            <Navbar />
-            <main className="flex-grow pt-16">
+          {/* 1. Loader global + bouton top  */}
+          <GlobalLoader />
+          <ScrollToTopButton />
+
+          {/* 2. Layout principal */}
+          <div className="flex flex-col min-h-screen bg-white">
+            <Navbar />      {/* header */}
+            <div className="flex-grow">
               <Routes>
-                {/* Pages publiques */}
                 <Route path="/" element={<Index />} />
                 <Route path="/artistes" element={<Artists />} />
-                <Route path="/artiste/:id" element={<ArtistProfile />} />
+                <Route path="/artistes/:id" element={<ArtistProfile />} />
                 <Route path="/murs" element={<Walls />} />
                 <Route path="/comment-ca-marche" element={<HowItWorksPage />} />
                 <Route path="/a-propos" element={<Apropos />} />
                 <Route path="/faq" element={<FAQ />} />
-                
-                {/* Authentification */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/verify-email" element={<VerifyEmail />} />
-                
-                {/* Pages protégées */}
-                <Route path="/messages" element={
-                  <ProtectedRoute>
-                    <Messages />
-                  </ProtectedRoute>
-                } />
-                <Route path="/mes-projets" element={
-                  <ProtectedRoute>
-                    <MyProjects />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/artiste" element={
-                  <ProtectedRoute requireUserType="artist">
-                    <ArtistDashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/proprietaire" element={
-                  <ProtectedRoute requireUserType="owner">
-                    <OwnerDashboard />
-                  </ProtectedRoute>
-                } />
-                
-                {/* 404 */}
+
+                {/* zones protégées */}
+                <Route
+                  path="/artiste/profil"
+                  element={
+                    <ProtectedRoute requireUserType="artist">
+                      <ArtistDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/proprietaire/profil"
+                  element={
+                    <ProtectedRoute requireUserType="owner">
+                      <OwnerDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </main>
-            <Footer />
+            </div>
+            <Footer />      {/* footer */}
           </div>
         </BrowserRouter>
       </TooltipProvider>

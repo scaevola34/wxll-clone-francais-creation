@@ -1,4 +1,6 @@
-# Logs
+############################################################
+# FICHIERS DE LOGS
+############################################################
 logs
 *.log
 npm-debug.log*
@@ -7,12 +9,21 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+############################################################
+# DEPENDANCES ET BUILDS
+############################################################
 node_modules
 dist
 dist-ssr
-*.local
 
-# Editor directories and files
+############################################################
+# FICHIERS LOCAUX GENERIQUES
+############################################################
+*.local   # ex : vite.config.local etc.
+
+############################################################
+# DOSSIERS / FICHIERS D'EDITEURS
+############################################################
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -22,5 +33,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-.env.local
 
+############################################################
+# VARIABLES D'ENVIRONNEMENT  ⚠️  NE JAMAIS COMMIT
+############################################################
+.env           # fichier racine
+.env.*         # .env.production, .env.development, etc.
+.env.local     # overrides locaux (déjà couvert mais rappel explicite)
+!.env.example  # on garde un modèle committable dans le repo

@@ -1,4 +1,11 @@
+
 import React, { useState } from "react";
+import { 
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const faqData = [
   {
@@ -54,52 +61,58 @@ const faqData = [
 ];
 
 const FAQ: React.FC = () => {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
-
-  const toggle = (idx: number) => {
-    setOpenIndex(openIndex === idx ? null : idx);
-  };
-
   return (
-    <main className="max-w-2xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-8 text-purple-700 text-center">FAQ Wxllspace</h1>
-      <div className="space-y-4">
-        {faqData.map((item, idx) => (
-          <div
-            key={idx}
-            className="border border-gray-200 rounded-xl shadow-sm bg-white transition-all duration-200"
-          >
-            <button
-              className="w-full text-left px-6 py-5 focus:outline-none flex justify-between items-center group"
-              onClick={() => toggle(idx)}
-              aria-expanded={openIndex === idx}
-              aria-controls={`faq-answer-${idx}`}
-            >
-              <span className="font-semibold text-gray-800 text-lg">{item.question}</span>
-              <svg
-                className={`w-6 h-6 text-purple-600 transform transition-transform duration-200 ${
-                  openIndex === idx ? "rotate-180" : ""
-                }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+      <main className="max-w-4xl mx-auto px-6 py-16">
+        {/* Header avec espacement amélioré */}
+        <div className="text-center mb-16">
+          <div className="text-6xl mb-6">❓</div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900 leading-tight">
+            FAQ <span className="text-wxll-blue">Wxllspace</span>
+          </h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Trouvez toutes les réponses à vos questions sur notre plateforme de street art
+          </p>
+        </div>
+
+        {/* FAQ Accordion avec design amélioré */}
+        <div className="bg-white rounded-2xl shadow-xl border-0 overflow-hidden">
+          <Accordion type="single" collapsible className="w-full">
+            {faqData.map((item, idx) => (
+              <AccordionItem 
+                key={idx} 
+                value={`item-${idx}`}
+                className={`border-b border-gray-100 ${idx === faqData.length - 1 ? 'border-b-0' : ''}`}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            <div
-              id={`faq-answer-${idx}`}
-              className={`overflow-hidden transition-all duration-300 ${
-                openIndex === idx ? "max-h-96 opacity-100 py-4 px-6" : "max-h-0 opacity-0 px-6"
-              }`}
-              style={{ background: openIndex === idx ? "#faf5ff" : "white" }}
-            >
-              <div className="text-gray-700">{item.answer}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </main>
+                <AccordionTrigger className="px-8 py-6 text-left hover:bg-gray-50 transition-colors">
+                  <span className="font-semibold text-lg text-gray-900 leading-relaxed">
+                    {item.question}
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="px-8 pb-6 pt-2">
+                  <div className="text-gray-700 leading-relaxed text-base border-l-4 border-wxll-blue pl-6 bg-gray-50 p-4 rounded-r-lg">
+                    {item.answer}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+
+        {/* Section contact avec espacement */}
+        <div className="text-center mt-16 p-8 bg-white rounded-2xl shadow-lg">
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">
+            Vous ne trouvez pas votre réponse ?
+          </h3>
+          <p className="text-gray-600 mb-6 text-lg">
+            Notre équipe est là pour vous aider !
+          </p>
+          <button className="bg-wxll-blue hover:bg-blue-600 text-white px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
+            Nous contacter
+          </button>
+        </div>
+      </main>
+    </div>
   );
 };
 

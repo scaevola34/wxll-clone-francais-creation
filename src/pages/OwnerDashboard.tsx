@@ -4,12 +4,8 @@ import { OwnerDashboard as OwnerDashboardComponent } from '@/components/OwnerDas
 
 const OwnerDashboard = () => {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <div className="flex-grow">
-        <OwnerDashboardComponent />
-      </div>
-      <Footer />
+    <div className="min-h-screen bg-gray-50">
+      <OwnerDashboardComponent />
     </div>
   );
 };

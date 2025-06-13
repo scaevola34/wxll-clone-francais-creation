@@ -57,63 +57,53 @@ const Walls = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
-        <Navbar />
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <div className="text-center space-y-4">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mx-auto"></div>
-            <p className="text-lg font-medium text-gray-700">Chargement des murs...</p>
-          </div>
+      <div className="flex items-center justify-center min-h-[60vh] bg-gradient-to-br from-blue-50 to-green-50">
+        <div className="text-center space-y-6">
+          <div className="animate-spin rounded-full h-20 w-20 border-4 border-wxll-blue border-t-transparent mx-auto"></div>
+          <p className="text-xl font-medium text-gray-700">Chargement des murs...</p>
         </div>
-        <Footer />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
-        <Navbar />
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <Card className="max-w-md mx-auto">
-            <CardContent className="p-6 text-center">
-              <div className="text-red-500 text-6xl mb-4">⚠️</div>
-              <h2 className="text-xl font-bold text-red-700 mb-2">Erreur</h2>
-              <p className="text-red-600">{error}</p>
-            </CardContent>
-          </Card>
-        </div>
-        <Footer />
+      <div className="flex items-center justify-center min-h-[60vh] bg-gradient-to-br from-blue-50 to-green-50">
+        <Card className="max-w-md mx-auto shadow-xl">
+          <CardContent className="p-8 text-center">
+            <div className="text-red-500 text-7xl mb-6">⚠️</div>
+            <h2 className="text-2xl font-bold text-red-700 mb-4">Erreur</h2>
+            <p className="text-red-600 text-lg">{error}</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
-      <Navbar />
-      
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Murs Disponibles <span className="text-blue-600">WXLLSPACE</span>
+      <div className="container mx-auto px-4 py-12">
+        {/* Header - Amélioration de l'espacement et de la lisibilité */}
+        <div className="text-center mb-16">
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+            Murs Disponibles <span className="text-wxll-blue">WXLLSPACE</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
             Explorez les opportunités de création sur notre marketplace du street art
           </p>
         </div>
 
-        {/* Filters */}
-        <Card className="mb-8 shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Filter className="h-5 w-5 text-blue-600" />
-              <h3 className="text-lg font-semibold text-gray-900">Filtres de recherche</h3>
+        {/* Filters - Design amélioré */}
+        <Card className="mb-12 shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+          <CardContent className="p-8">
+            <div className="flex items-center gap-3 mb-6">
+              <Filter className="h-6 w-6 text-wxll-blue" />
+              <h3 className="text-xl font-bold text-gray-900">Filtres de recherche</h3>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              <div className="relative">
-                <Label htmlFor="location" className="text-sm font-medium text-gray-700">Localisation</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="location" className="text-sm font-semibold text-gray-700">Localisation</Label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
@@ -121,15 +111,15 @@ const Walls = () => {
                     placeholder="Code postal..."
                     value={filters.location}
                     onChange={(e) => handleFilterChange('location', e.target.value)}
-                    className="pl-10 mt-1"
+                    className="pl-10 border-gray-300 focus:border-wxll-blue focus:ring-wxll-blue"
                   />
                 </div>
               </div>
               
-              <div>
-                <Label htmlFor="surfaceType" className="text-sm font-medium text-gray-700">Type de surface</Label>
+              <div className="space-y-2">
+                <Label htmlFor="surfaceType" className="text-sm font-semibold text-gray-700">Type de surface</Label>
                 <Select value={filters.surfaceType} onValueChange={(value) => handleFilterChange('surfaceType', value)}>
-                  <SelectTrigger className="mt-1">
+                  <SelectTrigger className="border-gray-300 focus:border-wxll-blue focus:ring-wxll-blue">
                     <SelectValue placeholder="Tous" />
                   </SelectTrigger>
                   <SelectContent>
@@ -142,10 +132,10 @@ const Walls = () => {
                 </Select>
               </div>
               
-              <div>
-                <Label htmlFor="indoor" className="text-sm font-medium text-gray-700">Localisation</Label>
+              <div className="space-y-2">
+                <Label htmlFor="indoor" className="text-sm font-semibold text-gray-700">Localisation</Label>
                 <Select value={filters.indoor} onValueChange={(value) => handleFilterChange('indoor', value)}>
-                  <SelectTrigger className="mt-1">
+                  <SelectTrigger className="border-gray-300 focus:border-wxll-blue focus:ring-wxll-blue">
                     <SelectValue placeholder="Tous" />
                   </SelectTrigger>
                   <SelectContent>
@@ -156,40 +146,40 @@ const Walls = () => {
                 </Select>
               </div>
               
-              <div>
-                <Label htmlFor="minBudget" className="text-sm font-medium text-gray-700">Budget min (€)</Label>
+              <div className="space-y-2">
+                <Label htmlFor="minBudget" className="text-sm font-semibold text-gray-700">Budget min (€)</Label>
                 <Input
                   id="minBudget"
                   type="number"
                   placeholder="0"
                   value={filters.minBudget}
                   onChange={(e) => handleFilterChange('minBudget', e.target.value)}
-                  className="mt-1"
+                  className="border-gray-300 focus:border-wxll-blue focus:ring-wxll-blue"
                 />
               </div>
               
-              <div>
-                <Label htmlFor="maxBudget" className="text-sm font-medium text-gray-700">Budget max (€)</Label>
+              <div className="space-y-2">
+                <Label htmlFor="maxBudget" className="text-sm font-semibold text-gray-700">Budget max (€)</Label>
                 <Input
                   id="maxBudget"
                   type="number"
                   placeholder="10000"
                   value={filters.maxBudget}
                   onChange={(e) => handleFilterChange('maxBudget', e.target.value)}
-                  className="mt-1"
+                  className="border-gray-300 focus:border-wxll-blue focus:ring-wxll-blue"
                 />
               </div>
             </div>
 
             {(filters.location || filters.surfaceType || filters.indoor || filters.minBudget || filters.maxBudget) && (
-              <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                <p className="text-sm text-gray-600">
+              <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                <p className="text-sm font-medium text-gray-600">
                   {filteredWalls.length} mur(s) trouvé(s)
                 </p>
                 <Button
                   variant="outline"
-                  size="sm"
                   onClick={resetFilters}
+                  className="border-wxll-blue text-wxll-blue hover:bg-wxll-blue hover:text-white transition-all"
                 >
                   Réinitialiser
                 </Button>
@@ -198,24 +188,25 @@ const Walls = () => {
           </CardContent>
         </Card>
 
-        {/* Walls Grid */}
+        {/* Walls Grid - Espacement amélioré */}
         {filteredWalls.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
             {filteredWalls.map((wall) => (
               <WallCard key={wall.id} {...wall} />
             ))}
           </div>
         ) : (
-          <Card className="max-w-md mx-auto">
-            <CardContent className="p-8 text-center">
-              <div className="text-gray-400 text-6xl mb-4">🧱</div>
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">Aucun mur trouvé</h3>
-              <p className="text-gray-500 mb-4">
+          <Card className="max-w-lg mx-auto shadow-xl">
+            <CardContent className="p-12 text-center">
+              <div className="text-gray-400 text-8xl mb-6">🧱</div>
+              <h3 className="text-2xl font-bold text-gray-700 mb-4">Aucun mur trouvé</h3>
+              <p className="text-gray-500 mb-6 text-lg leading-relaxed">
                 Essayez de modifier vos critères de recherche pour trouver des murs disponibles.
               </p>
               <Button
                 variant="outline"
                 onClick={resetFilters}
+                className="border-wxll-blue text-wxll-blue hover:bg-wxll-blue hover:text-white transition-all px-8 py-3"
               >
                 Voir tous les murs
               </Button>
@@ -223,8 +214,6 @@ const Walls = () => {
           </Card>
         )}
       </div>
-
-      <Footer />
     </div>
   );
 };

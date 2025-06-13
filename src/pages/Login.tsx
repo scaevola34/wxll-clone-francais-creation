@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -18,6 +19,7 @@ const Login = () => {
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [isResetMode, setIsResetMode] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -31,6 +33,12 @@ const Login = () => {
       });
 
       if (error) throw error;
+
+      // Toast de succès
+      toast({
+        title: "Connexion réussie !",
+        description: "Vous êtes maintenant connecté à votre compte.",
+      });
 
       // REDIRECTION CONDITIONNELLE selon le type d'utilisateur
       if (data.user) {
@@ -50,6 +58,11 @@ const Login = () => {
       
     } catch (error) {
       setError(error.message);
+      toast({
+        variant: "destructive",
+        title: "Erreur de connexion",
+        description: error.message,
+      });
     } finally {
       setLoading(false);
     }
@@ -67,8 +80,17 @@ const Login = () => {
 
       if (error) throw error;
       setResetEmailSent(true);
+      toast({
+        title: "Email envoyé !",
+        description: "Vérifiez votre boîte mail pour réinitialiser votre mot de passe.",
+      });
     } catch (error) {
       setError(error.message);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: error.message,
+      });
     } finally {
       setLoading(false);
     }
@@ -76,169 +98,171 @@ const Login = () => {
 
   if (isResetMode) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        
-        <div className="flex-grow flex items-center justify-center bg-gray-50 py-12 px-4">
-          <Card className="w-full max-w-md">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl">Mot de passe oublié</CardTitle>
-              <CardDescription>
-                Entrez votre email pour recevoir un lien de réinitialisation
-              </CardDescription>
-            </CardHeader>
-            
-            <form onSubmit={handleForgotPassword}>
-              <CardContent className="space-y-4">
-                {error && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
-                
-                {resetEmailSent && (
-                  <Alert>
-                    <AlertDescription className="text-green-600">
-                      Un email de réinitialisation a été envoyé à {email}
-                    </AlertDescription>
-                  </Alert>
-                )}
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="votre@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-9"
-                      required
-                    />
-                  </div>
-                </div>
-              </CardContent>
-              
-              <CardFooter className="flex flex-col space-y-4">
-                <Button 
-                  type="submit" 
-                  className="w-full bg-wxll-blue hover:bg-blue-600" 
-                  disabled={loading || resetEmailSent}
-                >
-                  {loading ? 'Envoi en cours...' : 'Envoyer le lien de réinitialisation'}
-                </Button>
-                
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  className="w-full"
-                  onClick={() => setIsResetMode(false)}
-                >
-                  Retour à la connexion
-                </Button>
-              </CardFooter>
-            </form>
-          </Card>
-        </div>
-        
-        <Footer />
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
-      <div className="flex-grow flex items-center justify-center bg-gray-50 py-12 px-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Connexion</CardTitle>
-            <CardDescription>
-              Connectez-vous à votre compte WXLLSPACE
+      <div className="flex-grow flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 py-12 px-4">
+        <Card className="w-full max-w-md shadow-2xl border-0">
+          <CardHeader className="text-center pb-8">
+            <CardTitle className="text-3xl font-bold text-gray-900">Mot de passe oublié</CardTitle>
+            <CardDescription className="text-lg text-gray-600 mt-4">
+              Entrez votre email pour recevoir un lien de réinitialisation
             </CardDescription>
           </CardHeader>
           
-          <form onSubmit={handleLogin}>
-            <CardContent className="space-y-4">
+          <form onSubmit={handleForgotPassword}>
+            <CardContent className="space-y-6">
               {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
+                <Alert variant="destructive" className="border-red-200 bg-red-50">
+                  <AlertDescription className="text-red-700">{error}</AlertDescription>
                 </Alert>
               )}
               
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+              {resetEmailSent && (
+                <Alert className="border-green-200 bg-green-50">
+                  <AlertDescription className="text-green-700">
+                    Un email de réinitialisation a été envoyé à {email}
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              <div className="space-y-3">
+                <Label htmlFor="email" className="text-sm font-semibold text-gray-700">Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                   <Input
                     id="email"
                     type="email"
                     placeholder="votre@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-9"
+                    className="pl-10 h-12 border-gray-300 focus:border-wxll-blue focus:ring-wxll-blue"
                     required
                   />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Mot de passe</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Votre mot de passe"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-9 pr-9"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-                <div className="text-right text-sm">
-                  <button
-                    type="button"
-                    onClick={() => setIsResetMode(true)}
-                    className="text-wxll-blue hover:underline"
-                  >
-                    Mot de passe oublié?
-                  </button>
                 </div>
               </div>
             </CardContent>
             
-            <CardFooter className="flex flex-col space-y-4">
+            <CardFooter className="flex flex-col space-y-4 pt-6">
               <Button 
                 type="submit" 
-                className="w-full bg-wxll-blue hover:bg-blue-600" 
-                disabled={loading}
+                className="w-full bg-wxll-blue hover:bg-blue-600 h-12 text-lg font-semibold shadow-lg hover:shadow-xl transition-all" 
+                disabled={loading || resetEmailSent}
               >
-                {loading ? 'Connexion en cours...' : 'Se connecter'}
+                {loading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                    <span>Envoi en cours...</span>
+                  </div>
+                ) : (
+                  'Envoyer le lien de réinitialisation'
+                )}
               </Button>
               
-              <div className="text-center text-sm text-gray-600">
-                Pas encore de compte ?{' '}
-                <Link to="/register" className="text-wxll-blue hover:underline">
-                  S'inscrire
-                </Link>
-              </div>
+              <Button 
+                type="button" 
+                variant="ghost" 
+                className="w-full text-gray-600 hover:text-wxll-blue h-12"
+                onClick={() => setIsResetMode(false)}
+              >
+                Retour à la connexion
+              </Button>
             </CardFooter>
           </form>
         </Card>
       </div>
-      
-      <Footer />
+    );
+  }
+
+  return (
+    <div className="flex-grow flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 py-12 px-4">
+      <Card className="w-full max-w-md shadow-2xl border-0">
+        <CardHeader className="text-center pb-8">
+          <CardTitle className="text-3xl font-bold text-gray-900">Connexion</CardTitle>
+          <CardDescription className="text-lg text-gray-600 mt-4">
+            Connectez-vous à votre compte WXLLSPACE
+          </CardDescription>
+        </CardHeader>
+        
+        <form onSubmit={handleLogin}>
+          <CardContent className="space-y-6">
+            {error && (
+              <Alert variant="destructive" className="border-red-200 bg-red-50">
+                <AlertDescription className="text-red-700">{error}</AlertDescription>
+              </Alert>
+            )}
+            
+            <div className="space-y-3">
+              <Label htmlFor="email" className="text-sm font-semibold text-gray-700">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="votre@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10 h-12 border-gray-300 focus:border-wxll-blue focus:ring-wxll-blue"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label htmlFor="password" className="text-sm font-semibold text-gray-700">Mot de passe</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Votre mot de passe"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10 pr-10 h-12 border-gray-300 focus:border-wxll-blue focus:ring-wxll-blue"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={() => setIsResetMode(true)}
+                  className="text-sm text-wxll-blue hover:underline font-medium"
+                >
+                  Mot de passe oublié?
+                </button>
+              </div>
+            </div>
+          </CardContent>
+          
+          <CardFooter className="flex flex-col space-y-6 pt-6">
+            <Button 
+              type="submit" 
+              className="w-full bg-wxll-blue hover:bg-blue-600 h-12 text-lg font-semibold shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5" 
+              disabled={loading}
+            >
+              {loading ? (
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                  <span>Connexion en cours...</span>
+                </div>
+              ) : (
+                'Se connecter'
+              )}
+            </Button>
+            
+            <div className="text-center text-gray-600">
+              Pas encore de compte ?{' '}
+              <Link to="/register" className="text-wxll-blue hover:underline font-semibold">
+                S'inscrire
+              </Link>
+            </div>
+          </CardFooter>
+        </form>
+      </Card>
     </div>
   );
 };

@@ -1,12 +1,20 @@
+/* -------------------------------------------------------------------
+   src/pages/Artists.tsx   (remplace entièrement ton fichier actuel)
+   ---------------------------------------------------------------
+   - Recherche « plein-texte » déléguée à Supabase (ilike)
+   - Debounce 400 ms pour ne pas spammer l’API
+   - Tes filtres avancés (location, style, etc.) restent en place
+------------------------------------------------------------------- */
 
 import React, { useState } from 'react';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useArtists } from '@/hooks/useArtists';
 import ArtistCard from '@/components/ArtistCard';
 import AdvancedFilters from '@/components/AdvancedFilters';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Search, MapPin, Palette } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 interface FilterState {
   location?: string;
@@ -15,46 +23,68 @@ interface FilterState {
   maxProjects?: number[];
 }
 
-const Artists = () => {
-  const { artists, loading, error } = useArtists();
+const Artists: React.FC = () => {
+  /* ------------ état barre de recherche + debounce ---------------- */
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 400);
+
+  /* ------------ état filtres avancés ------------------------------ */
   const [advancedFilters, setAdvancedFilters] = useState<FilterState>({});
 
-  const filteredArtists = artists.filter(artist => {
-    // Recherche textuelle
-    const matchesSearch = artist.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         artist.bio?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    // Filtres avancés
-    let matchesFilters = true;
-    
+  /* ------------ données Supabase ---------------------------------- */
+  const {
+    data: artists = [],
+    isLoading: loading,
+    isError: error,
+  } = useArtists({ search: debouncedSearch });
+
+  /* ------------ filtrage côté client pour filtres avancés --------- */
+  const filteredArtists = artists.filter((artist) => {
+    let matches = true;
+
     if (advancedFilters.location && artist.location) {
-      matchesFilters = matchesFilters && artist.location.toLowerCase().includes(advancedFilters.location.toLowerCase());
+      matches =
+        matches &&
+        artist.location
+          .toLowerCase()
+          .includes(advancedFilters.location.toLowerCase());
     }
-    
+
     if (advancedFilters.style && artist.style) {
-      matchesFilters = matchesFilters && artist.style.toLowerCase().includes(advancedFilters.style.toLowerCase());
+      matches =
+        matches &&
+        artist.style
+          .toLowerCase()
+          .includes(advancedFilters.style.toLowerCase());
     }
-    
-    if (advancedFilters.minExperience && advancedFilters.minExperience[0] > 0) {
-      matchesFilters = matchesFilters && (artist.experience_years || 0) >= advancedFilters.minExperience[0];
+
+    if (
+      advancedFilters.minExperience &&
+      advancedFilters.minExperience[0] > 0
+    ) {
+      matches =
+        matches &&
+        (artist.experience_years || 0) >= advancedFilters.minExperience[0];
     }
-    
+
     if (advancedFilters.maxProjects && advancedFilters.maxProjects[0] < 100) {
-      matchesFilters = matchesFilters && (artist.projects_count || 0) <= advancedFilters.maxProjects[0];
+      matches =
+        matches &&
+        (artist.projects_count || 0) <= advancedFilters.maxProjects[0];
     }
-    
-    return matchesSearch && matchesFilters;
+
+    return matches;
   });
 
+  /* ------------------------------- RENDER ------------------------- */
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <div className="text-center space-y-4">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent mx-auto"></div>
-            <p className="text-lg font-medium text-gray-700">Chargement des artistes...</p>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent mx-auto"></div>
+          <p className="text-lg font-medium text-gray-700">
+            Chargement des artistes…
+          </p>
         </div>
       </div>
     );
@@ -62,16 +92,16 @@ const Artists = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <Card className="max-w-md mx-auto">
-            <CardContent className="p-6 text-center">
-              <div className="text-red-500 text-6xl mb-4">⚠️</div>
-              <h2 className="text-xl font-bold text-red-700 mb-2">Erreur</h2>
-              <p className="text-red-600">{error}</p>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
+        <Card className="max-w-md mx-auto">
+          <CardContent className="p-6 text-center">
+            <div className="text-red-500 text-6xl mb-4">⚠️</div>
+            <h2 className="text-xl font-bold text-red-700 mb-2">Erreur</h2>
+            <p className="text-red-600">
+              Une erreur est survenue lors du chargement.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -85,7 +115,8 @@ const Artists = () => {
             Nos Artistes <span className="text-purple-600">WXLLSPACE</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Découvrez les talents du street art français et trouvez l'artiste parfait pour votre projet
+            Découvrez les talents du street art français et trouvez l'artiste
+            parfait pour votre projet
           </p>
         </div>
 
@@ -98,24 +129,22 @@ const Artists = () => {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
-                    placeholder="Rechercher un artiste..."
+                    placeholder="Rechercher un artiste…"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
                   />
                 </div>
               </div>
-              
+
               {/* Filtres avancés */}
-              <div className="flex gap-2">
-                <AdvancedFilters 
-                  onFiltersChange={setAdvancedFilters}
-                  initialFilters={advancedFilters}
-                />
-              </div>
+              <AdvancedFilters
+                onFiltersChange={setAdvancedFilters}
+                initialFilters={advancedFilters}
+              />
             </div>
 
-            {/* Résultats et reset */}
+            {/* Résultats & reset */}
             {(searchTerm || Object.keys(advancedFilters).length > 0) && (
               <div className="flex items-center justify-between mt-4 pt-4 border-t">
                 <p className="text-sm text-gray-600">
@@ -136,31 +165,22 @@ const Artists = () => {
           </CardContent>
         </Card>
 
-        {/* Artists Grid */}
+        {/* Grid */}
         {filteredArtists.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredArtists.map((artist) => (
-              <ArtistCard 
-                key={artist.id}
-                id={artist.id as string}
-                name={artist.name as string}
-                style={artist.style as string}
-                location={artist.location as string}
-                projectsCount={artist.projects_count || 0}
-                experienceYears={artist.experience_years || 0}
-                profileImageUrl={artist.profile_image_url as string}
-                instagramHandle={artist.instagram_handle as string}
-                website={artist.website as string}
-              />
+              <ArtistCard key={artist.id} {...artist} />
             ))}
           </div>
         ) : (
           <Card className="max-w-md mx-auto">
             <CardContent className="p-8 text-center">
               <div className="text-gray-400 text-6xl mb-4">🎨</div>
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">Aucun artiste trouvé</h3>
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                Aucun artiste trouvé
+              </h3>
               <p className="text-gray-500 mb-4">
-                Essayez de modifier vos critères de recherche pour trouver des artistes.
+                Essayez de modifier vos critères de recherche.
               </p>
               <Button
                 variant="outline"

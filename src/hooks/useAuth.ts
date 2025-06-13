@@ -1,7 +1,9 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
 import { toast } from "sonner";
 import type { User } from "@supabase/supabase-js";
+
+/* ---------- MUTATIONS ---------- */
 
 export const useSignUp = () =>
   useMutation({
@@ -15,10 +17,7 @@ export const useSignUp = () =>
         email: payload.email,
         password: payload.password,
         options: {
-          data: {
-            nom_complet: payload.nom_complet,
-            role: payload.role,
-          },
+          data: { nom_complet: payload.nom_complet, role: payload.role },
         },
       });
       if (error) throw error;
@@ -29,9 +28,8 @@ export const useSignUp = () =>
         "Inscription réussie ! Vérifie ta boîte mail pour confirmer ton compte."
       );
     },
-    onError: (err: any) => {
-      toast.error(err.message ?? "Erreur lors de l'inscription");
-    },
+    onError: (err: any) =>
+      toast.error(err.message ?? "Erreur lors de l'inscription"),
   });
 
 export const useSignIn = () =>
@@ -41,12 +39,9 @@ export const useSignIn = () =>
       if (error) throw error;
       return data.user as User;
     },
-    onSuccess: () => {
-      toast.success("Connexion réussie ! Bienvenue 👋");
-    },
-    onError: (err: any) => {
-      toast.error(err.message ?? "Email ou mot de passe incorrect");
-    },
+    onSuccess: () => toast.success("Connexion réussie ! Bienvenue 👋"),
+    onError: (err: any) =>
+      toast.error(err.message ?? "Email ou mot de passe incorrect"),
   });
 
 export const useSignOut = () =>
@@ -57,30 +52,14 @@ export const useSignOut = () =>
     },
   });
 
-/* ------------- FIN DU FICHIER ------------------ */
-
-/**
- * Petit alias “historique” : certains anciens fichiers importent encore
- * `useAuth`.  On expose donc une fonction qui retourne juste l’utilisateur
- * courant et son état de chargement.
- */
-import { useQuery } from '@tanstack/react-query';
-
-export const useAuth = () => {
-  return useQuery({
-    queryKey: ['currentUser'],
+/* ---------- QUERY utilitaire ---------- */
+/*  Rétablit la compatibilité avec les anciens imports `useAuth()`  */
+export const useAuth = () =>
+  useQuery({
+    queryKey: ["currentUser"],
     queryFn: async () => {
       const { data, error } = await supabase.auth.getUser();
       if (error) throw error;
       return data.user ?? null;
     },
   });
-};
-
-/* On exporte aussi par défaut les mutations si besoin */
-export {
-  useSignIn,
-  useSignUp,
-  useSignOut,
-};                    // déjà présents plus haut
-

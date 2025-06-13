@@ -1,7 +1,6 @@
 import React from "react";
 import { useIsFetching } from "@tanstack/react-query";
-import Spinner from "./ui/Spinner";
-
+import Spinner from "@/components/ui/Spinner";
 /**
  * Affiche un écran semi-transparent + spinner
  * dès qu'au moins UNE requête React-Query est en cours.

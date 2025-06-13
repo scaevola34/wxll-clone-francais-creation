@@ -59,7 +59,7 @@ const Index = () => {
   return (
     <>
       {/* Hero */}
-      <section className="relative min-h-[85vh] flex items-center overflow-hidden">
+      <section className="relative min-h-[85vh] flex items-center overflow-visible">
         <div className="absolute inset-0 z-0">
           <img
             src="/lovable-uploads/43b7f1bd-60a5-4bff-aeaa-2873676d8ee2.png"

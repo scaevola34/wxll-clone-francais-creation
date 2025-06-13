@@ -2,26 +2,42 @@
 import React, { useState } from 'react';
 import { useArtists } from '@/hooks/useArtists';
 import ArtistCard from '@/components/ArtistCard';
+import AdvancedFilters from '@/components/AdvancedFilters';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Search, MapPin, Palette, Filter } from 'lucide-react';
+import { Search, MapPin, Palette } from 'lucide-react';
 
 const Artists = () => {
   const { artists, loading, error } = useArtists();
   const [searchTerm, setSearchTerm] = useState('');
-  const [locationFilter, setLocationFilter] = useState('');
-  const [styleFilter, setStyleFilter] = useState('');
+  const [advancedFilters, setAdvancedFilters] = useState({});
 
   const filteredArtists = artists.filter(artist => {
+    // Recherche textuelle
     const matchesSearch = artist.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          artist.bio?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesLocation = !locationFilter || 
-                           artist.location?.toLowerCase().includes(locationFilter.toLowerCase());
-    const matchesStyle = !styleFilter || 
-                        artist.style?.toLowerCase().includes(styleFilter.toLowerCase());
     
-    return matchesSearch && matchesLocation && matchesStyle;
+    // Filtres avancés
+    let matchesFilters = true;
+    
+    if (advancedFilters.location && artist.location) {
+      matchesFilters = matchesFilters && artist.location.toLowerCase().includes(advancedFilters.location.toLowerCase());
+    }
+    
+    if (advancedFilters.style && artist.style) {
+      matchesFilters = matchesFilters && artist.style.toLowerCase().includes(advancedFilters.style.toLowerCase());
+    }
+    
+    if (advancedFilters.minExperience && advancedFilters.minExperience[0] > 0) {
+      matchesFilters = matchesFilters && (artist.experience_years || 0) >= advancedFilters.minExperience[0];
+    }
+    
+    if (advancedFilters.maxProjects && advancedFilters.maxProjects[0] < 100) {
+      matchesFilters = matchesFilters && (artist.projects_count || 0) <= advancedFilters.maxProjects[0];
+    }
+    
+    return matchesSearch && matchesFilters;
   });
 
   if (loading) {
@@ -69,44 +85,31 @@ const Artists = () => {
         {/* Filters */}
         <Card className="mb-8 shadow-lg">
           <CardContent className="p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Filter className="h-5 w-5 text-purple-600" />
-              <h3 className="text-lg font-semibold text-gray-900">Filtres de recherche</h3>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Rechercher un artiste..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
+            <div className="flex flex-col lg:flex-row gap-4">
+              {/* Recherche principale */}
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Rechercher un artiste..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
               </div>
               
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Localisation..."
-                  value={locationFilter}
-                  onChange={(e) => setLocationFilter(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              
-              <div className="relative">
-                <Palette className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Style artistique..."
-                  value={styleFilter}
-                  onChange={(e) => setStyleFilter(e.target.value)}
-                  className="pl-10"
+              {/* Filtres avancés */}
+              <div className="flex gap-2">
+                <AdvancedFilters 
+                  onFiltersChange={setAdvancedFilters}
+                  initialFilters={advancedFilters}
                 />
               </div>
             </div>
 
-            {(searchTerm || locationFilter || styleFilter) && (
+            {/* Résultats et reset */}
+            {(searchTerm || Object.keys(advancedFilters).length > 0) && (
               <div className="flex items-center justify-between mt-4 pt-4 border-t">
                 <p className="text-sm text-gray-600">
                   {filteredArtists.length} artiste(s) trouvé(s)
@@ -116,8 +119,7 @@ const Artists = () => {
                   size="sm"
                   onClick={() => {
                     setSearchTerm('');
-                    setLocationFilter('');
-                    setStyleFilter('');
+                    setAdvancedFilters({});
                   }}
                 >
                   Réinitialiser
@@ -157,8 +159,7 @@ const Artists = () => {
                 variant="outline"
                 onClick={() => {
                   setSearchTerm('');
-                  setLocationFilter('');
-                  setStyleFilter('');
+                  setAdvancedFilters({});
                 }}
               >
                 Voir tous les artistes

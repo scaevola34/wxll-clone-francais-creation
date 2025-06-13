@@ -1,120 +1,226 @@
 
-import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Button } from './ui/button';
+import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
+import { Menu, MessageCircle, FolderOpen, LogOut } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import NotificationBell from './NotificationBell';
 
-const navLinks = [
-  { to: "/", label: "Accueil" },
-  { to: "/artistes", label: "Artistes" },
-  { to: "/murs", label: "Murs" },
-  { to: "/comment-ca-marche", label: "Comment ça marche ?" },
-  { to: "/a-propos", label: "À propos" },
-  { to: "/faq", label: "FAQ" }
-];
-
-const Navbar: React.FC = () => {
+const Navbar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, userType, isAuthenticated, logout } = useAuth();
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
-  };
+  const isActivePath = (path: string) => location.pathname === path;
+
+  const navLinks = [
+    { href: '/', label: 'Accueil' },
+    { href: '/artistes', label: 'Artistes' },
+    { href: '/murs', label: 'Murs' },
+    { href: '/comment-ca-marche', label: 'Comment ça marche' },
+    { href: '/a-propos', label: 'À propos' },
+    { href: '/faq', label: 'FAQ' },
+  ];
+
+  const authenticatedLinks = [
+    { href: '/messages', label: 'Messages', icon: MessageCircle },
+    { href: '/mes-projets', label: 'Mes Projets', icon: FolderOpen },
+    { 
+      href: userType === 'artist' ? '/dashboard/artiste' : '/dashboard/proprietaire', 
+      label: 'Dashboard' 
+    },
+  ];
 
   return (
-    <nav className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
-      <div className="container mx-auto px-4 py-3">
-        {/* Desktop Navigation */}
-        <div className="flex items-center justify-between">
-          <Link 
-            to="/" 
-            className="text-2xl font-bold text-gray-900 hover:text-wxll-blue transition-colors"
-            onClick={closeMobileMenu}
-          >
-            WXLL<span className="text-wxll-blue">SPACE</span>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      scrolled ? 'bg-white/95 backdrop-blur-sm shadow-md' : 'bg-white'
+    }`}>
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">W</span>
+            </div>
+            <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              WXLLSPACE
+            </span>
           </Link>
-          
-          {/* Desktop Menu */}
-          <div className="hidden lg:flex gap-8 items-center">
+
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center space-x-8">
             {navLinks.map((link) => (
               <Link
-                key={link.to}
-                to={link.to}
-                className={`relative px-3 py-2 font-medium transition-all duration-300 rounded-lg ${
-                  location.pathname === link.to
-                    ? "text-wxll-blue bg-wxll-blue/10 after:absolute after:left-0 after:-bottom-1 after:w-full after:h-0.5 after:bg-wxll-blue after:rounded"
-                    : "text-gray-700 hover:text-wxll-blue hover:bg-gray-50"
+                key={link.href}
+                to={link.href}
+                className={`text-sm font-medium transition-colors hover:text-purple-600 ${
+                  isActivePath(link.href) 
+                    ? 'text-purple-600 border-b-2 border-purple-600 pb-1' 
+                    : 'text-gray-700'
                 }`}
               >
                 {link.label}
               </Link>
             ))}
-            <Link
-              to="/login"
-              className="ml-4 text-gray-700 hover:text-wxll-blue transition-colors font-medium px-3 py-2 rounded-lg hover:bg-gray-50"
-            >
-              Connexion
-            </Link>
-            <Link
-              to="/register"
-              className="ml-2 px-6 py-2 bg-wxll-blue text-white rounded-full font-semibold shadow-md hover:bg-blue-600 transition-all transform hover:-translate-y-0.5 hover:shadow-lg"
-            >
-              S'inscrire
-            </Link>
+          </div>
+
+          {/* Desktop Actions */}
+          <div className="hidden lg:flex items-center space-x-4">
+            {isAuthenticated ? (
+              <>
+                {/* Authenticated Navigation */}
+                <div className="flex items-center space-x-4">
+                  {authenticatedLinks.map((link) => {
+                    const Icon = link.icon;
+                    return (
+                      <Link
+                        key={link.href}
+                        to={link.href}
+                        className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-purple-600 ${
+                          isActivePath(link.href) 
+                            ? 'text-purple-600' 
+                            : 'text-gray-700'
+                        }`}
+                      >
+                        {Icon && <Icon className="h-4 w-4" />}
+                        {link.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+
+                {/* Notifications */}
+                <NotificationBell />
+
+                {/* Logout */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={logout}
+                  className="flex items-center gap-2 text-gray-700 hover:text-red-600"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Déconnexion
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="ghost" size="sm">
+                    Se connecter
+                  </Button>
+                </Link>
+                <Link to="/register">
+                  <Button size="sm" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
+                    S'inscrire
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
-          <button
-            onClick={toggleMobileMenu}
-            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            aria-label="Toggle mobile menu"
-          >
-            {isMobileMenuOpen ? (
-              <X className="h-6 w-6 text-gray-700" />
-            ) : (
-              <Menu className="h-6 w-6 text-gray-700" />
-            )}
-          </button>
-        </div>
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild className="lg:hidden">
+              <Button variant="ghost" size="sm">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            
+            <SheetContent side="right" className="w-80">
+              <div className="flex flex-col space-y-6 mt-6">
+                {/* Main Navigation */}
+                <div className="space-y-4">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      to={link.href}
+                      onClick={() => setIsOpen(false)}
+                      className={`block text-lg font-medium transition-colors hover:text-purple-600 ${
+                        isActivePath(link.href) 
+                          ? 'text-purple-600' 
+                          : 'text-gray-900'
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
 
-        {/* Mobile Menu */}
-        <div className={`lg:hidden transition-all duration-300 overflow-hidden ${
-          isMobileMenuOpen ? "max-h-96 opacity-100 mt-4" : "max-h-0 opacity-0"
-        }`}>
-          <div className="py-4 space-y-2 border-t border-gray-100">
-            {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                onClick={closeMobileMenu}
-                className={`block px-4 py-3 rounded-lg font-medium transition-all ${
-                  location.pathname === link.to
-                    ? "text-wxll-blue bg-wxll-blue/10 border-l-4 border-wxll-blue"
-                    : "text-gray-700 hover:text-wxll-blue hover:bg-gray-50"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-            <hr className="my-4 border-gray-200" />
-            <Link
-              to="/login"
-              onClick={closeMobileMenu}
-              className="block px-4 py-3 text-gray-700 hover:text-wxll-blue hover:bg-gray-50 rounded-lg font-medium transition-colors"
-            >
-              Connexion
-            </Link>
-            <Link
-              to="/register"
-              onClick={closeMobileMenu}
-              className="block mx-4 mt-2 px-6 py-3 bg-wxll-blue text-white rounded-lg font-semibold text-center shadow-md hover:bg-blue-600 transition-colors"
-            >
-              S'inscrire
-            </Link>
-          </div>
+                {/* Authenticated Navigation */}
+                {isAuthenticated && (
+                  <>
+                    <hr className="border-gray-200" />
+                    <div className="space-y-4">
+                      {authenticatedLinks.map((link) => {
+                        const Icon = link.icon;
+                        return (
+                          <Link
+                            key={link.href}
+                            to={link.href}
+                            onClick={() => setIsOpen(false)}
+                            className={`flex items-center gap-3 text-lg font-medium transition-colors hover:text-purple-600 ${
+                              isActivePath(link.href) 
+                                ? 'text-purple-600' 
+                                : 'text-gray-900'
+                            }`}
+                          >
+                            {Icon && <Icon className="h-5 w-5" />}
+                            {link.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+
+                {/* Mobile Actions */}
+                <hr className="border-gray-200" />
+                {isAuthenticated ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Notifications</span>
+                      <NotificationBell />
+                    </div>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        logout();
+                        setIsOpen(false);
+                      }}
+                      className="w-full flex items-center gap-2"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Déconnexion
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <Link to="/login" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" className="w-full">
+                        Se connecter
+                      </Button>
+                    </Link>
+                    <Link to="/register" onClick={() => setIsOpen(false)}>
+                      <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
+                        S'inscrire
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </nav>

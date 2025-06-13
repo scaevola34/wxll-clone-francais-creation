@@ -107,6 +107,179 @@ export type Database = {
         }
         Relationships: []
       }
+      conversations: {
+        Row: {
+          artist_id: string | null
+          created_at: string | null
+          id: string
+          project_id: string | null
+          updated_at: string | null
+          wall_owner_id: string | null
+        }
+        Insert: {
+          artist_id?: string | null
+          created_at?: string | null
+          id?: string
+          project_id?: string | null
+          updated_at?: string | null
+          wall_owner_id?: string | null
+        }
+        Update: {
+          artist_id?: string | null
+          created_at?: string | null
+          id?: string
+          project_id?: string | null
+          updated_at?: string | null
+          wall_owner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_wall_owner_id_fkey"
+            columns: ["wall_owner_id"]
+            isOneToOne: false
+            referencedRelation: "wall_owners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string | null
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          sender_id: string
+          sender_type: string
+        }
+        Insert: {
+          content: string
+          conversation_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          sender_id: string
+          sender_type: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          sender_id?: string
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          related_id: string | null
+          title: string
+          type: string
+          user_id: string
+          user_type: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          related_id?: string | null
+          title: string
+          type: string
+          user_id: string
+          user_type: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          related_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+          user_type?: string
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          artist_amount: number | null
+          commission_amount: number | null
+          commission_rate: number | null
+          created_at: string | null
+          currency: string | null
+          id: string
+          project_id: string | null
+          status: string | null
+          stripe_payment_intent_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          artist_amount?: number | null
+          commission_amount?: number | null
+          commission_rate?: number | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          project_id?: string | null
+          status?: string | null
+          stripe_payment_intent_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          artist_amount?: number | null
+          commission_amount?: number | null
+          commission_rate?: number | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          project_id?: string | null
+          status?: string | null
+          stripe_payment_intent_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           biographie: string | null
@@ -143,33 +316,93 @@ export type Database = {
         }
         Relationships: []
       }
-      projects: {
+      project_proposals: {
         Row: {
           artist_id: string | null
-          completed_at: string | null
+          budget_proposed: number | null
           created_at: string | null
           description: string | null
           id: string
+          status: string | null
+          title: string
+          updated_at: string | null
+          wall_owner_id: string | null
+        }
+        Insert: {
+          artist_id?: string | null
+          budget_proposed?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          status?: string | null
+          title: string
+          updated_at?: string | null
+          wall_owner_id?: string | null
+        }
+        Update: {
+          artist_id?: string | null
+          budget_proposed?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+          wall_owner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_proposals_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_proposals_wall_owner_id_fkey"
+            columns: ["wall_owner_id"]
+            isOneToOne: false
+            referencedRelation: "wall_owners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          artist_id: string | null
+          budget: number | null
+          completed_at: string | null
+          created_at: string | null
+          deadline: string | null
+          description: string | null
+          id: string
+          proposal_id: string | null
           status: string | null
           title: string
           wall_owner_id: string | null
         }
         Insert: {
           artist_id?: string | null
+          budget?: number | null
           completed_at?: string | null
           created_at?: string | null
+          deadline?: string | null
           description?: string | null
           id?: string
+          proposal_id?: string | null
           status?: string | null
           title: string
           wall_owner_id?: string | null
         }
         Update: {
           artist_id?: string | null
+          budget?: number | null
           completed_at?: string | null
           created_at?: string | null
+          deadline?: string | null
           description?: string | null
           id?: string
+          proposal_id?: string | null
           status?: string | null
           title?: string
           wall_owner_id?: string | null
@@ -180,6 +413,13 @@ export type Database = {
             columns: ["artist_id"]
             isOneToOne: false
             referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "project_proposals"
             referencedColumns: ["id"]
           },
           {
@@ -297,6 +537,14 @@ export type Database = {
       calculate_artist_rating: {
         Args: { artist_uuid: string }
         Returns: number
+      }
+      calculate_artist_stats: {
+        Args: { artist_uuid: string }
+        Returns: {
+          avg_rating: number
+          total_reviews: number
+          completed_projects: number
+        }[]
       }
     }
     Enums: {

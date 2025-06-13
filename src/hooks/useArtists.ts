@@ -13,15 +13,15 @@ export interface Artist {
 }
 
 interface Params {
-  search?: string;          // mot-clé
+  search?: string;
 }
 
-export const useArtists = ({ search }: Params) =>
+export const useArtists = ({ search }: Params = {}) =>
   useQuery<Artist[]>({
     queryKey: ['artists', search],
     queryFn: async () => {
       let req = supabase
-        .from('artists')          // <-- ta table actuelle
+        .from('artists')
         .select('*');
 
       if (search) {
@@ -31,7 +31,7 @@ export const useArtists = ({ search }: Params) =>
       const { data, error } = await req;
       if (error) throw error;
 
-      /* on renvoie tel quel, ArtistCard fera la mise en forme */
       return data as Artist[];
     },
   });
+

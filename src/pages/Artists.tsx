@@ -8,10 +8,17 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Search, MapPin, Palette } from 'lucide-react';
 
+interface FilterState {
+  location?: string;
+  style?: string;
+  minExperience?: number[];
+  maxProjects?: number[];
+}
+
 const Artists = () => {
   const { artists, loading, error } = useArtists();
   const [searchTerm, setSearchTerm] = useState('');
-  const [advancedFilters, setAdvancedFilters] = useState({});
+  const [advancedFilters, setAdvancedFilters] = useState<FilterState>({});
 
   const filteredArtists = artists.filter(artist => {
     // Recherche textuelle

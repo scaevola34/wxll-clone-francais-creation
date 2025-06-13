@@ -1,243 +1,110 @@
 
 import React, { useState } from 'react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Slider } from './ui/slider';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Checkbox } from './ui/checkbox';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';
-import { Filter, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Filter } from 'lucide-react';
 
-interface AdvancedFiltersProps {
-  onFiltersChange: (filters: any) => void;
-  initialFilters?: any;
+interface FilterState {
+  location?: string;
+  style?: string;
+  minExperience?: number[];
+  maxProjects?: number[];
 }
 
-const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ onFiltersChange, initialFilters = {} }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [filters, setFilters] = useState({
-    location: initialFilters.location || '',
-    style: initialFilters.style || '',
-    minExperience: initialFilters.minExperience || [0],
-    maxProjects: initialFilters.maxProjects || [100],
-    minRating: initialFilters.minRating || [0],
-    availability: initialFilters.availability || false,
-    priceRange: initialFilters.priceRange || '',
-    ...initialFilters
-  });
+interface AdvancedFiltersProps {
+  onFiltersChange: (filters: FilterState) => void;
+  initialFilters: FilterState;
+}
 
-  const styles = [
-    'Street Art',
-    'Graffiti',
-    'Art Urbain',
-    'Muralisme',
-    'Pochoir',
-    'Collage',
-    'Art Numérique',
-    'Art Abstrait'
-  ];
+const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ onFiltersChange, initialFilters }) => {
+  const [filters, setFilters] = useState<FilterState>(initialFilters);
 
-  const locations = [
-    'Paris',
-    'Lyon',
-    'Marseille',
-    'Toulouse',
-    'Nice',
-    'Nantes',
-    'Strasbourg',
-    'Montpellier',
-    'Bordeaux',
-    'Lille'
-  ];
-
-  const priceRanges = [
-    { value: '0-500', label: '0€ - 500€' },
-    { value: '500-1000', label: '500€ - 1000€' },
-    { value: '1000-2500', label: '1000€ - 2500€' },
-    { value: '2500-5000', label: '2500€ - 5000€' },
-    { value: '5000+', label: '5000€+' }
-  ];
-
-  const updateFilter = (key: string, value: any) => {
+  const handleFilterChange = (key: keyof FilterState, value: any) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
     onFiltersChange(newFilters);
   };
 
   const resetFilters = () => {
-    const resetFilters = {
-      location: '',
-      style: '',
-      minExperience: [0],
-      maxProjects: [100],
-      minRating: [0],
-      availability: false,
-      priceRange: ''
-    };
-    setFilters(resetFilters);
-    onFiltersChange(resetFilters);
+    setFilters({});
+    onFiltersChange({});
   };
 
-  const activeFiltersCount = Object.values(filters).filter(value => {
-    if (Array.isArray(value)) {
-      return value[0] !== 0 && value[0] !== 100;
-    }
-    return value !== '' && value !== false;
-  }).length;
-
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
-          <Filter className="h-4 w-4" />
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm">
+          <Filter className="h-4 w-4 mr-2" />
           Filtres avancés
-          {activeFiltersCount > 0 && (
-            <span className="bg-purple-500 text-white rounded-full px-2 py-1 text-xs">
-              {activeFiltersCount}
-            </span>
-          )}
         </Button>
-      </SheetTrigger>
-      
-      <SheetContent side="right" className="w-80 overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle className="flex items-center justify-between">
-            Filtres avancés
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={resetFilters}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <X className="h-4 w-4" />
-              Réinitialiser
-            </Button>
-          </SheetTitle>
-        </SheetHeader>
-        
-        <div className="space-y-6 mt-6">
-          {/* Localisation */}
+      </PopoverTrigger>
+      <PopoverContent className="w-80">
+        <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="location">Localisation</Label>
-            <Select value={filters.location} onValueChange={(value) => updateFilter('location', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Toutes les villes" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Toutes les villes</SelectItem>
-                {locations.map((location) => (
-                  <SelectItem key={location} value={location}>
-                    {location}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Input
+              id="location"
+              placeholder="Ville, région..."
+              value={filters.location || ''}
+              onChange={(e) => handleFilterChange('location', e.target.value)}
+            />
           </div>
 
-          {/* Style artistique */}
           <div className="space-y-2">
             <Label htmlFor="style">Style artistique</Label>
-            <Select value={filters.style} onValueChange={(value) => updateFilter('style', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Tous les styles" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Tous les styles</SelectItem>
-                {styles.map((style) => (
-                  <SelectItem key={style} value={style}>
-                    {style}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Input
+              id="style"
+              placeholder="Graffiti, muralisme..."
+              value={filters.style || ''}
+              onChange={(e) => handleFilterChange('style', e.target.value)}
+            />
           </div>
 
-          {/* Expérience minimum */}
           <div className="space-y-2">
-            <Label>Expérience minimum: {filters.minExperience[0]} an(s)</Label>
+            <Label>Expérience minimum (années)</Label>
             <Slider
-              value={filters.minExperience}
-              onValueChange={(value) => updateFilter('minExperience', value)}
+              value={filters.minExperience || [0]}
+              onValueChange={(value) => handleFilterChange('minExperience', value)}
               max={20}
+              min={0}
               step={1}
               className="w-full"
             />
+            <span className="text-sm text-gray-500">
+              {filters.minExperience?.[0] || 0} ans
+            </span>
           </div>
 
-          {/* Nombre de projets maximum */}
           <div className="space-y-2">
-            <Label>Projets réalisés: jusqu'à {filters.maxProjects[0]}</Label>
+            <Label>Projets maximum</Label>
             <Slider
-              value={filters.maxProjects}
-              onValueChange={(value) => updateFilter('maxProjects', value)}
+              value={filters.maxProjects || [100]}
+              onValueChange={(value) => handleFilterChange('maxProjects', value)}
               max={100}
+              min={0}
               step={5}
               className="w-full"
             />
+            <span className="text-sm text-gray-500">
+              {filters.maxProjects?.[0] || 100} projets
+            </span>
           </div>
 
-          {/* Note minimum */}
-          <div className="space-y-2">
-            <Label>Note minimum: {filters.minRating[0]}/5</Label>
-            <Slider
-              value={filters.minRating}
-              onValueChange={(value) => updateFilter('minRating', value)}
-              max={5}
-              step={0.5}
-              className="w-full"
-            />
-          </div>
-
-          {/* Gamme de prix */}
-          <div className="space-y-2">
-            <Label htmlFor="priceRange">Gamme de prix</Label>
-            <Select value={filters.priceRange} onValueChange={(value) => updateFilter('priceRange', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Tous les budgets" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Tous les budgets</SelectItem>
-                {priceRanges.map((range) => (
-                  <SelectItem key={range.value} value={range.value}>
-                    {range.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Disponibilité */}
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="availability"
-              checked={filters.availability}
-              onCheckedChange={(checked) => updateFilter('availability', checked)}
-            />
-            <Label htmlFor="availability" className="text-sm">
-              Disponible immédiatement
-            </Label>
-          </div>
-
-          {/* Actions */}
-          <div className="space-y-2 pt-4 border-t">
-            <Button 
-              onClick={() => setIsOpen(false)}
-              className="w-full"
-            >
-              Appliquer les filtres
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={resetFilters}
-              className="w-full"
-            >
+          <div className="flex justify-between pt-4">
+            <Button variant="outline" size="sm" onClick={resetFilters}>
               Réinitialiser
             </Button>
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      </PopoverContent>
+    </Popover>
   );
 };
 

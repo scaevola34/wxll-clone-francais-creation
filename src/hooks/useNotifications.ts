@@ -35,7 +35,12 @@ export const useNotifications = () => {
         table: 'notifications',
         filter: `user_id=eq.${user.id}`
       }, (payload) => {
-        setNotifications(prev => [payload.new as Notification, ...prev]);
+        const newNotification = {
+          ...payload.new,
+          user_type: payload.new.user_type as 'artist' | 'wall_owner',
+          type: payload.new.type as 'message' | 'project_update' | 'payment' | 'review'
+        } as Notification;
+        setNotifications(prev => [newNotification, ...prev]);
         setUnreadCount(prev => prev + 1);
       })
       .subscribe();
@@ -60,8 +65,14 @@ export const useNotifications = () => {
 
       if (error) throw error;
       
-      setNotifications(data || []);
-      setUnreadCount((data || []).filter(n => !n.is_read).length);
+      const typedNotifications = (data || []).map(notif => ({
+        ...notif,
+        user_type: notif.user_type as 'artist' | 'wall_owner',
+        type: notif.type as 'message' | 'project_update' | 'payment' | 'review'
+      }));
+      
+      setNotifications(typedNotifications);
+      setUnreadCount(typedNotifications.filter(n => !n.is_read).length);
     } catch (err) {
       console.error('Erreur lors du chargement des notifications:', err);
     } finally {

@@ -59,7 +59,10 @@ export const useMessages = (conversationId: string | null) => {
 
       if (error) throw error;
       
-      setMessages(data || []);
+      setMessages((data || []).map(msg => ({
+        ...msg,
+        sender_type: msg.sender_type as 'artist' | 'wall_owner'
+      })));
 
       // Marquer les messages comme lus
       if (user && userType) {

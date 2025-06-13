@@ -112,7 +112,12 @@ export const useProjects = () => {
 
       if (projectsError) throw projectsError;
 
-      setProposals(proposalsData || []);
+      const typedProposals = (proposalsData || []).map(proposal => ({
+        ...proposal,
+        status: proposal.status as 'pending' | 'accepted' | 'rejected' | 'completed'
+      }));
+
+      setProposals(typedProposals);
       setProjects(projectsData || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur lors du chargement');

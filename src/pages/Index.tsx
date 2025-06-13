@@ -44,7 +44,7 @@ const Index = () => {
       name: 'Nicolas Petit',
       role: "Directeur d'agence",
       quote:
-        'La fresque réalisée dans nos locaux a transformé l’ambiance de travail. Le processus de sélection d’artiste était fluide et professionnel.',
+        'La fresque réalisée dans nos locaux a transformé l'ambiance de travail. Le processus de sélection d'artiste était fluide et professionnel.',
       rating: 4,
       imageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2070&auto=format&fit=crop',
     },
@@ -59,20 +59,18 @@ const Index = () => {
   return (
     <>
       {/* Hero */}
-      <section className="relative min-h-[85vh] flex items-center overflow-visible">
+      <section className="relative py-20 md:py-32 flex items-center">
         <div className="absolute inset-0 z-0">
           <img
             src="/lovable-uploads/43b7f1bd-60a5-4bff-aeaa-2873676d8ee2.png"
             alt="Urban Wall Background"
-            className="w-full h-full object-cover scale-105"
+            className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-white">
           <div className="max-w-4xl">
-            {/* -- BANDEAU SUPPRIMÉ : on enlève la ligne qui affichait le texte en bas de l'image -- */}
-
             <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-8 leading-tight">
               Faites parler les murs <br />
               <span className="text-wxll-artist">avec l'art</span>
@@ -273,3 +271,4 @@ const Index = () => {
 };
 
 export default Index;
+

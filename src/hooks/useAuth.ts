@@ -56,3 +56,31 @@ export const useSignOut = () =>
       if (error) throw error;
     },
   });
+
+/* ------------- FIN DU FICHIER ------------------ */
+
+/**
+ * Petit alias “historique” : certains anciens fichiers importent encore
+ * `useAuth`.  On expose donc une fonction qui retourne juste l’utilisateur
+ * courant et son état de chargement.
+ */
+import { useQuery } from '@tanstack/react-query';
+
+export const useAuth = () => {
+  return useQuery({
+    queryKey: ['currentUser'],
+    queryFn: async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) throw error;
+      return data.user ?? null;
+    },
+  });
+};
+
+/* On exporte aussi par défaut les mutations si besoin */
+export {
+  useSignIn,
+  useSignUp,
+  useSignOut,
+};                    // déjà présents plus haut
+

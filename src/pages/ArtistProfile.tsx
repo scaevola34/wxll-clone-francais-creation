@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -7,10 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { MapPin, Globe, Instagram, Briefcase, Star, MessageSquare, ExternalLink } from 'lucide-react';
+import { MapPin, Globe, Instagram, Briefcase } from 'lucide-react';
+import { ImageGallery } from '@/components/ImageGallery';
+import { ProfileSkeleton } from '@/components/ui/loading-skeletons';
 import { ProjectProposalForm } from '@/components/ProjectProposalForm';
 import ReviewsSection from '@/components/ReviewsSection';
 import { ReviewForm } from '@/components/ReviewForm';
+import { getErrorMessage } from '@/utils/errorMessages';
+import { toast } from 'sonner';
 
 interface Artist {
   id: string;
@@ -31,18 +36,23 @@ interface Artist {
 }
 
 const fetchArtist = async (id: string): Promise<Artist | null> => {
-  const { data, error } = await supabase
-    .from('artists')
-    .select('*')
-    .eq('id', id)
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from('artists')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-  if (error) {
+    if (error) {
+      throw error;
+    }
+
+    return data as Artist;
+  } catch (error) {
     console.error('Error fetching artist:', error);
+    toast.error(getErrorMessage(error));
     return null;
   }
-
-  return data as Artist;
 };
 
 const ArtistProfile = () => {
@@ -53,8 +63,49 @@ const ArtistProfile = () => {
     enabled: !!id,
   });
 
-  if (isLoading) return <div className="min-h-screen bg-gray-50 p-8">Chargement...</div>;
-  if (error || !artist) return <div className="min-h-screen bg-gray-50 p-8">Artiste non trouvé</div>;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-8">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-1">
+              <ProfileSkeleton />
+            </div>
+            <div className="lg:col-span-2">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div key={i} className="h-32 bg-gray-100 rounded-lg animate-pulse" />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !artist) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-8">
+        <div className="container mx-auto">
+          <Card className="max-w-md mx-auto">
+            <CardContent className="text-center py-12">
+              <p className="text-red-600 mb-4">
+                {getErrorMessage(error) || 'Artiste non trouvé'}
+              </p>
+              <Button onClick={() => window.location.reload()}>
+                Réessayer
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -152,21 +203,11 @@ const ArtistProfile = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Briefcase className="h-5 w-5" />
-                    Portfolio
+                    Portfolio ({artist.previous_works_urls.length} œuvres)
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {artist.previous_works_urls.map((url, index) => (
-                      <div key={index} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                        <img
-                          src={url}
-                          alt={`Œuvre ${index + 1}`}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
-                        />
-                      </div>
-                    ))}
-                  </div>
+                  <ImageGallery images={artist.previous_works_urls} />
                 </CardContent>
               </Card>
             )}

@@ -3,7 +3,8 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useArtistsInfinite } from '@/hooks/useArtistsInfinite';
 import ArtistCarousel from '@/components/ArtistCarousel';
-import AdvancedFilters from '@/components/AdvancedFilters';
+import { InteractiveFilters } from '@/components/InteractiveFilters';
+import { GridSkeleton } from '@/components/ui/loading-skeletons';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -21,15 +22,10 @@ interface FilterState {
 const PAGE_SIZE = 12;
 
 const Artists: React.FC = () => {
-  /* recherche plein-texte */
   const [searchTerm, setSearchTerm] = useState('');
   const debounced = useDebounce(searchTerm, 400);
+  const [advancedFilters, setAdvancedFilters] = useState<FilterState>({});
 
-  /* filtres avancés (toujours en local) */
-  const [advancedFilters, setAdvancedFilters] =
-    useState<FilterState>({});
-
-  /* données serveur en pagination */
   const {
     data,
     fetchNextPage,
@@ -38,46 +34,23 @@ const Artists: React.FC = () => {
     status,
   } = useArtistsInfinite({ search: debounced });
 
-  /* concatène les pages déjà récupérées */
   const artists = (data?.pages.flat() ?? []).filter((artist) => {
-    /* on conserve ton filtrage local */
     let ok = true;
     if (advancedFilters.location && artist.location) {
-      ok =
-        ok &&
-        artist.location
-          .toLowerCase()
-          .includes(advancedFilters.location.toLowerCase());
+      ok = ok && artist.location.toLowerCase().includes(advancedFilters.location.toLowerCase());
     }
     if (advancedFilters.style && artist.style) {
-      ok =
-        ok &&
-        artist.style
-          .toLowerCase()
-          .includes(advancedFilters.style.toLowerCase());
+      ok = ok && artist.style.toLowerCase().includes(advancedFilters.style.toLowerCase());
     }
-    if (
-      advancedFilters.minExperience &&
-      advancedFilters.minExperience[0] > 0
-    ) {
-      ok =
-        ok &&
-        (artist.experience_years || 0) >=
-          advancedFilters.minExperience[0];
+    if (advancedFilters.minExperience && advancedFilters.minExperience[0] > 0) {
+      ok = ok && (artist.experience_years || 0) >= advancedFilters.minExperience[0];
     }
-    if (
-      advancedFilters.maxProjects &&
-      advancedFilters.maxProjects[0] < 100
-    ) {
-      ok =
-        ok &&
-        (artist.projects_count || 0) <=
-          advancedFilters.maxProjects[0];
+    if (advancedFilters.maxProjects && advancedFilters.maxProjects[0] < 100) {
+      ok = ok && (artist.projects_count || 0) <= advancedFilters.maxProjects[0];
     }
     return ok;
   });
 
-  /* intersection-observer ↓ pour déclencher fetchNextPage */
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -92,29 +65,81 @@ const Artists: React.FC = () => {
     return () => io.disconnect();
   }, [hasNextPage, fetchNextPage]);
 
-  /* ------------- états de chargement ---------------- */
+  // Configuration des filtres
+  const filterGroups = [
+    {
+      id: 'location',
+      label: 'Localisation',
+      type: 'text' as const,
+      value: advancedFilters.location
+    },
+    {
+      id: 'style',
+      label: 'Style artistique',
+      type: 'text' as const,
+      value: advancedFilters.style
+    },
+    {
+      id: 'minExperience',
+      label: 'Expérience minimum (années)',
+      type: 'range' as const,
+      min: 0,
+      max: 20,
+      value: advancedFilters.minExperience
+    },
+    {
+      id: 'maxProjects',
+      label: 'Projets maximum',
+      type: 'range' as const,
+      min: 0,
+      max: 100,
+      value: advancedFilters.maxProjects
+    }
+  ];
+
   if (status === 'pending') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
-        <Spinner size={48} />
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              Nos Artistes <span className="text-purple-600">WXLLSPACE</span>
+            </h1>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Découvrez les talents du street art français et trouvez l'artiste idéal
+            </p>
+          </div>
+          <GridSkeleton count={12} type="artist" />
+        </div>
       </div>
     );
   }
+
   if (status === 'error') {
     return (
-      <p className="text-center text-red-600 py-20">
-        Erreur de chargement.
-      </p>
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+        <div className="container mx-auto px-4 py-8">
+          <Card className="max-w-md mx-auto">
+            <CardContent className="text-center py-12">
+              <p className="text-red-600 mb-4">
+                Impossible de charger les artistes pour le moment.
+              </p>
+              <Button onClick={() => window.location.reload()}>
+                Réessayer
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     );
   }
 
-  // Diviser les artistes en groupes de 3 pour le carousel
+  // Diviser les artistes en groupes de 6 pour le carousel
   const artistGroups = [];
   for (let i = 0; i < artists.length; i += 6) {
     artistGroups.push(artists.slice(i, i + 6));
   }
 
-  /* ------------- RENDER principal ------------------- */
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
       <div className="container mx-auto px-4 py-8">
@@ -131,8 +156,7 @@ const Artists: React.FC = () => {
         {/* Barre recherche + filtres */}
         <Card className="mb-8 shadow-lg">
           <CardContent className="p-6">
-            <div className="flex flex-col lg:flex-row gap-4">
-              {/* search */}
+            <div className="flex flex-col lg:flex-row gap-4 mb-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
@@ -142,40 +166,26 @@ const Artists: React.FC = () => {
                   className="pl-10"
                 />
               </div>
-
-              {/* advanced filters */}
-              <AdvancedFilters
-                onFiltersChange={setAdvancedFilters}
-                initialFilters={advancedFilters}
-              />
             </div>
 
-            {(searchTerm ||
-              Object.keys(advancedFilters).length > 0) && (
-              <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                <p className="text-sm text-gray-600">
-                  {artists.length} artiste(s) affiché(s)
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSearchTerm('');
-                    setAdvancedFilters({});
-                  }}
-                >
-                  Réinitialiser
-                </Button>
-              </div>
-            )}
+            <InteractiveFilters
+              filters={filterGroups}
+              activeFilters={advancedFilters}
+              onFiltersChange={setAdvancedFilters}
+              resultsCount={artists.length}
+            />
           </CardContent>
         </Card>
 
-        {/* Affichage des artistes avec le format carousel */}
+        {/* Affichage des artistes */}
         {artists.length === 0 ? (
-          <p className="text-center text-gray-500 py-20">
-            Aucun artiste ne correspond aux critères.
-          </p>
+          <Card>
+            <CardContent className="text-center py-20">
+              <p className="text-gray-500">
+                Aucun artiste ne correspond aux critères.
+              </p>
+            </CardContent>
+          </Card>
         ) : (
           <div className="space-y-12">
             {artistGroups.map((group, groupIndex) => (
@@ -186,19 +196,18 @@ const Artists: React.FC = () => {
           </div>
         )}
 
-        {/* sentinel + spinner scroll  */}
+        {/* Chargement scroll infini */}
         <div ref={sentinelRef} className="h-1" />
         {isFetchingNextPage && (
           <div className="flex justify-center py-10">
             <Spinner size={28} />
           </div>
         )}
-        {!hasNextPage &&
-          artists.length >= PAGE_SIZE && (
-            <p className="text-center text-gray-500 py-10">
-              Vous avez atteint la fin.
-            </p>
-          )}
+        {!hasNextPage && artists.length >= PAGE_SIZE && (
+          <p className="text-center text-gray-500 py-10">
+            Vous avez atteint la fin.
+          </p>
+        )}
       </div>
     </div>
   );

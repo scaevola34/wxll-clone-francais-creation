@@ -6,15 +6,18 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MessageSquare, Calendar, Euro, MapPin, Palette } from 'lucide-react';
+import { ProposalSkeleton } from '@/components/ui/loading-skeletons';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { getErrorMessage } from '@/utils/errorMessages';
+import { toast } from 'sonner';
 
 interface OwnerProposalsSectionProps {
   ownerId: string;
 }
 
 export const OwnerProposalsSection: React.FC<OwnerProposalsSectionProps> = ({ ownerId }) => {
-  const { data: proposals = [], isLoading } = useOwnerProposals(ownerId);
+  const { data: proposals = [], isLoading, error } = useOwnerProposals(ownerId);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -36,9 +39,37 @@ export const OwnerProposalsSection: React.FC<OwnerProposalsSectionProps> = ({ ow
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <div className="h-32 bg-gray-100 rounded-lg animate-pulse" />
-        <div className="h-24 bg-gray-100 rounded-lg animate-pulse" />
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          <MessageSquare className="h-6 w-6 text-blue-600" />
+          Propositions Reçues
+        </h2>
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <ProposalSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          <MessageSquare className="h-6 w-6 text-blue-600" />
+          Propositions Reçues
+        </h2>
+        <Card>
+          <CardContent className="text-center py-12">
+            <p className="text-red-600 mb-4">
+              {getErrorMessage(error)}
+            </p>
+            <Button onClick={() => window.location.reload()}>
+              Réessayer
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -135,10 +166,19 @@ export const OwnerProposalsSection: React.FC<OwnerProposalsSectionProps> = ({ ow
                             <MessageSquare className="h-4 w-4 mr-1" />
                             Contacter
                           </Button>
-                          <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                          <Button 
+                            size="sm" 
+                            className="bg-green-600 hover:bg-green-700"
+                            onClick={() => toast.success('Fonctionnalité bientôt disponible')}
+                          >
                             Accepter
                           </Button>
-                          <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-red-600 hover:text-red-700"
+                            onClick={() => toast.success('Fonctionnalité bientôt disponible')}
+                          >
                             Refuser
                           </Button>
                         </div>

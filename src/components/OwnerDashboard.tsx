@@ -8,21 +8,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/hooks/use-toast'
-import { Building, MapPin, Phone, Mail, User as UserIcon, FileText, Camera, Plus, Edit, Trash2 } from 'lucide-react'
+import { Building, MapPin, Phone, Mail, User as UserIcon, FileText, Camera, MessageSquare, FolderOpen } from 'lucide-react'
 import ImageUpload from '@/components/ui/ImageUpload'
-
-interface Wall {
-  id: string
-  Name: string
-  location_postal_code: string
-  width_m: number
-  height_m: number
-  surface_type: string
-  indoor: boolean
-  description?: string
-  image_url?: string
-}
+import { OwnerWallsSection } from './OwnerWallsSection'
+import { OwnerProposalsSection } from './OwnerProposalsSection'
 
 export const OwnerDashboard: React.FC = () => {
   const [user, setUser] = useState<User | null>(null)
@@ -36,19 +27,7 @@ export const OwnerDashboard: React.FC = () => {
     profile_image_url: ''
   })
   const [saving, setSaving] = useState(false)
-  const [walls, setWalls] = useState<Wall[]>([])
-  const [showAddWall, setShowAddWall] = useState(false)
-  const [editingWall, setEditingWall] = useState<Wall | null>(null)
-  const [newWall, setNewWall] = useState({
-    Name: '',
-    location_postal_code: '',
-    width_m: 0,
-    height_m: 0,
-    surface_type: '',
-    indoor: false,
-    description: '',
-    image_url: ''
-  })
+  const [activeTab, setActiveTab] = useState('overview')
 
   useEffect(() => {
     // Récupérer l'utilisateur connecté au chargement
@@ -80,26 +59,6 @@ export const OwnerDashboard: React.FC = () => {
     }
   }, [profile])
 
-  useEffect(() => {
-    if (user) {
-      fetchWalls()
-    }
-  }, [user])
-
-  const fetchWalls = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('wall_owners')
-        .select('*')
-        .eq('id', user?.id)
-
-      if (error) throw error
-      setWalls(data || [])
-    } catch (error) {
-      console.error('Erreur lors du chargement des murs:', error)
-    }
-  }
-
   const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({
       ...prev,
@@ -125,51 +84,6 @@ export const OwnerDashboard: React.FC = () => {
       })
     } finally {
       setSaving(false)
-    }
-  }
-
-  const handleAddWall = async () => {
-    try {
-      const { error } = await supabase
-        .from('wall_owners')
-        .insert([{
-          id: user?.id,
-          Name: newWall.Name,
-          location_postal_code: newWall.location_postal_code,
-          width_m: newWall.width_m,
-          height_m: newWall.height_m,
-          surface_type: newWall.surface_type,
-          indoor: newWall.indoor,
-          description: newWall.description,
-          image_url: newWall.image_url,
-          contact_email: user?.email
-        }])
-
-      if (error) throw error
-
-      toast({
-        title: "✅ Mur ajouté",
-        description: "Votre mur a été ajouté avec succès.",
-      })
-
-      setNewWall({
-        Name: '',
-        location_postal_code: '',
-        width_m: 0,
-        height_m: 0,
-        surface_type: '',
-        indoor: false,
-        description: '',
-        image_url: ''
-      })
-      setShowAddWall(false)
-      fetchWalls()
-    } catch (error) {
-      toast({
-        title: "❌ Erreur",
-        description: "Une erreur est survenue lors de l'ajout du mur.",
-        variant: "destructive",
-      })
     }
   }
 
@@ -223,275 +137,239 @@ export const OwnerDashboard: React.FC = () => {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent mb-2">
             WXLLSPACE
           </h1>
-          <p className="text-lg text-gray-600">Marketplace Street Art - Profil Propriétaire</p>
+          <p className="text-lg text-gray-600">Marketplace Street Art - Tableau de Bord Propriétaire</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Photo de profil sidebar */}
-          <div className="lg:col-span-1">
-            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-xl font-bold flex items-center gap-2">
-                  <Camera className="h-6 w-6 text-green-600" />
-                  Photo de profil
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ImageUpload
-                  currentImageUrl={formData.profile_image_url}
-                  onImageUploaded={updateProfileImage}
-                  className="flex flex-col items-center"
-                />
-              </CardContent>
-            </Card>
-          </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview" className="flex items-center gap-2">
+              <UserIcon className="h-4 w-4" />
+              Vue d'ensemble
+            </TabsTrigger>
+            <TabsTrigger value="walls" className="flex items-center gap-2">
+              <Building className="h-4 w-4" />
+              Mes Murs
+            </TabsTrigger>
+            <TabsTrigger value="proposals" className="flex items-center gap-2">
+              <FolderOpen className="h-4 w-4" />
+              Propositions
+            </TabsTrigger>
+            <TabsTrigger value="profile" className="flex items-center gap-2">
+              <Camera className="h-4 w-4" />
+              Mon Profil
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Main content */}
-          <div className="lg:col-span-3 space-y-8">
-            {/* Profil Section */}
-            <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
-              <CardHeader className="bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-t-lg">
-                <CardTitle className="text-2xl font-bold flex items-center gap-3">
-                  <Building className="h-8 w-8" />
-                  Mon Profil de Propriétaire WXLLSPACE
-                </CardTitle>
-                <p className="text-green-100">Gérez vos informations sur la marketplace street art</p>
-              </CardHeader>
-              
-              <CardContent className="p-8">
-                <form onSubmit={handleSubmit} className="space-y-8">
-                  {/* Informations personnelles */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                      <Label htmlFor="nom_complet" className="text-lg font-semibold flex items-center gap-2">
-                        <UserIcon className="h-5 w-5 text-green-600" />
-                        Nom complet
-                      </Label>
-                      <Input
-                        id="nom_complet"
-                        type="text"
-                        value={formData.nom_complet}
-                        onChange={(e) => handleInputChange('nom_complet', e.target.value)}
-                        placeholder="Votre nom complet"
-                        className="h-12 text-lg border-2 focus:border-green-500 transition-colors"
-                      />
-                    </div>
-
-                    <div className="space-y-3">
-                      <Label htmlFor="email" className="text-lg font-semibold flex items-center gap-2">
-                        <Mail className="h-5 w-5 text-blue-600" />
-                        Email WXLLSPACE
-                      </Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        className="h-12 text-lg bg-gray-100 border-2 cursor-not-allowed"
-                        readOnly
-                      />
-                      <p className="text-sm text-gray-500 flex items-center gap-1">
-                        🔒 Email utilisé lors de votre inscription WXLLSPACE (non modifiable)
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Contact et localisation */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                      <Label htmlFor="telephone" className="text-lg font-semibold flex items-center gap-2">
-                        <Phone className="h-5 w-5 text-green-600" />
-                        Téléphone
-                      </Label>
-                      <Input
-                        id="telephone"
-                        type="tel"
-                        value={formData.telephone}
-                        onChange={(e) => handleInputChange('telephone', e.target.value)}
-                        placeholder="+33 1 23 45 67 89"
-                        className="h-12 text-lg border-2 focus:border-green-500 transition-colors"
-                      />
-                    </div>
-
-                    <div className="space-y-3">
-                      <Label htmlFor="localisation" className="text-lg font-semibold flex items-center gap-2">
-                        <MapPin className="h-5 w-5 text-red-600" />
-                        Localisation
-                      </Label>
-                      <Input
-                        id="localisation"
-                        type="text"
-                        value={formData.localisation}
-                        onChange={(e) => handleInputChange('localisation', e.target.value)}
-                        placeholder="Paris, Lyon, Marseille..."
-                        className="h-12 text-lg border-2 focus:border-red-500 transition-colors"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Biographie */}
-                  <div className="space-y-3">
-                    <Label htmlFor="biographie" className="text-lg font-semibold flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-indigo-600" />
-                      Présentation
-                    </Label>
-                    <Textarea
-                      id="biographie"
-                      value={formData.biographie}
-                      onChange={(e) => handleInputChange('biographie', e.target.value)}
-                      placeholder="Présentez-vous : votre entreprise, vos projets, pourquoi vous souhaitez collaborer avec des artistes..."
-                      rows={6}
-                      className="text-lg border-2 focus:border-indigo-500 transition-colors resize-none"
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+              {/* Sidebar - Photo et actions rapides */}
+              <div className="lg:col-span-1">
+                <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="text-xl font-bold flex items-center gap-2">
+                      <Camera className="h-6 w-6 text-green-600" />
+                      Photo de profil
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ImageUpload
+                      currentImageUrl={formData.profile_image_url}
+                      onImageUploaded={updateProfileImage}
+                      className="flex flex-col items-center"
                     />
-                    <p className="text-sm text-gray-500">
-                      Cette présentation sera visible sur votre profil public WXLLSPACE
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Main content - Vue d'ensemble */}
+              <div className="lg:col-span-3 space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Bienvenue {formData.nom_complet || 'sur WXLLSPACE'} !</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 mb-4">
+                      Gérez vos murs, suivez les propositions d'artistes et développez vos projets street art.
                     </p>
-                  </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <Button variant="outline" onClick={() => setActiveTab('walls')} className="h-20 flex flex-col items-center gap-2">
+                        <Building className="h-5 w-5" />
+                        Gérer mes murs
+                      </Button>
+                      <Button variant="outline" onClick={() => setActiveTab('proposals')} className="h-20 flex flex-col items-center gap-2">
+                        <FolderOpen className="h-5 w-5" />
+                        Voir propositions
+                      </Button>
+                      <Button variant="outline" onClick={() => setActiveTab('profile')} className="h-20 flex flex-col items-center gap-2">
+                        <UserIcon className="h-5 w-5" />
+                        Modifier profil
+                      </Button>
+                      <Button variant="outline" className="h-20 flex flex-col items-center gap-2">
+                        <MessageSquare className="h-5 w-5" />
+                        Messages
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
 
-                  {/* Bouton de sauvegarde */}
-                  <div className="pt-6">
-                    <Button 
-                      type="submit" 
-                      className="w-full h-14 text-lg font-bold bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
-                      disabled={saving}
-                    >
-                      {saving ? (
-                        <>
-                          <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-3"></div>
-                          Sauvegarde en cours...
-                        </>
-                      ) : (
-                        <>
-                          💾 Sauvegarder mon profil WXLLSPACE
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
+          <TabsContent value="walls">
+            <OwnerWallsSection ownerId={user?.id || ''} ownerEmail={user?.email} />
+          </TabsContent>
 
-            {/* Post a Wall Section */}
-            <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
-              <CardHeader className="bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-t-lg">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-2xl font-bold flex items-center gap-3">
-                    <Building className="h-8 w-8" />
-                    Poster un Mur
-                  </CardTitle>
-                  <Button
-                    onClick={() => setShowAddWall(true)}
-                    className="bg-white text-green-600 hover:bg-gray-100"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Ajouter un mur
-                  </Button>
-                </div>
-              </CardHeader>
+          <TabsContent value="proposals">
+            <OwnerProposalsSection ownerId={user?.id || ''} />
+          </TabsContent>
 
-              <CardContent className="p-8">
-                {/* Add Wall Form */}
-                {showAddWall && (
-                  <Card className="mb-6 border-2 border-green-200">
-                    <CardHeader>
-                      <CardTitle className="text-lg">Ajouter un nouveau mur</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="new_name">Nom du mur</Label>
+          <TabsContent value="profile">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+              {/* Photo de profil sidebar */}
+              <div className="lg:col-span-1">
+                <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="text-xl font-bold flex items-center gap-2">
+                      <Camera className="h-6 w-6 text-green-600" />
+                      Photo de profil
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ImageUpload
+                      currentImageUrl={formData.profile_image_url}
+                      onImageUploaded={updateProfileImage}
+                      className="flex flex-col items-center"
+                    />
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Main content */}
+              <div className="lg:col-span-3">
+                <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+                  <CardHeader className="bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-t-lg">
+                    <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                      <Building className="h-8 w-8" />
+                      Mon Profil de Propriétaire WXLLSPACE
+                    </CardTitle>
+                    <p className="text-green-100">Gérez vos informations sur la marketplace street art</p>
+                  </CardHeader>
+                  
+                  <CardContent className="p-8">
+                    <form onSubmit={handleSubmit} className="space-y-8">
+                      {/* Informations personnelles */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                          <Label htmlFor="nom_complet" className="text-lg font-semibold flex items-center gap-2">
+                            <UserIcon className="h-5 w-5 text-green-600" />
+                            Nom complet
+                          </Label>
                           <Input
-                            id="new_name"
-                            value={newWall.Name}
-                            onChange={(e) => setNewWall(prev => ({ ...prev, Name: e.target.value }))}
-                            placeholder="Nom de votre mur"
+                            id="nom_complet"
+                            type="text"
+                            value={formData.nom_complet}
+                            onChange={(e) => handleInputChange('nom_complet', e.target.value)}
+                            placeholder="Votre nom complet"
+                            className="h-12 text-lg border-2 focus:border-green-500 transition-colors"
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="new_postal_code">Code postal</Label>
+
+                        <div className="space-y-3">
+                          <Label htmlFor="email" className="text-lg font-semibold flex items-center gap-2">
+                            <Mail className="h-5 w-5 text-blue-600" />
+                            Email WXLLSPACE
+                          </Label>
                           <Input
-                            id="new_postal_code"
-                            value={newWall.location_postal_code}
-                            onChange={(e) => setNewWall(prev => ({ ...prev, location_postal_code: e.target.value }))}
-                            placeholder="75001"
+                            id="email"
+                            type="email"
+                            value={formData.email}
+                            className="h-12 text-lg bg-gray-100 border-2 cursor-not-allowed"
+                            readOnly
+                          />
+                          <p className="text-sm text-gray-500 flex items-center gap-1">
+                            🔒 Email utilisé lors de votre inscription WXLLSPACE (non modifiable)
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Contact et localisation */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                          <Label htmlFor="telephone" className="text-lg font-semibold flex items-center gap-2">
+                            <Phone className="h-5 w-5 text-green-600" />
+                            Téléphone
+                          </Label>
+                          <Input
+                            id="telephone"
+                            type="tel"
+                            value={formData.telephone}
+                            onChange={(e) => handleInputChange('telephone', e.target.value)}
+                            placeholder="+33 1 23 45 67 89"
+                            className="h-12 text-lg border-2 focus:border-green-500 transition-colors"
+                          />
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label htmlFor="localisation" className="text-lg font-semibold flex items-center gap-2">
+                            <MapPin className="h-5 w-5 text-red-600" />
+                            Localisation
+                          </Label>
+                          <Input
+                            id="localisation"
+                            type="text"
+                            value={formData.localisation}
+                            onChange={(e) => handleInputChange('localisation', e.target.value)}
+                            placeholder="Paris, Lyon, Marseille..."
+                            className="h-12 text-lg border-2 focus:border-red-500 transition-colors"
                           />
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="new_width">Largeur (m)</Label>
-                          <Input
-                            id="new_width"
-                            type="number"
-                            step="0.1"
-                            value={newWall.width_m}
-                            onChange={(e) => setNewWall(prev => ({ ...prev, width_m: parseFloat(e.target.value) || 0 }))}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="new_height">Hauteur (m)</Label>
-                          <Input
-                            id="new_height"
-                            type="number"
-                            step="0.1"
-                            value={newWall.height_m}
-                            onChange={(e) => setNewWall(prev => ({ ...prev, height_m: parseFloat(e.target.value) || 0 }))}
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <Label htmlFor="new_surface_type">Type de surface</Label>
-                        <Input
-                          id="new_surface_type"
-                          value={newWall.surface_type}
-                          onChange={(e) => setNewWall(prev => ({ ...prev, surface_type: e.target.value }))}
-                          placeholder="Béton, brique, métal..."
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="new_description">Description</Label>
+
+                      {/* Biographie */}
+                      <div className="space-y-3">
+                        <Label htmlFor="biographie" className="text-lg font-semibold flex items-center gap-2">
+                          <FileText className="h-5 w-5 text-indigo-600" />
+                          Présentation
+                        </Label>
                         <Textarea
-                          id="new_description"
-                          value={newWall.description}
-                          onChange={(e) => setNewWall(prev => ({ ...prev, description: e.target.value }))}
-                          placeholder="Décrivez votre mur, son emplacement, vos attentes..."
-                          rows={3}
+                          id="biographie"
+                          value={formData.biographie}
+                          onChange={(e) => handleInputChange('biographie', e.target.value)}
+                          placeholder="Présentez-vous : votre entreprise, vos projets, pourquoi vous souhaitez collaborer avec des artistes..."
+                          rows={6}
+                          className="text-lg border-2 focus:border-indigo-500 transition-colors resize-none"
                         />
+                        <p className="text-sm text-gray-500">
+                          Cette présentation sera visible sur votre profil public WXLLSPACE
+                        </p>
                       </div>
-                      <div>
-                        <Label>Photo du mur</Label>
-                        <ImageUpload
-                          currentImageUrl={newWall.image_url}
-                          onImageUploaded={(url) => setNewWall(prev => ({ ...prev, image_url: url }))}
-                          bucketName="wall-images"
-                        />
-                      </div>
-                      <div className="flex gap-2">
-                        <Button onClick={handleAddWall} disabled={!newWall.Name}>
-                          Ajouter le mur
-                        </Button>
-                        <Button variant="outline" onClick={() => setShowAddWall(false)}>
-                          Annuler
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
 
-                {walls.length === 0 && !showAddWall && (
-                  <div className="text-center py-12">
-                    <Building className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-500 mb-2">Aucun mur posté</h3>
-                    <p className="text-gray-400 mb-4">Ajoutez votre premier mur pour attirer des artistes.</p>
-                    <Button onClick={() => setShowAddWall(true)}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Poster votre premier mur
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+                      {/* Bouton de sauvegarde */}
+                      <div className="pt-6">
+                        <Button 
+                          type="submit" 
+                          className="w-full h-14 text-lg font-bold bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                          disabled={saving}
+                        >
+                          {saving ? (
+                            <>
+                              <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-3"></div>
+                              Sauvegarde en cours...
+                            </>
+                          ) : (
+                            <>
+                              💾 Sauvegarder mon profil WXLLSPACE
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </form>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
 
         {/* Footer */}
         <div className="text-center mt-8 text-gray-500">

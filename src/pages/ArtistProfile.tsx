@@ -1,52 +1,77 @@
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabaseClient';
 import { Button } from "@/components/ui/button";
-import { MapPin, Mail, Heart, Instagram, ExternalLink } from 'lucide-react';
+import { MapPin, Mail, Heart, Instagram, ExternalLink, Briefcase, Star } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
+import Spinner from '@/components/ui/Spinner';
 
 const ArtistProfile = () => {
   const { id } = useParams();
   
-  // This would come from an API in a real application
-  const artist = {
-    id: "5",
-    name: "Julie Dubois",
-    instagram: "@julie_dubois_art",
-    style: "Art Urbain",
-    location: "Toulouse",
-    imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1964&auto=format&fit=crop",
-    description: "Artiste urbaine passionnée par la création de fresques colorées et engagées. Spécialisée dans l'art urbain contemporain avec une touche de street art traditionnel.",
-    projects: 25,
-    experience: "5 ans",
-    website: "https://julie-dubois-art.fr",
-    previousWorks: [
-      {
-        id: 1,
-        title: "Fresque Murales École Primaire",
-        location: "Toulouse Centre",
-        imageUrl: "https://images.unsplash.com/photo-1578321272176-b7bbc0679853?q=80&w=1964&auto=format&fit=crop",
-        year: "2024",
-        description: "Création d'une fresque colorée représentant la nature et les animaux pour égayer la cour de récréation."
-      },
-      {
-        id: 2,
-        title: "Mur Commercial Quartier Saint-Cyprien",
-        location: "Toulouse",
-        imageUrl: "https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=1964&auto=format&fit=crop",
-        year: "2023",
-        description: "Œuvre abstraite aux couleurs vives pour dynamiser l'entrée d'un centre commercial."
-      },
-      {
-        id: 3,
-        title: "Passage Souterrain Métro",
-        location: "Station Capitole",
-        imageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=1964&auto=format&fit=crop",
-        year: "2023",
-        description: "Transformation d'un passage souterrain en galerie d'art urbain avec des motifs géométriques."
-      }
-    ]
-  };
+  const { data: artist, isLoading, error } = useQuery({
+    queryKey: ['artist', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('artists')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Spinner size={48} />
+      </div>
+    );
+  }
+
+  if (error || !artist) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Artiste non trouvé</h1>
+          <p className="text-gray-600">Cet artiste n'existe pas ou a été supprimé.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Mock previous works for now since we don't have this data in the database yet
+  const previousWorks = [
+    {
+      id: 1,
+      title: "Fresque Murales École Primaire",
+      location: artist.location || "Ville",
+      imageUrl: "https://images.unsplash.com/photo-1578321272176-b7bbc0679853?q=80&w=1964&auto=format&fit=crop",
+      year: "2024",
+      description: "Création d'une fresque colorée représentant la nature et les animaux pour égayer la cour de récréation."
+    },
+    {
+      id: 2,
+      title: "Mur Commercial Quartier",
+      location: artist.location || "Ville",
+      imageUrl: "https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=1964&auto=format&fit=crop",
+      year: "2023",
+      description: "Œuvre abstraite aux couleurs vives pour dynamiser l'entrée d'un centre commercial."
+    },
+    {
+      id: 3,
+      title: "Passage Souterrain",
+      location: artist.location || "Ville",
+      imageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=1964&auto=format&fit=crop",
+      year: "2023",
+      description: "Transformation d'un passage souterrain en galerie d'art urbain avec des motifs géométriques."
+    }
+  ];
 
   return (
     <div className="min-h-screen flex flex-col artist-theme">
@@ -56,7 +81,7 @@ const ArtistProfile = () => {
             {/* Image Section */}
             <div className="relative h-[500px] rounded-xl overflow-hidden">
               <img 
-                src={artist.imageUrl} 
+                src={artist.profile_image_url || "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1964&auto=format&fit=crop"} 
                 alt={artist.name}
                 className="w-full h-full object-cover"
               />
@@ -67,16 +92,16 @@ const ArtistProfile = () => {
             <div className="space-y-6">
               <div>
                 <h1 className="text-4xl font-bold mb-2 gradient-artist">{artist.name}</h1>
-                {artist.instagram && (
+                {artist.instagram_handle && (
                   <div className="flex items-center text-wxll-artist mb-3">
                     <Instagram className="w-4 h-4 mr-2" />
                     <a 
-                      href={`https://instagram.com/${artist.instagram.replace('@', '')}`}
+                      href={`https://instagram.com/${artist.instagram_handle.replace('@', '')}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm font-medium hover:underline"
                     >
-                      {artist.instagram}
+                      {artist.instagram_handle}
                     </a>
                   </div>
                 )}
@@ -93,26 +118,36 @@ const ArtistProfile = () => {
                     </a>
                   </div>
                 )}
-                <div className="flex items-center text-gray-600 mb-4">
-                  <MapPin className="w-4 h-4 mr-2" />
-                  <span>{artist.location}</span>
-                </div>
-                <span className="inline-block bg-wxll-artist/10 border border-wxll-artist/20 text-wxll-artist text-sm font-medium px-3 py-1 rounded-full">
-                  {artist.style}
-                </span>
+                {artist.location && (
+                  <div className="flex items-center text-gray-600 mb-4">
+                    <MapPin className="w-4 h-4 mr-2" />
+                    <span>{artist.location}</span>
+                  </div>
+                )}
+                {artist.style && (
+                  <span className="inline-block bg-wxll-artist/10 border border-wxll-artist/20 text-wxll-artist text-sm font-medium px-3 py-1 rounded-full">
+                    {artist.style}
+                  </span>
+                )}
               </div>
 
-              <p className="text-gray-700 leading-relaxed">{artist.description}</p>
+              {artist.bio && (
+                <p className="text-gray-700 leading-relaxed">{artist.bio}</p>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white/70 backdrop-blur-sm p-4 rounded-lg border border-wxll-artist/10">
-                  <div className="text-2xl font-bold text-wxll-artist">{artist.projects}</div>
-                  <div className="text-gray-600">Projets réalisés</div>
-                </div>
-                <div className="bg-white/70 backdrop-blur-sm p-4 rounded-lg border border-wxll-artist/10">
-                  <div className="text-2xl font-bold text-wxll-artist">{artist.experience}</div>
-                  <div className="text-gray-600">d'expérience</div>
-                </div>
+                {artist.projects_count !== null && (
+                  <div className="bg-white/70 backdrop-blur-sm p-4 rounded-lg border border-wxll-artist/10">
+                    <div className="text-2xl font-bold text-wxll-artist">{artist.projects_count}</div>
+                    <div className="text-gray-600">Projets réalisés</div>
+                  </div>
+                )}
+                {artist.experience_years && (
+                  <div className="bg-white/70 backdrop-blur-sm p-4 rounded-lg border border-wxll-artist/10">
+                    <div className="text-2xl font-bold text-wxll-artist">{artist.experience_years} ans</div>
+                    <div className="text-gray-600">d'expérience</div>
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
@@ -133,12 +168,12 @@ const ArtistProfile = () => {
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold mb-4 gradient-artist">Réalisations précédentes</h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
-                Découvrez quelques-unes des œuvres créées par {artist.name.split(' ')[0]} dans la région toulousaine
+                Découvrez quelques-unes des œuvres créées par {artist.name.split(' ')[0]} dans la région
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {artist.previousWorks.map((work) => (
+              {previousWorks.map((work) => (
                 <Card key={work.id} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 bg-white/70 backdrop-blur-sm">
                   <div className="relative h-64 overflow-hidden">
                     <img

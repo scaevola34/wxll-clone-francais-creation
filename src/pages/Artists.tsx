@@ -2,13 +2,14 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useArtistsInfinite } from '@/hooks/useArtistsInfinite';
-import ArtistCard from '@/components/ArtistCard';
+import ArtistCarousel from '@/components/ArtistCarousel';
 import AdvancedFilters from '@/components/AdvancedFilters';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Search } from 'lucide-react';
 import Spinner from '@/components/ui/Spinner';
+import { adaptArtistForCarousel } from '@/utils/dataAdapters';
 
 interface FilterState {
   location?: string;
@@ -17,7 +18,7 @@ interface FilterState {
   maxProjects?: number[];
 }
 
-const PAGE_SIZE = 12; // juste pour le compteur
+const PAGE_SIZE = 12;
 
 const Artists: React.FC = () => {
   /* recherche plein-texte */
@@ -107,6 +108,12 @@ const Artists: React.FC = () => {
     );
   }
 
+  // Diviser les artistes en groupes de 3 pour le carousel
+  const artistGroups = [];
+  for (let i = 0; i < artists.length; i += 6) {
+    artistGroups.push(artists.slice(i, i + 6));
+  }
+
   /* ------------- RENDER principal ------------------- */
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
@@ -164,15 +171,17 @@ const Artists: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Grille */}
+        {/* Affichage des artistes avec le format carousel */}
         {artists.length === 0 ? (
           <p className="text-center text-gray-500 py-20">
             Aucun artiste ne correspond aux critères.
           </p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {artists.map((artist) => (
-              <ArtistCard key={artist.id} {...artist} />
+          <div className="space-y-12">
+            {artistGroups.map((group, groupIndex) => (
+              <div key={groupIndex}>
+                <ArtistCarousel artists={group.map(adaptArtistForCarousel)} />
+              </div>
             ))}
           </div>
         )}

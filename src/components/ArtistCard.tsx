@@ -33,44 +33,44 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
   projects_count,
 }) => {
   return (
-    <Card className="hover:shadow-lg transition-shadow duration-300">
-      <CardHeader className="text-center">
-        <Avatar className="h-24 w-24 mx-auto mb-4">
+    <Card className="hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+      <CardHeader className="text-center pb-4">
+        <Avatar className="h-20 w-20 mx-auto mb-3">
           <AvatarImage src={profile_image_url || undefined} alt={name} />
-          <AvatarFallback className="text-lg">
+          <AvatarFallback className="text-lg bg-purple-100 text-purple-700">
             {name.split(' ').map(n => n[0]).join('').toUpperCase()}
           </AvatarFallback>
         </Avatar>
-        <CardTitle className="text-xl">{name}</CardTitle>
+        <CardTitle className="text-lg font-bold text-gray-900">{name}</CardTitle>
         {location && (
-          <div className="flex items-center justify-center text-gray-600 text-sm">
+          <div className="flex items-center justify-center text-gray-500 text-sm">
             <MapPin className="h-4 w-4 mr-1" />
             {location}
           </div>
         )}
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 flex-grow flex flex-col">
         {style && (
-          <Badge variant="secondary" className="w-fit">
+          <Badge variant="secondary" className="w-fit mx-auto bg-purple-100 text-purple-700">
             {style}
           </Badge>
         )}
 
         {bio && (
-          <p className="text-gray-700 text-sm line-clamp-3">
+          <p className="text-gray-600 text-sm line-clamp-3 text-center flex-grow">
             {bio}
           </p>
         )}
 
-        <div className="flex justify-between text-sm text-gray-600">
+        <div className="flex justify-center gap-6 text-sm text-gray-500 py-2">
           {experience_years && (
             <div className="flex items-center gap-1">
               <Briefcase className="h-4 w-4" />
               {experience_years} ans
             </div>
           )}
-          {projects_count && (
+          {projects_count !== null && projects_count !== undefined && (
             <div className="flex items-center gap-1">
               <Star className="h-4 w-4" />
               {projects_count} projets
@@ -78,30 +78,30 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
           )}
         </div>
 
-        <div className="flex gap-2">
-          <Button asChild size="sm" className="flex-1">
+        <div className="flex gap-2 mt-auto">
+          <Button asChild size="sm" className="flex-1 bg-purple-600 hover:bg-purple-700">
             <Link to={`/artistes/${id}`}>
               Voir le profil
             </Link>
           </Button>
-          <Button size="sm" variant="outline" className="flex items-center gap-1">
+          <Button size="sm" variant="outline" className="flex items-center gap-1 border-purple-200 text-purple-600 hover:bg-purple-50">
             <MessageSquare className="h-4 w-4" />
             Contacter
           </Button>
         </div>
 
         {(website || instagram_handle) && (
-          <div className="flex gap-2 pt-2 border-t">
+          <div className="flex gap-2 pt-2 border-t border-gray-100">
             {website && (
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" asChild className="text-xs">
                 <a href={website} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="h-4 w-4 mr-1" />
-                  Site web
+                  <ExternalLink className="h-3 w-3 mr-1" />
+                  Site
                 </a>
               </Button>
             )}
             {instagram_handle && (
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" asChild className="text-xs">
                 <a 
                   href={`https://instagram.com/${instagram_handle.replace('@', '')}`} 
                   target="_blank" 

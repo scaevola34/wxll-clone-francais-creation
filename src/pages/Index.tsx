@@ -19,8 +19,8 @@ const Index = () => {
   const [authInitialTab, setAuthInitialTab] = useState<'register' | 'login'>('register');
   const [userType, setUserType] = useState<'artist' | 'owner' | null>(null);
 
-  const { artists, loading: artistsLoading } = useArtists();
-  const { walls, loading: wallsLoading } = useWalls();
+  const { data: artists, isLoading: artistsLoading } = useArtists();
+  const { data: walls, isLoading: wallsLoading } = useWalls();
 
   // Témoignages (exemple)
   const testimonials = [
@@ -152,7 +152,7 @@ const Index = () => {
                 <div className="text-lg text-gray-600">Chargement des artistes...</div>
               </div>
             ) : (
-              <ArtistCarousel artists={artists} />
+              <ArtistCarousel artists={artists || []} />
             )}
           </div>
 
@@ -190,7 +190,7 @@ const Index = () => {
                 <div className="text-lg text-gray-600">Chargement des murs...</div>
               </div>
             ) : (
-              <WallCarousel walls={walls} />
+              <WallCarousel walls={walls || []} />
             )}
           </div>
 

@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { useConversations } from '@/hooks/useConversations';
 import { useMessages } from '@/hooks/useMessages';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthComplete } from '@/hooks/useAuthComplete';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +16,7 @@ const Messages = () => {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const { messages, sendMessage } = useMessages(selectedConversationId);
-  const { user, userType } = useAuth();
+  const { user, userType } = useAuthComplete();
 
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
 

@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useArtistsInfinite } from '@/hooks/useArtistsInfinite';
@@ -91,7 +92,7 @@ const Artists: React.FC = () => {
   }, [hasNextPage, fetchNextPage]);
 
   /* ------------- états de chargement ---------------- */
-  if (status === 'loading') {
+  if (status === 'pending') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
         <Spinner size={48} />
@@ -195,4 +196,3 @@ const Artists: React.FC = () => {
 };
 
 export default Artists;
-

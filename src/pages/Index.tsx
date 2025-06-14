@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,7 @@ import ArtistCarousel from '@/components/ArtistCarousel';
 import WallCarousel from '@/components/WallCarousel';
 import { useArtists } from '@/hooks/useArtists';
 import { useWalls } from '@/hooks/useWalls';
+import { adaptArtistForCarousel, adaptWallForCarousel } from '@/utils/dataAdapters';
 
 const Index = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -152,7 +154,7 @@ const Index = () => {
                 <div className="text-lg text-gray-600">Chargement des artistes...</div>
               </div>
             ) : (
-              <ArtistCarousel artists={artists || []} />
+              <ArtistCarousel artists={(artists || []).map(adaptArtistForCarousel)} />
             )}
           </div>
 
@@ -190,7 +192,7 @@ const Index = () => {
                 <div className="text-lg text-gray-600">Chargement des murs...</div>
               </div>
             ) : (
-              <WallCarousel walls={walls || []} />
+              <WallCarousel walls={(walls || []).map(adaptWallForCarousel)} />
             )}
           </div>
 

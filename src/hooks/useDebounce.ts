@@ -1,13 +1,18 @@
-import { useEffect, useState } from 'react';
 
-/* retourne value après n ms sans frappe (par défaut 400 ms) */
-export const useDebounce = <T,>(value: T, delay = 400) => {
-  const [debounced, setDebounced] = useState(value);
+import { useState, useEffect } from 'react';
+
+export function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
 
   useEffect(() => {
-    const id = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(id);
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
   }, [value, delay]);
 
-  return debounced;
-};
+  return debouncedValue;
+}

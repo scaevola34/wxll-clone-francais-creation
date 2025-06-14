@@ -1,39 +1,36 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 
 export interface Artist {
   id: string;
   name: string;
-  style: string | null;
-  location: string | null;
-  profile_image_url: string | null;
+  style?: string | null;
+  location?: string | null;
   bio?: string | null;
+  profile_image_url?: string | null;
+  website?: string | null;
+  instagram_handle?: string | null;
   experience_years?: number | null;
   projects_count?: number | null;
+  contact_email?: string | null;
+  previous_works_urls?: string[] | null;
+  coverage_area?: string | null;
+  visibility?: boolean;
+  created_at?: string;
 }
 
-interface Params {
-  search?: string;
-}
-
-export const useArtists = ({ search }: Params = {}) =>
-  useQuery<Artist[]>({
-    queryKey: ['artists', search],
+export const useArtists = () => {
+  return useQuery<Artist[]>({
+    queryKey: ['artists'],
     queryFn: async () => {
-      let req = supabase
+      const { data, error } = await supabase
         .from('artists')
-        .select('*');
+        .select('*')
+        .eq('visibility', true);
 
-      if (search) {
-  req = req
-    .not('location', 'is', null)  // Exclure les artistes sans ville
-    .ilike('location', `%${search}%`);  // Rechercher dans la localisation
-}
-
-      const { data, error } = await req;
       if (error) throw error;
-
       return data as Artist[];
     },
   });
-
+};

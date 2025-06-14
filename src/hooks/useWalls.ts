@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -6,49 +7,43 @@ export interface Wall {
   title: string | null;
   location: string | null;
   surface_m2: number | null;
-  type: string | null;           // ex. « façade », « intérieur »
+  type: string | null;
   image_url: string | null;
+  Name?: string;
+  description?: string;
+  indoor?: boolean;
+  width_m?: number;
+  height_m?: number;
+  owner_type?: string;
+  contact_email?: string;
 }
 
-interface Params {
-  search?: string;               // mot-clé ville
-  minSurface?: number;           // surface minimale m²
-  type?: string;                 // façade / intérieur…
-}
-
-/* ------- le paramètre est optionnel, on met {} par défaut ------------ */
-export const useWalls = ({
-  search,
-  minSurface,
-  type,
-}: Params = {}) =>
-  useQuery<Wall[]>({
-    queryKey: ['walls', search, minSurface, type],
+export const useWalls = () => {
+  return useQuery<Wall[]>({
+    queryKey: ['walls'],
     queryFn: async () => {
-      let req = supabase.from('walls').select('*');
+      const { data, error } = await supabase
+        .from('wall_owners')
+        .select('*')
+        .eq('visibility', true);
 
-      /* recherche ville ------------------------------------------------ */
-      if (search) {
-        req = req
-          .not('location', 'is', null)          // exclut NULL
-          .ilike('location', `%${search}%`);    // côté serveur
-      }
-
-      /* type de mur ---------------------------------------------------- */
-      if (type) {
-        req = req.eq('type', type);
-      }
-
-      /* surface minimale ---------------------------------------------- */
-      if (minSurface) {
-        req = req
-          .not('surface_m2', 'is', null)
-          .gte('surface_m2', minSurface);
-      }
-
-      const { data, error } = await req;
       if (error) throw error;
-
-      return data as Wall[];
+      
+      return (data || []).map(wall => ({
+        id: wall.id,
+        title: wall.Name,
+        location: wall.location_postal_code,
+        surface_m2: wall.surface_area_m2,
+        type: wall.surface_type,
+        image_url: wall.image_url,
+        Name: wall.Name,
+        description: wall.description,
+        indoor: wall.indoor,
+        width_m: wall.width_m,
+        height_m: wall.height_m,
+        owner_type: wall.owner_type,
+        contact_email: wall.contact_email,
+      }));
     },
   });
+};

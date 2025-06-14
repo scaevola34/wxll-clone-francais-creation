@@ -3,15 +3,20 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Palette, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth, useSignOut } from '@/hooks/useAuth';
 import NotificationBell from './NotificationBell';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const { user, signOut } = useAuth();
+  const { data: user } = useAuth();
+  const signOutMutation = useSignOut();
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleSignOut = () => {
+    signOutMutation.mutate();
+  };
 
   const navLinks = [
     { path: '/', label: 'Accueil' },
@@ -64,8 +69,13 @@ const Navbar = () => {
                   <span className="text-sm text-gray-700">
                     Bonjour, {user.email}
                   </span>
-                  <Button variant="outline" size="sm" onClick={() => signOut()}>
-                    Déconnexion
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleSignOut}
+                    disabled={signOutMutation.isPending}
+                  >
+                    {signOutMutation.isPending ? 'Déconnexion...' : 'Déconnexion'}
                   </Button>
                 </div>
               </>

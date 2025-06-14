@@ -15,6 +15,7 @@ import ScrollToTopButton from "./components/ScrollToTopButton";
 import Index from "./pages/Index";
 import Artists from "./pages/Artists";
 import Walls from "./pages/Walls";
+import MapView from "./pages/MapView";
 import Apropos from "./pages/Apropos";
 import FAQ from "./pages/FAQ";
 import HowItWorksPage from "./pages/HowItWorksPage";
@@ -58,6 +59,7 @@ const App = () => (
                 <Route path="/artistes" element={<Artists />} />
                 <Route path="/artistes/:id" element={<ArtistProfile />} />
                 <Route path="/murs" element={<Walls />} />
+                <Route path="/carte" element={<MapView />} />
                 <Route path="/comment-ca-marche" element={<HowItWorksPage />} />
                 <Route path="/a-propos" element={<Apropos />} />
                 <Route path="/faq" element={<FAQ />} />

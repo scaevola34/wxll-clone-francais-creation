@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
 import ArtistProfile from "./pages/ArtistProfile";
 import ArtistDashboard from "./pages/ArtistDashboard";
 import OwnerDashboard from "./pages/OwnerDashboard";
+import Messages from "./pages/Messages";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ResetPassword from "./pages/ResetPassword";
@@ -81,6 +82,16 @@ const App = () => (
                   element={
                     <ProtectedRoute requireUserType="owner">
                       <OwnerDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Messages - accessible aux deux types d'utilisateurs */}
+                <Route
+                  path="/messages"
+                  element={
+                    <ProtectedRoute>
+                      <Messages />
                     </ProtectedRoute>
                   }
                 />

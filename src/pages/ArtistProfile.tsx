@@ -3,13 +3,16 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
+import { useAuthComplete } from '@/hooks/useAuthComplete';
 import { Button } from "@/components/ui/button";
 import { MapPin, Mail, Heart, Instagram, ExternalLink, Briefcase, Star } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
+import { ProjectProposalForm } from '@/components/ProjectProposalForm';
 import Spinner from '@/components/ui/Spinner';
 
 const ArtistProfile = () => {
   const { id } = useParams();
+  const { userType, isAuthenticated } = useAuthComplete();
   
   const { data: artist, isLoading, error } = useQuery({
     queryKey: ['artist', id],
@@ -151,10 +154,20 @@ const ArtistProfile = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
+                {/* Bouton de contact par email */}
                 <Button className="btn-artist flex-1 flex items-center justify-center gap-2">
                   <Mail className="w-4 h-4" />
                   Contacter
                 </Button>
+                
+                {/* Bouton de proposition de projet (uniquement pour les propriétaires connectés) */}
+                {isAuthenticated && userType === 'owner' && (
+                  <div className="flex-1">
+                    <ProjectProposalForm artistId={artist.id} artistName={artist.name} />
+                  </div>
+                )}
+                
+                {/* Bouton de suivi */}
                 <Button variant="outline" className="flex-1 flex items-center justify-center gap-2 border-wxll-artist text-wxll-artist hover:bg-wxll-artist hover:text-white">
                   <Heart className="w-4 h-4" />
                   Suivre

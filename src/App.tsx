@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -31,7 +32,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 60_000,            // garde les données 1 min en cache
-      refetchOnWindowFocus: false,  // pas de refresh automatique quand on revient sur l’onglet
+      refetchOnWindowFocus: false,  // pas de refresh automatique quand on revient sur l'onglet
     },
   },
 });
@@ -64,7 +65,7 @@ const App = () => (
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/verify-email" element={<VerifyEmail />} />
 
-                {/* zones protégées */}
+                {/* zones protégées pour artistes */}
                 <Route
                   path="/artiste/profil"
                   element={
@@ -73,6 +74,8 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
+
+                {/* zones protégées pour propriétaires */}
                 <Route
                   path="/proprietaire/profil"
                   element={

@@ -9,43 +9,41 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from '@/hooks/use-toast'
-import { Palette, MapPin, Phone, Mail, User as UserIcon, FileText, Globe, Instagram, Clock, Camera, Plus, Edit, Trash2 } from 'lucide-react'
+import { Palette, MapPin, Globe, Instagram, User as UserIcon, FileText, Camera, Plus, Edit } from 'lucide-react'
 import ImageUpload from '@/components/ui/ImageUpload'
 
-interface Portfolio {
+interface ArtistProject {
   id: string
   title: string
-  year: number
-  location: string
-  description: string
+  location?: string
+  description?: string
   image_url?: string
+  year?: number
 }
 
 export const ArtistDashboard: React.FC = () => {
   const [user, setUser] = useState<User | null>(null)
   const { profile, loading, error, updateProfile } = useProfile(user)
   const [formData, setFormData] = useState({
-    nom_complet: '',
+    name: '',
     email: '',
-    telephone: '',
-    localisation: '',
-    style_artistique: '',
-    biographie: '',
-    instagram_handle: '',
+    bio: '',
+    location: '',
+    style: '',
     website: '',
+    instagram_handle: '',
     experience_years: 0,
     profile_image_url: ''
   })
   const [saving, setSaving] = useState(false)
-  const [portfolio, setPortfolio] = useState<Portfolio[]>([])
-  const [showAddWork, setShowAddWork] = useState(false)
-  const [editingWork, setEditingWork] = useState<Portfolio | null>(null)
-  const [newWork, setNewWork] = useState({
+  const [projects, setProjects] = useState<ArtistProject[]>([])
+  const [showAddProject, setShowAddProject] = useState(false)
+  const [newProject, setNewProject] = useState({
     title: '',
-    year: new Date().getFullYear(),
     location: '',
     description: '',
-    image_url: ''
+    image_url: '',
+    year: new Date().getFullYear()
   })
 
   useEffect(() => {
@@ -65,46 +63,56 @@ export const ArtistDashboard: React.FC = () => {
   }, [])
 
   useEffect(() => {
-    // Pré-remplir automatiquement le formulaire avec les données du profil
-    if (profile) {
-      setFormData({
-        nom_complet: profile.nom_complet || '',
-        email: user?.email || '',
-        telephone: profile.telephone || '',
-        localisation: profile.localisation || '',
-        style_artistique: profile.style_artistique || '',
-        biographie: profile.biographie || '',
-        instagram_handle: profile.instagram_handle || '',
-        website: profile.website || '',
-        experience_years: profile.experience_years || 0,
-        profile_image_url: profile.profile_image_url || ''
-      })
-    } else if (user) {
-      setFormData(prev => ({
-        ...prev,
-        email: user.email || ''
-      }))
-    }
-  }, [profile, user])
-
-  useEffect(() => {
     if (user) {
-      fetchPortfolio()
+      fetchArtistData()
+      fetchProjects()
     }
   }, [user])
 
-  const fetchPortfolio = async () => {
+  const fetchArtistData = async () => {
+    if (!user) return
+
+    try {
+      const { data, error } = await supabase
+        .from('artists')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (error) throw error
+
+      if (data) {
+        setFormData({
+          name: data.name || '',
+          email: data.contact_email || user.email || '',
+          bio: data.bio || '',
+          location: data.location || '',
+          style: data.style || '',
+          website: data.website || '',
+          instagram_handle: data.instagram_handle || '',
+          experience_years: data.experience_years || 0,
+          profile_image_url: data.profile_image_url || ''
+        })
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des données artiste:', error)
+    }
+  }
+
+  const fetchProjects = async () => {
+    if (!user) return
+
     try {
       const { data, error } = await supabase
         .from('artist_projects')
         .select('*')
-        .eq('artist_id', user?.id)
+        .eq('artist_id', user.id)
         .order('year', { ascending: false })
 
       if (error) throw error
-      setPortfolio(data || [])
+      setProjects(data || [])
     } catch (error) {
-      console.error('Erreur lors du chargement du portfolio:', error)
+      console.error('Erreur lors du chargement des projets:', error)
     }
   }
 
@@ -120,15 +128,32 @@ export const ArtistDashboard: React.FC = () => {
     
     try {
       setSaving(true)
-      await updateProfile(formData)
+      
+      const { error } = await supabase
+        .from('artists')
+        .upsert({
+          id: user?.id,
+          name: formData.name,
+          contact_email: formData.email,
+          bio: formData.bio,
+          location: formData.location,
+          style: formData.style,
+          website: formData.website,
+          instagram_handle: formData.instagram_handle,
+          experience_years: formData.experience_years,
+          profile_image_url: formData.profile_image_url
+        })
+
+      if (error) throw error
+
       toast({
-        title: "✅ Profil WXLLSPACE mis à jour",
-        description: "Vos informations d'artiste ont été sauvegardées avec succès sur la marketplace.",
+        title: "✅ Profil artiste mis à jour",
+        description: "Vos informations ont été sauvegardées avec succès.",
       })
     } catch (error) {
       toast({
-        title: "❌ Erreur WXLLSPACE",
-        description: "Une erreur est survenue lors de la sauvegarde de votre profil artiste.",
+        title: "❌ Erreur",
+        description: "Une erreur est survenue lors de la sauvegarde.",
         variant: "destructive",
       })
     } finally {
@@ -136,96 +161,39 @@ export const ArtistDashboard: React.FC = () => {
     }
   }
 
-  const handleAddWork = async () => {
+  const handleAddProject = async () => {
     try {
       const { error } = await supabase
         .from('artist_projects')
         .insert([{
           artist_id: user?.id,
-          title: newWork.title,
-          year: newWork.year,
-          location: newWork.location,
-          description: newWork.description,
-          image_url: newWork.image_url
+          title: newProject.title,
+          location: newProject.location,
+          description: newProject.description,
+          image_url: newProject.image_url,
+          year: newProject.year
         }])
 
       if (error) throw error
 
       toast({
-        title: "✅ Œuvre ajoutée",
-        description: "Votre œuvre a été ajoutée à votre portfolio.",
+        title: "✅ Projet ajouté",
+        description: "Votre projet a été ajouté avec succès.",
       })
 
-      setNewWork({
+      setNewProject({
         title: '',
-        year: new Date().getFullYear(),
         location: '',
         description: '',
-        image_url: ''
+        image_url: '',
+        year: new Date().getFullYear()
       })
-      setShowAddWork(false)
-      fetchPortfolio()
+      setShowAddProject(false)
+      fetchProjects()
     } catch (error) {
       toast({
         title: "❌ Erreur",
-        description: "Une erreur est survenue lors de l'ajout de l'œuvre.",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const handleEditWork = async (work: Portfolio) => {
-    try {
-      const { error } = await supabase
-        .from('artist_projects')
-        .update({
-          title: work.title,
-          year: work.year,
-          location: work.location,
-          description: work.description,
-          image_url: work.image_url
-        })
-        .eq('id', work.id)
-
-      if (error) throw error
-
-      toast({
-        title: "✅ Œuvre modifiée",
-        description: "Votre œuvre a été mise à jour.",
-      })
-
-      setEditingWork(null)
-      fetchPortfolio()
-    } catch (error) {
-      toast({
-        title: "❌ Erreur",
-        description: "Une erreur est survenue lors de la modification de l'œuvre.",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const handleDeleteWork = async (workId: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette œuvre ?')) return
-
-    try {
-      const { error } = await supabase
-        .from('artist_projects')
-        .delete()
-        .eq('id', workId)
-
-      if (error) throw error
-
-      toast({
-        title: "✅ Œuvre supprimée",
-        description: "L'œuvre a été supprimée de votre portfolio.",
-      })
-
-      fetchPortfolio()
-    } catch (error) {
-      toast({
-        title: "❌ Erreur",
-        description: "Une erreur est survenue lors de la suppression de l'œuvre.",
+        description: "Une erreur est survenue lors de l'ajout du projet.",
         variant: "destructive",
       })
     }
@@ -233,7 +201,13 @@ export const ArtistDashboard: React.FC = () => {
 
   const updateProfileImage = async (imageUrl: string) => {
     try {
-      await updateProfile({ ...formData, profile_image_url: imageUrl })
+      const { error } = await supabase
+        .from('artists')
+        .update({ profile_image_url: imageUrl })
+        .eq('id', user?.id)
+
+      if (error) throw error
+
       setFormData(prev => ({ ...prev, profile_image_url: imageUrl }))
       toast({
         title: "✅ Photo de profil mise à jour",
@@ -250,10 +224,10 @@ export const ArtistDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent mx-auto"></div>
-          <p className="text-lg font-medium text-gray-700">Chargement de votre profil WXLLSPACE...</p>
+          <p className="text-lg font-medium text-gray-700">Chargement de votre profil artiste...</p>
         </div>
       </div>
     )
@@ -265,7 +239,7 @@ export const ArtistDashboard: React.FC = () => {
         <Card className="max-w-md mx-auto">
           <CardContent className="p-6 text-center">
             <div className="text-red-500 text-6xl mb-4">⚠️</div>
-            <h2 className="text-xl font-bold text-red-700 mb-2">Erreur WXLLSPACE</h2>
+            <h2 className="text-xl font-bold text-red-700 mb-2">Erreur</h2>
             <p className="text-red-600">{error}</p>
           </CardContent>
         </Card>
@@ -274,14 +248,14 @@ export const ArtistDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 py-8">
       <div className="container mx-auto px-4">
-        {/* Header WXLLSPACE */}
+        {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
             WXLLSPACE
           </h1>
-          <p className="text-lg text-gray-600">Marketplace Street Art - Profil Artiste</p>
+          <p className="text-lg text-gray-600">Dashboard Artiste - Marketplace Street Art</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -299,7 +273,6 @@ export const ArtistDashboard: React.FC = () => {
                   currentImageUrl={formData.profile_image_url}
                   onImageUploaded={updateProfileImage}
                   className="flex flex-col items-center"
-                  bucketName="profile-images"
                 />
               </CardContent>
             </Card>
@@ -309,11 +282,12 @@ export const ArtistDashboard: React.FC = () => {
           <div className="lg:col-span-3 space-y-8">
             {/* Profil Section */}
             <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
-              <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-t-lg">
+              <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-t-lg">
                 <CardTitle className="text-2xl font-bold flex items-center gap-3">
-                  <UserIcon className="h-8 w-8" />
-                  Mon Profil d'Artiste WXLLSPACE
+                  <Palette className="h-8 w-8" />
+                  Mon Profil Artiste WXLLSPACE
                 </CardTitle>
+                <p className="text-purple-100">Gérez vos informations sur la marketplace street art</p>
               </CardHeader>
               
               <CardContent className="p-8">
@@ -321,88 +295,70 @@ export const ArtistDashboard: React.FC = () => {
                   {/* Informations personnelles */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-3">
-                      <Label htmlFor="nom_complet" className="text-lg font-semibold flex items-center gap-2">
+                      <Label htmlFor="name" className="text-lg font-semibold flex items-center gap-2">
                         <UserIcon className="h-5 w-5 text-purple-600" />
-                        Nom d'artiste complet
+                        Nom d'artiste
                       </Label>
                       <Input
-                        id="nom_complet"
+                        id="name"
                         type="text"
-                        value={formData.nom_complet}
-                        onChange={(e) => handleInputChange('nom_complet', e.target.value)}
-                        placeholder="Votre nom d'artiste sur WXLLSPACE"
+                        value={formData.name}
+                        onChange={(e) => handleInputChange('name', e.target.value)}
+                        placeholder="Votre nom d'artiste"
                         className="h-12 text-lg border-2 focus:border-purple-500 transition-colors"
                       />
                     </div>
 
                     <div className="space-y-3">
                       <Label htmlFor="email" className="text-lg font-semibold flex items-center gap-2">
-                        <Mail className="h-5 w-5 text-blue-600" />
-                        Email WXLLSPACE
+                        <UserIcon className="h-5 w-5 text-pink-600" />
+                        Email
                       </Label>
                       <Input
                         id="email"
                         type="email"
                         value={formData.email}
-                        className="h-12 text-lg bg-gray-100 border-2 cursor-not-allowed"
-                        readOnly
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        className="h-12 text-lg border-2 focus:border-pink-500 transition-colors"
                       />
-                      <p className="text-sm text-gray-500 flex items-center gap-1">
-                        🔒 Email utilisé lors de votre inscription WXLLSPACE (non modifiable)
-                      </p>
                     </div>
                   </div>
 
-                  {/* Contact et localisation */}
+                  {/* Localisation et style */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-3">
-                      <Label htmlFor="telephone" className="text-lg font-semibold flex items-center gap-2">
-                        <Phone className="h-5 w-5 text-green-600" />
-                        Téléphone
-                      </Label>
-                      <Input
-                        id="telephone"
-                        type="tel"
-                        value={formData.telephone}
-                        onChange={(e) => handleInputChange('telephone', e.target.value)}
-                        placeholder="+33 1 23 45 67 89"
-                        className="h-12 text-lg border-2 focus:border-green-500 transition-colors"
-                      />
-                    </div>
-
-                    <div className="space-y-3">
-                      <Label htmlFor="localisation" className="text-lg font-semibold flex items-center gap-2">
+                      <Label htmlFor="location" className="text-lg font-semibold flex items-center gap-2">
                         <MapPin className="h-5 w-5 text-red-600" />
                         Localisation
                       </Label>
                       <Input
-                        id="localisation"
+                        id="location"
                         type="text"
-                        value={formData.localisation}
-                        onChange={(e) => handleInputChange('localisation', e.target.value)}
+                        value={formData.location}
+                        onChange={(e) => handleInputChange('location', e.target.value)}
                         placeholder="Paris, Lyon, Marseille..."
                         className="h-12 text-lg border-2 focus:border-red-500 transition-colors"
                       />
                     </div>
-                  </div>
 
-                  {/* Social et experience */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-3">
-                      <Label htmlFor="instagram_handle" className="text-lg font-semibold flex items-center gap-2">
-                        <Instagram className="h-5 w-5 text-pink-600" />
-                        Instagram
+                      <Label htmlFor="style" className="text-lg font-semibold flex items-center gap-2">
+                        <Palette className="h-5 w-5 text-orange-600" />
+                        Style artistique
                       </Label>
                       <Input
-                        id="instagram_handle"
+                        id="style"
                         type="text"
-                        value={formData.instagram_handle}
-                        onChange={(e) => handleInputChange('instagram_handle', e.target.value)}
-                        placeholder="@votre_instagram"
-                        className="h-12 text-lg border-2 focus:border-pink-500 transition-colors"
+                        value={formData.style}
+                        onChange={(e) => handleInputChange('style', e.target.value)}
+                        placeholder="Street art, Graffiti, Muralisme..."
+                        className="h-12 text-lg border-2 focus:border-orange-500 transition-colors"
                       />
                     </div>
+                  </div>
 
+                  {/* Réseaux sociaux et expérience */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-3">
                       <Label htmlFor="website" className="text-lg font-semibold flex items-center gap-2">
                         <Globe className="h-5 w-5 text-blue-600" />
@@ -413,55 +369,52 @@ export const ArtistDashboard: React.FC = () => {
                         type="url"
                         value={formData.website}
                         onChange={(e) => handleInputChange('website', e.target.value)}
-                        placeholder="https://votre-site.com"
+                        placeholder="https://mon-site.com"
                         className="h-12 text-lg border-2 focus:border-blue-500 transition-colors"
                       />
                     </div>
 
                     <div className="space-y-3">
-                      <Label htmlFor="experience_years" className="text-lg font-semibold flex items-center gap-2">
-                        <Clock className="h-5 w-5 text-indigo-600" />
-                        Années d'expérience
+                      <Label htmlFor="instagram" className="text-lg font-semibold flex items-center gap-2">
+                        <Instagram className="h-5 w-5 text-pink-600" />
+                        Instagram
                       </Label>
                       <Input
-                        id="experience_years"
+                        id="instagram"
+                        type="text"
+                        value={formData.instagram_handle}
+                        onChange={(e) => handleInputChange('instagram_handle', e.target.value)}
+                        placeholder="@mon_compte"
+                        className="h-12 text-lg border-2 focus:border-pink-500 transition-colors"
+                      />
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label htmlFor="experience" className="text-lg font-semibold flex items-center gap-2">
+                        <Palette className="h-5 w-5 text-green-600" />
+                        Expérience (années)
+                      </Label>
+                      <Input
+                        id="experience"
                         type="number"
-                        min="0"
                         value={formData.experience_years}
                         onChange={(e) => handleInputChange('experience_years', parseInt(e.target.value) || 0)}
-                        placeholder="5"
-                        className="h-12 text-lg border-2 focus:border-indigo-500 transition-colors"
+                        className="h-12 text-lg border-2 focus:border-green-500 transition-colors"
                       />
                     </div>
                   </div>
 
-                  {/* Style artistique */}
-                  <div className="space-y-3">
-                    <Label htmlFor="style_artistique" className="text-lg font-semibold flex items-center gap-2">
-                      <Palette className="h-5 w-5 text-orange-600" />
-                      Style artistique WXLLSPACE
-                    </Label>
-                    <Input
-                      id="style_artistique"
-                      type="text"
-                      value={formData.style_artistique}
-                      onChange={(e) => handleInputChange('style_artistique', e.target.value)}
-                      placeholder="Graffiti, Pochoir, Muralisme, Art urbain, Collage..."
-                      className="h-12 text-lg border-2 focus:border-orange-500 transition-colors"
-                    />
-                  </div>
-
                   {/* Biographie */}
                   <div className="space-y-3">
-                    <Label htmlFor="biographie" className="text-lg font-semibold flex items-center gap-2">
+                    <Label htmlFor="bio" className="text-lg font-semibold flex items-center gap-2">
                       <FileText className="h-5 w-5 text-indigo-600" />
-                      Biographie d'artiste
+                      Biographie
                     </Label>
                     <Textarea
-                      id="biographie"
-                      value={formData.biographie}
-                      onChange={(e) => handleInputChange('biographie', e.target.value)}
-                      placeholder="Parlez-nous de votre parcours artistique, vos influences, vos œuvres marquantes sur WXLLSPACE..."
+                      id="bio"
+                      value={formData.bio}
+                      onChange={(e) => handleInputChange('bio', e.target.value)}
+                      placeholder="Présentez-vous : votre parcours, votre style, vos inspirations..."
                       rows={6}
                       className="text-lg border-2 focus:border-indigo-500 transition-colors resize-none"
                     />
@@ -471,7 +424,7 @@ export const ArtistDashboard: React.FC = () => {
                   <div className="pt-6">
                     <Button 
                       type="submit" 
-                      className="w-full h-14 text-lg font-bold bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                      className="w-full h-14 text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
                       disabled={saving}
                     >
                       {saving ? (
@@ -481,7 +434,7 @@ export const ArtistDashboard: React.FC = () => {
                         </>
                       ) : (
                         <>
-                          💾 Sauvegarder mon profil WXLLSPACE
+                          💾 Sauvegarder mon profil
                         </>
                       )}
                     </Button>
@@ -492,84 +445,82 @@ export const ArtistDashboard: React.FC = () => {
 
             {/* Portfolio Section */}
             <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
-              <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-t-lg">
+              <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-t-lg">
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-2xl font-bold flex items-center gap-3">
                     <Palette className="h-8 w-8" />
-                    Mon Portfolio WXLLSPACE
+                    Mon Portfolio
                   </CardTitle>
                   <Button
-                    onClick={() => setShowAddWork(true)}
+                    onClick={() => setShowAddProject(true)}
                     className="bg-white text-purple-600 hover:bg-gray-100"
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Ajouter une œuvre
+                    Ajouter un projet
                   </Button>
                 </div>
               </CardHeader>
 
               <CardContent className="p-8">
-                {/* Add Work Form */}
-                {showAddWork && (
+                {/* Add Project Form */}
+                {showAddProject && (
                   <Card className="mb-6 border-2 border-purple-200">
                     <CardHeader>
-                      <CardTitle className="text-lg">Ajouter une nouvelle œuvre</CardTitle>
+                      <CardTitle className="text-lg">Ajouter un nouveau projet</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="new_title">Nom de l'œuvre</Label>
+                          <Label htmlFor="project_title">Titre du projet</Label>
                           <Input
-                            id="new_title"
-                            value={newWork.title}
-                            onChange={(e) => setNewWork(prev => ({ ...prev, title: e.target.value }))}
-                            placeholder="Titre de votre œuvre"
+                            id="project_title"
+                            value={newProject.title}
+                            onChange={(e) => setNewProject(prev => ({ ...prev, title: e.target.value }))}
+                            placeholder="Nom de votre œuvre"
                           />
                         </div>
                         <div>
-                          <Label htmlFor="new_year">Année de création</Label>
+                          <Label htmlFor="project_location">Lieu</Label>
                           <Input
-                            id="new_year"
-                            type="number"
-                            min="1900"
-                            max={new Date().getFullYear()}
-                            value={newWork.year}
-                            onChange={(e) => setNewWork(prev => ({ ...prev, year: parseInt(e.target.value) }))}
+                            id="project_location"
+                            value={newProject.location}
+                            onChange={(e) => setNewProject(prev => ({ ...prev, location: e.target.value }))}
+                            placeholder="Paris, Lyon..."
                           />
                         </div>
                       </div>
                       <div>
-                        <Label htmlFor="new_location">Localisation</Label>
+                        <Label htmlFor="project_year">Année</Label>
                         <Input
-                          id="new_location"
-                          value={newWork.location}
-                          onChange={(e) => setNewWork(prev => ({ ...prev, location: e.target.value }))}
-                          placeholder="Où cette œuvre a-t-elle été réalisée ?"
+                          id="project_year"
+                          type="number"
+                          value={newProject.year}
+                          onChange={(e) => setNewProject(prev => ({ ...prev, year: parseInt(e.target.value) || new Date().getFullYear() }))}
                         />
                       </div>
                       <div>
-                        <Label htmlFor="new_description">Contexte</Label>
+                        <Label htmlFor="project_description">Description</Label>
                         <Textarea
-                          id="new_description"
-                          value={newWork.description}
-                          onChange={(e) => setNewWork(prev => ({ ...prev, description: e.target.value }))}
-                          placeholder="Décrivez le contexte, l'inspiration, la technique utilisée..."
+                          id="project_description"
+                          value={newProject.description}
+                          onChange={(e) => setNewProject(prev => ({ ...prev, description: e.target.value }))}
+                          placeholder="Décrivez votre projet, la technique utilisée, l'inspiration..."
                           rows={3}
                         />
                       </div>
                       <div>
-                        <Label>Photo de l'œuvre</Label>
+                        <Label>Photo du projet</Label>
                         <ImageUpload
-                          currentImageUrl={newWork.image_url}
-                          onImageUploaded={(url) => setNewWork(prev => ({ ...prev, image_url: url }))}
-                          bucketName="artist-images"
+                          currentImageUrl={newProject.image_url}
+                          onImageUploaded={(url) => setNewProject(prev => ({ ...prev, image_url: url }))}
+                          bucketName="artist-projects"
                         />
                       </div>
                       <div className="flex gap-2">
-                        <Button onClick={handleAddWork} disabled={!newWork.title}>
-                          Ajouter l'œuvre
+                        <Button onClick={handleAddProject} disabled={!newProject.title}>
+                          Ajouter le projet
                         </Button>
-                        <Button variant="outline" onClick={() => setShowAddWork(false)}>
+                        <Button variant="outline" onClick={() => setShowAddProject(false)}>
                           Annuler
                         </Button>
                       </div>
@@ -577,98 +528,46 @@ export const ArtistDashboard: React.FC = () => {
                   </Card>
                 )}
 
-                {/* Portfolio Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {portfolio.map((work) => (
-                    <Card key={work.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                      {work.image_url && (
-                        <div className="h-48 bg-gray-200 overflow-hidden">
-                          <img 
-                            src={work.image_url} 
-                            alt={work.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      )}
-                      <CardContent className="p-4">
-                        {editingWork?.id === work.id ? (
-                          <div className="space-y-3">
-                            <Input
-                              value={editingWork.title}
-                              onChange={(e) => setEditingWork(prev => prev ? { ...prev, title: e.target.value } : null)}
-                              placeholder="Titre"
-                            />
-                            <Input
-                              type="number"
-                              value={editingWork.year}
-                              onChange={(e) => setEditingWork(prev => prev ? { ...prev, year: parseInt(e.target.value) } : null)}
-                              placeholder="Année"
-                            />
-                            <Input
-                              value={editingWork.location}
-                              onChange={(e) => setEditingWork(prev => prev ? { ...prev, location: e.target.value } : null)}
-                              placeholder="Localisation"
-                            />
-                            <Textarea
-                              value={editingWork.description}
-                              onChange={(e) => setEditingWork(prev => prev ? { ...prev, description: e.target.value } : null)}
-                              placeholder="Description"
-                              rows={2}
-                            />
-                            <ImageUpload
-                              currentImageUrl={editingWork.image_url}
-                              onImageUploaded={(url) => setEditingWork(prev => prev ? { ...prev, image_url: url } : null)}
-                              bucketName="artist-images"
-                            />
-                            <div className="flex gap-2">
-                              <Button size="sm" onClick={() => handleEditWork(editingWork)}>
-                                Sauvegarder
-                              </Button>
-                              <Button size="sm" variant="outline" onClick={() => setEditingWork(null)}>
-                                Annuler
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <>
-                            <h3 className="font-bold text-lg mb-2">{work.title}</h3>
-                            <p className="text-sm text-gray-600 mb-1">{work.year} • {work.location}</p>
-                            <p className="text-sm text-gray-700 mb-3">{work.description}</p>
-                            <div className="flex gap-2">
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => setEditingWork(work)}
-                              >
-                                <Edit className="h-3 w-3 mr-1" />
-                                Modifier
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => handleDeleteWork(work.id)}
-                                className="text-red-600 hover:bg-red-50"
-                              >
-                                <Trash2 className="h-3 w-3 mr-1" />
-                                Supprimer
-                              </Button>
-                            </div>
-                          </>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-
-                {portfolio.length === 0 && !showAddWork && (
+                {/* Projects Grid */}
+                {projects.length === 0 && !showAddProject && (
                   <div className="text-center py-12">
                     <Palette className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-500 mb-2">Aucune œuvre dans votre portfolio</h3>
-                    <p className="text-gray-400 mb-4">Ajoutez vos premières œuvres pour présenter votre travail aux clients.</p>
-                    <Button onClick={() => setShowAddWork(true)}>
+                    <h3 className="text-xl font-semibold text-gray-500 mb-2">Aucun projet dans votre portfolio</h3>
+                    <p className="text-gray-400 mb-4">Ajoutez vos premières œuvres pour attirer des clients.</p>
+                    <Button onClick={() => setShowAddProject(true)}>
                       <Plus className="h-4 w-4 mr-2" />
-                      Ajouter votre première œuvre
+                      Ajouter votre premier projet
                     </Button>
+                  </div>
+                )}
+
+                {projects.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {projects.map((project) => (
+                      <Card key={project.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                        {project.image_url && (
+                          <div className="aspect-square bg-gray-100">
+                            <img
+                              src={project.image_url}
+                              alt={project.title}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                        <CardContent className="p-4">
+                          <h3 className="font-semibold text-lg mb-2">{project.title}</h3>
+                          {project.location && (
+                            <p className="text-sm text-gray-600 mb-1">📍 {project.location}</p>
+                          )}
+                          {project.year && (
+                            <p className="text-sm text-gray-600 mb-2">📅 {project.year}</p>
+                          )}
+                          {project.description && (
+                            <p className="text-sm text-gray-700 line-clamp-3">{project.description}</p>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
                 )}
               </CardContent>

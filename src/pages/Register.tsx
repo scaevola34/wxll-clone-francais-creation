@@ -1,6 +1,5 @@
-
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -32,6 +31,7 @@ const Register: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleUserTypeSelect = (selectedRole: "artist" | "buyer") => {
     setRole(selectedRole);
@@ -54,7 +54,7 @@ const Register: React.FC = () => {
     setSuccess(false);
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -65,14 +65,40 @@ const Register: React.FC = () => {
           },
         },
       });
-      if (error) throw error;
+      
+      if (authError) throw authError;
+
+      // Create profile in appropriate table
+      if (role === "artist") {
+        const { error: artistError } = await supabase
+          .from('artists')
+          .insert({
+            id: data.user?.id,
+            name: nom,
+            contact_email: email,
+          });
+        
+        if (artistError) throw artistError;
+      } else {
+        // For buyers/owners, we'll insert into profiles table
+        // The wall_owners table is for when they actually post a wall
+      }
 
       setSuccess(true);
       toast({
         title: "Inscription réussie !",
-        description:
-          "Un email de confirmation vient d'être envoyé. Vérifie ta boîte mail.",
+        description: "Un email de confirmation vient d'être envoyé. Vérifie ta boîte mail.",
       });
+
+      // Redirect after successful registration
+      setTimeout(() => {
+        if (role === "artist") {
+          navigate('/artiste/profil');
+        } else {
+          navigate('/proprietaire/profil');
+        }
+      }, 2000);
+
     } catch (err: any) {
       setError(err.message);
       toast({

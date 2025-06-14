@@ -1,3 +1,4 @@
+
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -25,16 +26,18 @@ export const useWallsInfinite = ({
 }: Params = {}) =>
   useInfiniteQuery<Wall[]>({
     queryKey: ['walls-infinite', search, minSurface, type],
+    initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) =>
       lastPage.length < PAGE_SIZE ? undefined : allPages.length,
     queryFn: async ({ pageParam = 0 }) => {
+      const page = Number(pageParam);
       /* requête de base */
       let req = supabase
         .from('walls')
         .select('*')
         .range(
-          pageParam * PAGE_SIZE,
-          pageParam * PAGE_SIZE + PAGE_SIZE - 1
+          page * PAGE_SIZE,
+          page * PAGE_SIZE + PAGE_SIZE - 1
         );
 
       /* filtre ville */

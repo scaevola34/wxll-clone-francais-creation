@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthComplete } from '@/hooks/useAuthComplete';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -14,7 +14,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   redirectTo = '/login',
   requireUserType
 }) => {
-  const { user, userType, loading } = useAuth();
+  const { user, userType, loading } = useAuthComplete();
 
   if (loading) {
     return (

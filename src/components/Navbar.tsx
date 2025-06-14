@@ -1,17 +1,16 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { Menu, MessageCircle, FolderOpen, LogOut } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthComplete } from '@/hooks/useAuthComplete';
 import NotificationBell from './NotificationBell';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  const { user, userType, isAuthenticated, logout } = useAuth();
+  const { user, userType, isAuthenticated, logout } = useAuthComplete();
 
   useEffect(() => {
     const handleScroll = () => {

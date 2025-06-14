@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthComplete } from '@/hooks/useAuthComplete';
 
 export interface Conversation {
   id: string;
@@ -29,7 +28,7 @@ export const useConversations = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user, userType } = useAuth();
+  const { user, userType } = useAuthComplete();
 
   useEffect(() => {
     if (!user || !userType) return;

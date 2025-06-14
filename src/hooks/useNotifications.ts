@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthComplete } from '@/hooks/useAuthComplete';
 
 export interface Notification {
   id: string;
@@ -19,7 +18,7 @@ export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const { user, userType } = useAuth();
+  const { user, userType } = useAuthComplete();
 
   useEffect(() => {
     if (!user || !userType) return;

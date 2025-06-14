@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthComplete } from '@/hooks/useAuthComplete';
 
 export interface ProjectProposal {
   id: string;
@@ -48,7 +47,7 @@ export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user, userType } = useAuth();
+  const { user, userType } = useAuthComplete();
 
   useEffect(() => {
     if (!user || !userType) return;

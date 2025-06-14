@@ -1,231 +1,181 @@
-
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
-import { useAuthComplete } from '@/hooks/useAuthComplete';
-import { Button } from "@/components/ui/button";
-import { MapPin, Mail, Heart, Instagram, ExternalLink, Briefcase, Star } from 'lucide-react';
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import { MapPin, Globe, Instagram, Briefcase, Star, MessageSquare, ExternalLink } from 'lucide-react';
 import { ProjectProposalForm } from '@/components/ProjectProposalForm';
-import Spinner from '@/components/ui/Spinner';
+import ReviewsSection from '@/components/ReviewsSection';
+import { ReviewForm } from '@/components/ReviewForm';
+
+interface Artist {
+  id: string;
+  name: string;
+  style?: string | null;
+  location?: string | null;
+  bio?: string | null;
+  profile_image_url?: string | null;
+  website?: string | null;
+  instagram_handle?: string | null;
+  experience_years?: number | null;
+  projects_count?: number | null;
+  contact_email?: string | null;
+  previous_works_urls?: string[] | null;
+  coverage_area?: string | null;
+  visibility?: boolean;
+  created_at?: string;
+}
+
+const fetchArtist = async (id: string): Promise<Artist | null> => {
+  const { data, error } = await supabase
+    .from('artists')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error('Error fetching artist:', error);
+    return null;
+  }
+
+  return data as Artist;
+};
 
 const ArtistProfile = () => {
-  const { id } = useParams();
-  const { userType, isAuthenticated } = useAuthComplete();
-  
+  const { id } = useParams<{ id: string }>();
   const { data: artist, isLoading, error } = useQuery({
     queryKey: ['artist', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('artists')
-        .select('*')
-        .eq('id', id)
-        .single();
-      
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => fetchArtist(id!),
     enabled: !!id,
   });
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Spinner size={48} />
-      </div>
-    );
-  }
-
-  if (error || !artist) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Artiste non trouvé</h1>
-          <p className="text-gray-600">Cet artiste n'existe pas ou a été supprimé.</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Mock previous works for now since we don't have this data in the database yet
-  const previousWorks = [
-    {
-      id: 1,
-      title: "Fresque Murales École Primaire",
-      location: artist.location || "Ville",
-      imageUrl: "https://images.unsplash.com/photo-1578321272176-b7bbc0679853?q=80&w=1964&auto=format&fit=crop",
-      year: "2024",
-      description: "Création d'une fresque colorée représentant la nature et les animaux pour égayer la cour de récréation."
-    },
-    {
-      id: 2,
-      title: "Mur Commercial Quartier",
-      location: artist.location || "Ville",
-      imageUrl: "https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=1964&auto=format&fit=crop",
-      year: "2023",
-      description: "Œuvre abstraite aux couleurs vives pour dynamiser l'entrée d'un centre commercial."
-    },
-    {
-      id: 3,
-      title: "Passage Souterrain",
-      location: artist.location || "Ville",
-      imageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=1964&auto=format&fit=crop",
-      year: "2023",
-      description: "Transformation d'un passage souterrain en galerie d'art urbain avec des motifs géométriques."
-    }
-  ];
+  if (isLoading) return <div className="min-h-screen bg-gray-50 p-8">Chargement...</div>;
+  if (error || !artist) return <div className="min-h-screen bg-gray-50 p-8">Artiste non trouvé</div>;
 
   return (
-    <div className="min-h-screen flex flex-col artist-theme">
-      <main className="flex-grow">
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            {/* Image Section */}
-            <div className="relative h-[500px] rounded-xl overflow-hidden">
-              <img 
-                src={artist.profile_image_url || "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1964&auto=format&fit=crop"} 
-                alt={artist.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-            </div>
-
-            {/* Info Section */}
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-4xl font-bold mb-2 gradient-artist">{artist.name}</h1>
-                {artist.instagram_handle && (
-                  <div className="flex items-center text-wxll-artist mb-3">
-                    <Instagram className="w-4 h-4 mr-2" />
-                    <a 
-                      href={`https://instagram.com/${artist.instagram_handle.replace('@', '')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-medium hover:underline"
-                    >
-                      {artist.instagram_handle}
-                    </a>
-                  </div>
-                )}
-                {artist.website && (
-                  <div className="flex items-center text-wxll-artist mb-3">
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    <a 
-                      href={artist.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-medium hover:underline"
-                    >
-                      Site web
-                    </a>
-                  </div>
-                )}
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Artist Info */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Profile Card */}
+            <Card>
+              <CardHeader className="text-center">
+                <Avatar className="h-32 w-32 mx-auto mb-4">
+                  <AvatarImage src={artist.profile_image_url || undefined} alt={artist.name} />
+                  <AvatarFallback className="text-2xl bg-purple-100 text-purple-700">
+                    {artist.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <CardTitle className="text-2xl font-bold">{artist.name}</CardTitle>
                 {artist.location && (
-                  <div className="flex items-center text-gray-600 mb-4">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    <span>{artist.location}</span>
+                  <div className="flex items-center justify-center text-gray-600">
+                    <MapPin className="h-4 w-4 mr-1" />
+                    {artist.location}
                   </div>
                 )}
                 {artist.style && (
-                  <span className="inline-block bg-wxll-artist/10 border border-wxll-artist/20 text-wxll-artist text-sm font-medium px-3 py-1 rounded-full">
+                  <Badge variant="secondary" className="mt-2 bg-purple-100 text-purple-700">
                     {artist.style}
-                  </span>
+                  </Badge>
                 )}
-              </div>
-
-              {artist.bio && (
-                <p className="text-gray-700 leading-relaxed">{artist.bio}</p>
-              )}
-
-              <div className="grid grid-cols-2 gap-4">
-                {artist.projects_count !== null && (
-                  <div className="bg-white/70 backdrop-blur-sm p-4 rounded-lg border border-wxll-artist/10">
-                    <div className="text-2xl font-bold text-wxll-artist">{artist.projects_count}</div>
-                    <div className="text-gray-600">Projets réalisés</div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Bio */}
+                {artist.bio && (
+                  <div>
+                    <h3 className="font-semibold mb-2">À propos</h3>
+                    <p className="text-gray-700 text-sm leading-relaxed">{artist.bio}</p>
                   </div>
                 )}
-                {artist.experience_years && (
-                  <div className="bg-white/70 backdrop-blur-sm p-4 rounded-lg border border-wxll-artist/10">
-                    <div className="text-2xl font-bold text-wxll-artist">{artist.experience_years} ans</div>
-                    <div className="text-gray-600">d'expérience</div>
-                  </div>
-                )}
-              </div>
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                {/* Bouton de contact par email */}
-                <Button className="btn-artist flex-1 flex items-center justify-center gap-2">
-                  <Mail className="w-4 h-4" />
-                  Contacter
-                </Button>
-                
-                {/* Bouton de proposition de projet (uniquement pour les propriétaires connectés) */}
-                {isAuthenticated && userType === 'owner' && (
-                  <div className="flex-1">
-                    <ProjectProposalForm artistId={artist.id} artistName={artist.name} />
-                  </div>
-                )}
-                
-                {/* Bouton de suivi */}
-                <Button variant="outline" className="flex-1 flex items-center justify-center gap-2 border-wxll-artist text-wxll-artist hover:bg-wxll-artist hover:text-white">
-                  <Heart className="w-4 h-4" />
-                  Suivre
-                </Button>
-              </div>
-            </div>
+                {/* Stats */}
+                <div className="flex justify-between text-center pt-4 border-t">
+                  {artist.experience_years && (
+                    <div>
+                      <div className="font-semibold text-lg">{artist.experience_years}</div>
+                      <div className="text-xs text-gray-600">ans d'expérience</div>
+                    </div>
+                  )}
+                  {artist.projects_count !== null && (
+                    <div>
+                      <div className="font-semibold text-lg">{artist.projects_count}</div>
+                      <div className="text-xs text-gray-600">projets réalisés</div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Contact & Social */}
+                <Separator />
+                <div className="space-y-3">
+                  {artist.website && (
+                    <Button variant="outline" size="sm" asChild className="w-full">
+                      <a href={artist.website} target="_blank" rel="noopener noreferrer">
+                        <Globe className="h-4 w-4 mr-2" />
+                        Site Web
+                      </a>
+                    </Button>
+                  )}
+                  {artist.instagram_handle && (
+                    <Button variant="outline" size="sm" asChild className="w-full">
+                      <a 
+                        href={`https://instagram.com/${artist.instagram_handle.replace('@', '')}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                      >
+                        <Instagram className="h-4 w-4 mr-2" />
+                        Instagram
+                      </a>
+                    </Button>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <Separator />
+                <div className="space-y-2">
+                  <ProjectProposalForm artistId={artist.id} artistName={artist.name} />
+                  <ReviewForm artistId={artist.id} artistName={artist.name} />
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
-          {/* Previous Realizations Section */}
-          <section className="mb-12">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-4 gradient-artist">Réalisations précédentes</h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Découvrez quelques-unes des œuvres créées par {artist.name.split(' ')[0]} dans la région
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {previousWorks.map((work) => (
-                <Card key={work.id} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 bg-white/70 backdrop-blur-sm">
-                  <div className="relative h-64 overflow-hidden">
-                    <img
-                      src={work.imageUrl}
-                      alt={work.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                    
-                    {/* Year Badge */}
-                    <div className="absolute top-4 right-4">
-                      <span className="bg-wxll-artist text-white text-xs font-bold px-3 py-1 rounded-full">
-                        {work.year}
-                      </span>
-                    </div>
-                    
-                    {/* Location on image */}
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <div className="flex items-center text-white">
-                        <MapPin className="h-4 w-4 mr-2" />
-                        <span className="text-sm font-medium">{work.location}</span>
+          {/* Right Column - Portfolio & Reviews */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Portfolio Section */}
+            {artist.previous_works_urls && artist.previous_works_urls.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Briefcase className="h-5 w-5" />
+                    Portfolio
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {artist.previous_works_urls.map((url, index) => (
+                      <div key={index} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                        <img
+                          src={url}
+                          alt={`Œuvre ${index + 1}`}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
+                        />
                       </div>
-                    </div>
+                    ))}
                   </div>
-                  
-                  <CardContent className="p-6">
-                    <h3 className="font-bold text-lg mb-2 text-wxll-dark group-hover:text-wxll-artist transition-colors">
-                      {work.title}
-                    </h3>
-                    <p className="text-gray-600 text-sm leading-relaxed">
-                      {work.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </section>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Reviews Section */}
+            <ReviewsSection artistId={artist.id} />
+          </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 };

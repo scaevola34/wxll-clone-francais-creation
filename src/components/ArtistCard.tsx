@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MapPin, Star, Briefcase, MessageSquare, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useArtistRating } from '@/hooks/useReviews';
 
 interface ArtistCardProps {
   id: string;
@@ -32,6 +33,8 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
   experience_years,
   projects_count,
 }) => {
+  const { data: rating } = useArtistRating(id);
+
   return (
     <Card className="hover:shadow-xl transition-all duration-300 h-full flex flex-col">
       <CardHeader className="text-center pb-4">
@@ -55,6 +58,19 @@ const ArtistCard: React.FC<ArtistCardProps> = ({
           <Badge variant="secondary" className="w-fit mx-auto bg-purple-100 text-purple-700">
             {style}
           </Badge>
+        )}
+
+        {/* Rating */}
+        {rating && rating.total_reviews > 0 && (
+          <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center gap-1">
+              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+              <span className="font-medium">{rating.avg_rating.toFixed(1)}</span>
+            </div>
+            <span className="text-sm text-gray-500">
+              ({rating.total_reviews} avis)
+            </span>
+          </div>
         )}
 
         {bio && (
